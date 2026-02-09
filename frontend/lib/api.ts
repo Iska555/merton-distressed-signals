@@ -22,12 +22,20 @@ export interface CompanyInfo {
 }
 
 export interface MertonOutputs {
+  // Primary Institutional Keys
   V: number;
   sigma_V: number;
-  leverage: number;
   distance_to_default: number;
-  default_probability: number;
   theo_spread_bps: number;
+  
+  // Normalized Keys for Frontend Components
+  default_prob?: number; 
+  asset_value?: number;
+  asset_volatility?: number;
+  
+  // Original Backend Keys
+  default_probability: number;
+  leverage: number;
   solver_method: string;
 }
 

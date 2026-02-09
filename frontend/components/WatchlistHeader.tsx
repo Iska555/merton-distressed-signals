@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Plus, Star } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 
 interface WatchlistHeaderProps {
   onAddTicker: (ticker: string) => boolean;
@@ -27,56 +27,42 @@ export default function WatchlistHeader({ onAddTicker, count }: WatchlistHeaderP
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mb-8"
-    >
-      {/* Title */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-            <Star className="text-yellow-400" size={32} />
-            My Watchlist
-          </h1>
-          <p className="text-zinc-400">
-            {count === 0 ? 'No tickers saved yet' : `Tracking ${count} ${count === 1 ? 'ticker' : 'tickers'}`}
-          </p>
-        </div>
-      </div>
-
-      {/* Quick Add Bar */}
-      <form onSubmit={handleSubmit} className="relative">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
+    <div className="w-full max-w-md">
+      <form onSubmit={handleSubmit} className="relative group">
+        <div className="relative flex items-center">
+          <Search className="absolute left-4 text-zinc-500 group-focus-within:text-white transition-colors" size={16} />
+          
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value.toUpperCase())}
-            placeholder="Add ticker to watchlist (e.g., AAPL)"
-            className="w-full pl-12 pr-12 py-4 bg-zinc-900 border border-zinc-800 rounded-2xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            placeholder="ADD TICKER (E.G. AAPL)"
+            className="w-full pl-10 pr-12 py-3 bg-black border border-zinc-800 focus:border-white text-white placeholder-zinc-600 focus:outline-none font-mono text-sm uppercase tracking-widest transition-all rounded-none"
           />
-          <motion.button
+          
+          <button
             type="submit"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-emerald-500 hover:bg-emerald-600 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!inputValue.trim()}
+            className="absolute right-2 p-1.5 bg-zinc-900 hover:bg-white hover:text-black text-zinc-400 transition-all disabled:opacity-0 disabled:pointer-events-none rounded-none"
           >
-            <Plus className="text-white" size={20} />
-          </motion.button>
+            <Plus size={16} />
+          </button>
         </div>
         
         {error && (
           <motion.p
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-2 text-sm text-red-400"
+            className="absolute -bottom-6 left-0 text-[10px] text-red-500 uppercase tracking-widest"
           >
             {error}
           </motion.p>
         )}
       </form>
-    </motion.div>
+      
+      <p className="mt-3 text-[10px] text-zinc-600 uppercase tracking-[0.2em]">
+        {count === 0 ? 'Portfolio Empty' : `Tracking ${count} ${count === 1 ? 'Asset' : 'Assets'}`}
+      </p>
+    </div>
   );
 }

@@ -18,14 +18,11 @@ export default function WatchlistButton({ ticker }: WatchlistButtonProps) {
 
   const toggleWatchlist = () => {
     const watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
-    
     if (isWatched) {
-      // Remove from watchlist
       const updated = watchlist.filter((t: string) => t !== ticker);
       localStorage.setItem('watchlist', JSON.stringify(updated));
       setIsWatched(false);
     } else {
-      // Add to watchlist
       const updated = [...watchlist, ticker];
       localStorage.setItem('watchlist', JSON.stringify(updated));
       setIsWatched(true);
@@ -34,16 +31,15 @@ export default function WatchlistButton({ ticker }: WatchlistButtonProps) {
 
   return (
     <motion.button
-      whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       onClick={toggleWatchlist}
-      className={`p-2 rounded-full transition-colors ${
-        isWatched
-          ? 'bg-yellow-500/20 text-yellow-400'
-          : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-      }`}
+      className="group relative"
     >
-      <Star size={20} fill={isWatched ? 'currentColor' : 'none'} />
+      <Star 
+        size={20} 
+        className={`transition-colors ${isWatched ? 'text-white fill-white' : 'text-zinc-600 hover:text-white'}`}
+        strokeWidth={1.5}
+      />
     </motion.button>
   );
 }

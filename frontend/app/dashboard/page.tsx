@@ -42,29 +42,39 @@ export default function DashboardPage() {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.05 }}
-      whileHover={{ scale: 1.02, x: 8 }}
-      className="bg-zinc-900 border border-zinc-800 rounded-none p-4 hover:border-white transition-all cursor-pointer mb-3 border-l-2 border-l-transparent hover:border-l-white"
+      whileHover={{ scale: 1.01, x: 4 }}
+      className="bg-zinc-900 border border-zinc-800 rounded-none p-5 hover:border-white transition-all cursor-pointer mb-3 border-l-2 border-l-transparent hover:border-l-white group"
     >
       <Link href={`/?ticker=${signal.company.ticker}`}>
         <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <p className="font-serif font-bold text-white text-lg tracking-wider">{signal.company.ticker}</p>
-            <p className="text-[10px] text-zinc-500 uppercase tracking-widest truncate max-w-[120px] md:max-w-none">
-              {signal.company.company_name}
-            </p>
-          </div>
-          <div className="flex items-center gap-4 md:gap-8">
-            <div className="text-right hidden sm:block">
-              <p className="text-[9px] text-zinc-600 uppercase tracking-widest">Market</p>
-              <p className="font-serif font-medium text-white">{signal.market_spread_bps.toFixed(0)}</p>
+          <div className="flex-1 min-w-0 pr-4">
+            <div className="flex items-baseline gap-3">
+              <p className="font-serif font-bold text-white text-xl tracking-wider group-hover:text-emerald-400 transition-colors">
+                {signal.company.ticker}
+              </p>
+              <p className="text-[10px] text-zinc-500 uppercase tracking-widest truncate hidden sm:block">
+                {signal.company.company_name}
+              </p>
             </div>
-            <div className="text-right">
-              <p className="text-[9px] text-zinc-600 uppercase tracking-widest">Spread Diff</p>
-              <p className={`font-serif font-bold ${signal.signal.spread_diff_bps > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+          </div>
+          
+          <div className="flex items-center gap-8 md:gap-12">
+            <div className="text-right hidden md:block w-20">
+              <p className="text-[9px] text-zinc-600 uppercase tracking-widest mb-0.5">Market</p>
+              <p className="font-serif font-medium text-white text-lg">{signal.market_spread_bps.toFixed(0)}</p>
+            </div>
+            
+            <div className="text-right w-24">
+              <p className="text-[9px] text-zinc-600 uppercase tracking-widest mb-0.5">Spread Diff</p>
+              <p className={`font-serif font-bold text-lg ${signal.signal.spread_diff_bps > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
                 {signal.signal.spread_diff_bps > 0 ? '+' : ''}{signal.signal.spread_diff_bps.toFixed(0)}
               </p>
             </div>
-            <div className="text-xl w-8 text-center text-white font-serif">{signal.signal.signal_strength}</div>
+            
+            {/* Stars Container - Widened to fit content */}
+            <div className="text-lg text-white font-serif tracking-widest min-w-[100px] text-right">
+              {signal.signal.signal_strength}
+            </div>
           </div>
         </div>
       </Link>
@@ -84,17 +94,19 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <main className="container mx-auto px-6 py-12 max-w-6xl">
-        {/* Added a local title since header is gone, for context */}
-        <div className="flex justify-between items-end mb-12 border-b border-zinc-900 pb-6">
+      {/* Container widened to max-w-[1600px] to fill the screen better */}
+      <main className="container mx-auto px-6 md:px-12 py-12 max-w-[1600px]">
+        
+        {/* Local Title Section */}
+        <div className="flex justify-between items-end mb-16 border-b border-zinc-900 pb-6">
            <div>
-             <h2 className="text-3xl font-serif text-white tracking-wide mb-2">Market Dashboard</h2>
-             <p className="text-[10px] text-zinc-500 uppercase tracking-[0.2em]">Live Credit Opportunities</p>
+             <h2 className="text-4xl font-serif text-white tracking-tight mb-2">Market Dashboard</h2>
+             <p className="text-xs text-zinc-500 uppercase tracking-[0.25em]">Live Credit Opportunities & Volatility Arbitrage</p>
            </div>
            <button 
              onClick={handleRefresh}
              disabled={refreshing}
-             className="text-[10px] uppercase tracking-widest text-zinc-500 hover:text-white flex items-center gap-2 transition-colors"
+             className="text-[10px] uppercase tracking-widest text-zinc-500 hover:text-white flex items-center gap-2 transition-colors border border-zinc-800 px-4 py-2 hover:bg-zinc-900"
            >
              <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} />
              {refreshing ? 'Scanning...' : 'Refresh Data'}
@@ -102,37 +114,50 @@ export default function DashboardPage() {
         </div>
 
         {data && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-20">
             {/* Short Signals */}
             <section>
-              <div className="flex items-center gap-2 mb-6 border-b border-zinc-900 pb-2">
-                <TrendingDown className="text-zinc-500" size={16} />
-                <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">Overvalued Credit (Short)</h3>
+              <div className="flex items-center gap-3 mb-8 border-b border-zinc-800 pb-4">
+                <div className="p-1.5 bg-red-900/20 rounded-none border border-red-900/30">
+                  <TrendingDown className="text-red-500" size={18} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-serif font-medium text-white">Overvalued Credit (Short)</h3>
+                  <p className="text-[9px] text-zinc-500 uppercase tracking-widest">Market spread too low vs. Model risk</p>
+                </div>
               </div>
-              <AnimatePresence>
-                {data.top_short_signals.map((signal, idx) => (
-                  <SignalRow key={signal.company.ticker} signal={signal} index={idx} />
-                ))}
-              </AnimatePresence>
+              <div className="space-y-1">
+                <AnimatePresence>
+                  {data.top_short_signals.map((signal, idx) => (
+                    <SignalRow key={signal.company.ticker} signal={signal} index={idx} />
+                  ))}
+                </AnimatePresence>
+              </div>
             </section>
 
             {/* Long Signals */}
             <section>
-              <div className="flex items-center gap-2 mb-6 border-b border-zinc-900 pb-2">
-                <TrendingUp className="text-zinc-500" size={16} />
-                <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">Undervalued Credit (Long)</h3>
+              <div className="flex items-center gap-3 mb-8 border-b border-zinc-800 pb-4">
+                <div className="p-1.5 bg-emerald-900/20 rounded-none border border-emerald-900/30">
+                  <TrendingUp className="text-emerald-500" size={18} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-serif font-medium text-white">Undervalued Credit (Long)</h3>
+                  <p className="text-[9px] text-zinc-500 uppercase tracking-widest">Market spread too high vs. Model risk</p>
+                </div>
               </div>
-              <AnimatePresence>
-                {data.top_long_signals.map((signal, idx) => (
-                  <SignalRow key={signal.company.ticker} signal={signal} index={idx} />
-                ))}
-              </AnimatePresence>
+              <div className="space-y-1">
+                <AnimatePresence>
+                  {data.top_long_signals.map((signal, idx) => (
+                    <SignalRow key={signal.company.ticker} signal={signal} index={idx} />
+                  ))}
+                </AnimatePresence>
+              </div>
             </section>
           </div>
         )}
       </main>
       
-      {/* Kept MobileNav to ensure safe fallback, though Layout handles it */}
       <MobileNav />
     </div>
   );
