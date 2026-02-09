@@ -16,10 +16,10 @@ interface SpreadChartProps {
   theoSpread: number;
   marketSpread: number;
   volatilitySensitivity?: Array<{
-    shock_pct?: number; // Made optional to handle union types
-    theo_spread_bps?: number; // Made optional to handle union types
-    vol_shock?: number; // Added to match backend output
-    spread?: number; // Added to match backend output
+    shock_pct?: number; // Optional to handle varying backend keys
+    theo_spread_bps?: number; // Optional to handle varying backend keys
+    vol_shock?: number; // Added to match fallback data shape
+    spread?: number; // Added to match fallback data shape
   }>;
 }
 
@@ -37,14 +37,20 @@ export default function SpreadChart({
     { vol_shock: 20, spread: theoSpread * 1.18 },
   ];
 
+  // Fix 1: Use type assertion (d: any) to handle mixed keys safely
   const chartData = data.map((d: any) => ({
-    // Nullish coalescing (??) handles '0' values better than logical OR (||)
     name: `${d.vol_shock ?? d.shock_pct ?? 0}%`,
     theoretical: d.theo_spread_bps ?? d.spread ?? d.theo_spread ?? 0,
     market: marketSpread,
   }));
 
   const isLongSignal = theoSpread < marketSpread;
+  
+  // Dynamic colors based on signal
+  const strokeColor = isLongSignal ? '#10b981' : '#ef4444'; 
+  const glowColor = isLongSignal 
+    ? 'rgba(16, 185, 129, 0.6)' 
+    : 'rgba(239, 68, 68, 0.6)'; 
 
   return (
     <motion.div
@@ -62,18 +68,19 @@ export default function SpreadChart({
         <AreaChart data={chartData}>
           <defs>
             <linearGradient id="colorTheo" x1="0" y1="0" x2="0" y2="1">
-              <stop
-                offset="5%"
-                stopColor={isLongSignal ? '#10b981' : '#ef4444'}
-                stopOpacity={0.3}
-              />
-              <stop
-                offset="95%"
-                stopColor={isLongSignal ? '#10b981' : '#ef4444'}
-                stopOpacity={0}
-              />
+              <stop offset="5%" stopColor={strokeColor} stopOpacity={0.3} />
+              <stop offset="95%" stopColor={strokeColor} stopOpacity={0} />
             </linearGradient>
+            
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
           </defs>
+          
           <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
           <XAxis
             dataKey="name"
@@ -83,7 +90,12 @@ export default function SpreadChart({
           <YAxis
             stroke="#71717a"
             style={{ fontSize: '12px' }}
-            label={{ value: 'Spread (bps)', angle: -90, position: 'insideLeft', fill: '#71717a' }}
+            label={{ 
+              value: 'Spread (bps)', 
+              angle: -90, 
+              position: 'insideLeft', 
+              fill: '#71717a' 
+            }}
           />
           <Tooltip
             contentStyle={{
@@ -92,34 +104,42 @@ export default function SpreadChart({
               borderRadius: '12px',
               color: '#fff',
             }}
-            // FIX: Explicitly handle 'number | undefined' for Tooltip
+            // Fix 2: Explicitly handle 'number | undefined' for toFixed()
             formatter={(value: number | any) => {
                 const numValue = value ?? 0;
-                return [`${numValue.toFixed(0)} bps`, 'Theoretical Spread'];
+                return [`${numValue.toFixed(0)} bps`, 'Theoretical'];
             }}
           />
           <ReferenceLine
             y={marketSpread}
             stroke="#ef4444"
             strokeDasharray="5 5"
-            label={{ value: 'Market Spread', fill: '#ef4444', fontSize: 12, position: 'top' }}
+            label={{ 
+              value: 'Market Spread', 
+              fill: '#ef4444', 
+              fontSize: 12,
+              position: 'right'
+            }}
           />
           <Area
             type="monotone"
             dataKey="theoretical"
-            stroke={isLongSignal ? '#10b981' : '#ef4444'}
+            stroke={strokeColor}
             strokeWidth={3}
             fillOpacity={1}
             fill="url(#colorTheo)"
             animationDuration={1500}
             animationBegin={300}
             animationEasing="ease-in-out"
+            style={{
+              filter: `drop-shadow(0px 0px 8px ${glowColor})`,
+            }}
           />
         </AreaChart>
       </ResponsiveContainer>
 
       <div className="mt-4 text-sm text-zinc-400 text-center">
-        Theoretical spread changes with equity volatility shocks
+        Theoretical spread changes with ±20% equity volatility shocks
       </div>
     </motion.div>
   );
