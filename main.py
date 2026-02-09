@@ -2,59 +2,124 @@
 Command-line interface for Merton Signal Generator
 """
 import sys
-from data.equity_fetcher import EquityDataFetcher
-from core.engine import (
-    solve_merton_system,
-    merton_distance_to_default,
-    merton_credit_spread
-)
+import argparse
+from signals.generator import SignalGenerator
 
 
-def analyze_company(ticker):
-    """Analyze a single company"""
-    print(f"\n{'='*60}")
-    print(f"ANALYZING: {ticker}")
-    print(f"{'='*60}\n")
-    
-    # Fetch data
-    fetcher = EquityDataFetcher(ticker)
-    data = fetcher.fetch()
-    
-    # Run Merton model
-    V, sigma_V, method = solve_merton_system(
-        E=data['E'],
-        sigma_E=data['sigma_E'],
-        D=data['D'],
-        r=data['r'],
-        T=data['T']
+def main():
+    parser = argparse.ArgumentParser(
+        description='Merton Credit Signal Generator',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python main.py AAPL              # Analyze single company
+  python main.py AAPL TSLA MSFT    # Analyze multiple companies
+  python main.py --batch sp500.txt # Analyze from file
+        """
     )
     
-    dd = merton_distance_to_default(V, sigma_V, data['D'], data['r'], data['T'])
-    spread = merton_credit_spread(V, sigma_V, data['D'], data['r'], data['T'])
+    parser.add_argument(
+        'tickers',
+        nargs='*',
+        help='Stock tickers to analyze'
+    )
     
-    # Print results
-    print(f"Company: {data['company_name']}")
-    print(f"Sector:  {data['sector']}\n")
+    parser.add_argument(
+        '--batch',
+        type=str,
+        help='File containing list of tickers (one per line)'
+    )
     
-    print("INPUTS:")
-    print(f"  Market Cap (E):  ${data['E']/1e9:.2f}B")
-    print(f"  Total Debt (D):  ${data['D']/1e9:.2f}B")
-    print(f"  Equity Vol:      {data['sigma_E']:.2%}\n")
+    parser.add_argument(
+        '--output',
+        type=str,
+        help='Save results to CSV file'
+    )
     
-    print("MERTON OUTPUTS:")
-    print(f"  Asset Value (V):      ${V/1e9:.2f}B")
-    print(f"  Asset Volatility:     {sigma_V:.2%}")
-    print(f"  Leverage (D/V):       {data['D']/V:.2%}")
-    print(f"  Distance to Default:  {dd:.2f}σ")
-    print(f"  Theoretical Spread:   {spread:.0f} bps")
-    print(f"  Solver Method:        {method}")
+    parser.add_argument(
+        '--top',
+        type=int,
+        default=10,
+        help='Number of top signals to show (default: 10)'
+    )
+    
+    args = parser.parse_args()
+    
+    # Get tickers
+    tickers = args.tickers
+    
+    if args.batch:
+        with open(args.batch, 'r') as f:
+            batch_tickers = [line.strip() for line in f if line.strip()]
+            tickers.extend(batch_tickers)
+    
+    if not tickers:
+        parser.print_help()
+        sys.exit(1)
+    
+    # Run analysis
+    generator = SignalGenerator()
+    
+    if len(tickers) == 1:
+        # Single company
+        result = generator.analyze_single(tickers[0], verbose=True)
+    else:
+        # Batch
+        df = generator.analyze_batch(tickers, verbose=True)
+        
+        if not df.empty:
+            # Show top signals
+            top_signals = generator.get_top_signals(df, n=args.top)
+            
+            print("\n" + "="*60)
+            print(f"TOP {args.top} SIGNALS")
+            print("="*60)
+            
+            if not top_signals['short'].empty:
+                print("\n🔴 SHORT CREDIT OPPORTUNITIES:")
+                print(top_signals['short'][[
+                    'ticker', 'theo_spread_bps', 'market_spread_bps',
+                    'spread_diff_bps', 'signal_strength'
+                ]].to_string(index=False))
+            
+            if not top_signals['long'].empty:
+                print("\n🟢 LONG CREDIT OPPORTUNITIES:")
+                print(top_signals['long'][[
+                    'ticker', 'theo_spread_bps', 'market_spread_bps',
+                    'spread_diff_bps', 'signal_strength'
+                ]].to_string(index=False))
+            
+            # Save to CSV if requested
+            if args.output:
+                df.to_csv(args.output, index=False)
+                print(f"\n✓ Results saved to {args.output}")
+    
+
+    parser.add_argument(
+    '--sensitivity',
+    action='store_true',
+    help='Run sensitivity analysis on results'
+)
+
+# After single company analysis, add:
+    if args.sensitivity and 'error' not in result:
+        from signals.sensitivity import analyze_sensitivity
+    
+        base_inputs = {
+            'E': result['E'],
+            'D': result['D'],
+            'sigma_E': result['sigma_E'],
+            'r': result['r'],
+            'T': result['T']
+        }
+    
+        analyze_sensitivity(
+            base_inputs,
+            result['market_spread_bps'],
+            ticker=result['ticker'],
+            verbose=True
+        )
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python main.py TICKER")
-        print("Example: python main.py AAPL")
-        sys.exit(1)
-    
-    ticker = sys.argv[1]
-    analyze_company(ticker)
+    main()
