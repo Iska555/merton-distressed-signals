@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link'; // Added for the case studies link
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import TickerSearch from '@/components/TickerSearch';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import SignalCard from '@/components/SignalCard';
@@ -14,6 +14,20 @@ import MobileNav from '@/components/MobileNav';
 import ErrorState from '@/components/ErrorState';
 import { analyzeTicker, analyzeSensitivity, AnalysisResponse, SensitivityResponse } from '@/lib/api';
 import { motion } from 'framer-motion';
+
+// Child component to handle deep-linked ticker searches
+function SearchParamsHandler({ onSearch }: { onSearch: (ticker: string) => void }) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const ticker = searchParams.get('ticker');
+    if (ticker) {
+      onSearch(ticker);
+    }
+  }, [searchParams, onSearch]);
+
+  return null;
+}
 
 export default function Home() {
   const router = useRouter();
@@ -73,52 +87,64 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white pb-20 md:pb-0">
-      {/* Header */}
+      <Suspense fallback={null}>
+        <SearchParamsHandler onSearch={handleSearch} />
+      </Suspense>
+
+      {/* 🆕 Institutional Blackstone-Style Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="border-b border-zinc-800 backdrop-blur-sm bg-black/50 sticky top-0 z-50"
+        className="border-b border-zinc-800 bg-black sticky top-0 z-50 py-6"
       >
-        <div className="container mx-auto px-6 py-4">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-            🎯 Merton Credit Scanner
-          </h1>
+        <div className="container mx-auto px-6 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            {/* Geometric Structure Mark */}
+            <div className="flex gap-1 items-end h-8">
+              <div className="w-2 h-8 bg-white" />
+              <div className="w-2 h-4 bg-zinc-600" />
+              <div className="w-2 h-6 bg-white" />
+            </div>
+            
+            <div className="flex flex-col border-l border-zinc-700 pl-6">
+              <h1 className="text-2xl font-serif font-medium tracking-[0.15em] text-white uppercase leading-none">
+                Merton
+              </h1>
+              <span className="text-[9px] font-sans font-light tracking-[0.4em] text-zinc-500 uppercase mt-2">
+                Credit Signal Generator
+              </span>
+            </div>
+          </div>
+
+          <nav className="hidden md:flex gap-8 text-[11px] font-medium uppercase tracking-widest text-zinc-400">
+            <Link href="/" className="hover:text-white transition-colors">Scanner</Link>
+            <Link href="/dashboard" className="hover:text-white transition-colors">Market</Link>
+            <Link href="/watchlist" className="hover:text-white transition-colors">Watchlist</Link>
+          </nav>
         </div>
       </motion.header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-6 py-12">
-        {/* Search Section */}
         <div className="mb-12">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center mb-8"
+            className="text-center mb-12"
           >
-            <h2 className="text-4xl font-bold mb-4">
-              Discover Credit Arbitrage Opportunities
+            <h2 className="text-4xl md:text-5xl font-serif tracking-tight mb-4">
+              Structural Credit Analysis
             </h2>
-            <p className="text-zinc-400 text-lg">
-              Analyze equity volatility to find mispriced corporate bonds
+            <p className="text-zinc-500 font-sans tracking-wide text-lg max-w-2xl mx-auto uppercase text-[12px]">
+              Quantitative arbitrage detection via equity volatility mapping
             </p>
           </motion.div>
 
           <TickerSearch onSearch={handleSearch} loading={loading} />
         </div>
 
-        {/* Refined Error State */}
-        {error && (
-          <ErrorState 
-            error={error} 
-            onRetry={handleRetry}
-            ticker={lastTicker}
-          />
-        )}
-
-        {/* Loading State */}
+        {error && <ErrorState error={error} onRetry={handleRetry} ticker={lastTicker} />}
         {loading && <SkeletonLoader />}
 
-        {/* Results */}
         {analysis && !loading && (
           <div className="max-w-6xl mx-auto space-y-8">
             <motion.div
@@ -127,15 +153,14 @@ export default function Home() {
               className="text-center"
             >
               <div className="flex items-center justify-center gap-4 mb-2">
-                <h3 className="text-4xl font-bold">{analysis.company.company_name}</h3>
+                <h3 className="text-4xl font-serif uppercase tracking-wider">{analysis.company.company_name}</h3>
                 <WatchlistButton ticker={analysis.company.ticker} />
               </div>
-              <p className="text-zinc-400">
+              <p className="text-zinc-500 font-mono text-xs uppercase tracking-[0.2em]">
                 {analysis.company.ticker} • {analysis.company.sector} • {analysis.company.industry}
               </p>
             </motion.div>
 
-            {/* Input Stats Grid */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -153,24 +178,21 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.1 + idx * 0.05 }}
-                  whileHover={{ scale: 1.05 }}
-                  className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800"
+                  className="bg-zinc-950 rounded-none p-6 border border-zinc-900"
                   style={{ minHeight: '108px' }}
                 >
-                  <p className="text-zinc-400 text-sm mb-2">{stat.label}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
+                  <p className="text-zinc-600 text-[10px] uppercase tracking-[0.2em] mb-2 font-bold">{stat.label}</p>
+                  <p className="text-2xl font-serif">{stat.value}</p>
                 </motion.div>
               ))}
             </motion.div>
 
             <MertonResultsCard merton={analysis.merton} E={analysis.E} D={analysis.D} />
-
             <SpreadChart
               theoSpread={analysis.merton.theo_spread_bps}
               marketSpread={analysis.market_spread_bps}
               volatilitySensitivity={sensitivity?.volatility_sensitivity}
             />
-
             <SignalCard
               signal={analysis.signal.signal}
               signalStrength={analysis.signal.signal_strength}
@@ -184,9 +206,9 @@ export default function Home() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSensitivityToggle}
-                className="px-8 py-4 bg-purple-500/20 border border-purple-500/50 rounded-2xl text-purple-400 font-semibold hover:bg-purple-500/30 transition-colors"
+                className="px-8 py-4 bg-zinc-900 border border-zinc-800 rounded-none text-zinc-400 text-xs font-bold uppercase tracking-widest hover:bg-zinc-800 transition-colors"
               >
-                {showSensitivity ? 'Hide' : 'View'} Sensitivity Analysis
+                {showSensitivity ? 'Hide' : 'Generate'} Full Sensitivity Matrix
               </motion.button>
             </div>
 
@@ -194,33 +216,27 @@ export default function Home() {
           </div>
         )}
 
-        {/* Case Studies Link Section */}
-        <div className="text-center py-16 mt-12 border-t border-zinc-800/50">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-          >
-            <p className="text-zinc-500 mb-6 max-w-md mx-auto">
-              Want to see how this model performed during the 2023 banking crisis and other major collapses?
+        <div className="text-center py-24 mt-20 border-t border-zinc-900">
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
+            <p className="text-zinc-600 text-[10px] uppercase tracking-[0.3em] mb-8 max-w-md mx-auto leading-loose">
+              Historical validation: Model performance during institutional insolvency events
             </p>
             <Link href="/case-studies">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl text-white font-semibold shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all"
+                className="px-10 py-5 bg-white text-black text-[11px] font-bold uppercase tracking-[0.3em] transition-all"
               >
-                📚 View Historical Case Studies
+                Access Case Studies
               </motion.button>
             </Link>
           </motion.div>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-zinc-800 py-8">
-        <div className="container mx-auto px-6 text-center text-zinc-500 text-sm">
-          <p>Merton Credit Scanner • Built with Next.js, FastAPI, and the Merton Structural Model</p>
+      <footer className="border-t border-zinc-900 py-12">
+        <div className="container mx-auto px-6 text-center text-zinc-700 text-[10px] uppercase tracking-[0.4em]">
+          <p>© 2026 Merton quantitative framework • Proprietary credit analytics</p>
         </div>
       </footer>
       <MobileNav />
