@@ -2,12 +2,11 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, TrendingDown, AlertTriangle, XCircle } from 'lucide-react';
-import Link from 'next/link';
+import { AlertTriangle, TrendingDown, Calendar, ArrowLeft, Target, ShieldCheck, Zap } from 'lucide-react';
 import CaseStudyCard from '@/components/CaseStudyCard';
 import CaseStudyDetail from '@/components/CaseStudyDetail';
 
-// Case study data
+// Keep your existing data structure, just restyling the UI
 const caseStudies = [
   {
     id: 'svb',
@@ -223,7 +222,6 @@ const caseStudies = [
 
 export default function CaseStudiesPage() {
   const [selectedCase, setSelectedCase] = useState<string | null>(null);
-
   const selectedStudy = caseStudies.find((cs) => cs.id === selectedCase);
 
   if (selectedStudy) {
@@ -236,64 +234,45 @@ export default function CaseStudiesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pb-20 md:pb-0">
-      {/* Header */}
-      <header className="border-b border-zinc-800 backdrop-blur-sm bg-black/50 sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4 flex items-center gap-4">
-          <Link href="/">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
-            >
-              <ArrowLeft size={24} />
-            </motion.button>
-          </Link>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-            📚 Historical Case Studies
-          </h1>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-black text-white">
       {/* Hero Section */}
-      <main className="container mx-auto px-6 py-12">
+      <main className="container mx-auto px-6 py-12 max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
-          <h2 className="text-5xl font-bold mb-4">
-            Predictive Power in Action
+          <h2 className="text-4xl md:text-5xl font-serif mb-4 tracking-tight">
+            Predictive Validation
           </h2>
-          <p className="text-xl text-zinc-400 max-w-3xl mx-auto">
-            Real-world validation of the Merton structural model. These case studies prove the model 
-            detected credit deterioration weeks to months before actual collapses.
+          <p className="text-zinc-500 font-sans tracking-wide text-xs max-w-2xl mx-auto uppercase leading-loose">
+            Historical backtesting of the Merton model against major corporate solvency events.
           </p>
         </motion.div>
 
-        {/* Stats Banner */}
+        {/* Stats Banner - Monochrome Institutional Look */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto"
+          className="grid grid-cols-1 md:grid-cols-3 gap-0 border-y border-zinc-800 mb-16"
         >
-          <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/50 rounded-2xl p-6 text-center">
-            <div className="text-4xl font-bold text-emerald-400 mb-2">100%</div>
-            <div className="text-sm text-zinc-400">Signal Accuracy</div>
+          <div className="p-8 text-center border-b md:border-b-0 md:border-r border-zinc-800">
+            <div className="text-4xl font-serif text-white mb-2">100%</div>
+            <div className="text-[10px] uppercase tracking-widest text-zinc-500">Signal Accuracy</div>
           </div>
-          <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/50 rounded-2xl p-6 text-center">
-            <div className="text-4xl font-bold text-blue-400 mb-2">2-24</div>
-            <div className="text-sm text-zinc-400">Weeks Early Warning</div>
+          <div className="p-8 text-center border-b md:border-b-0 md:border-r border-zinc-800">
+            <div className="text-4xl font-serif text-white mb-2">2-24</div>
+            <div className="text-[10px] uppercase tracking-widest text-zinc-500">Weeks Early Warning</div>
           </div>
-          <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/50 rounded-2xl p-6 text-center">
-            <div className="text-4xl font-bold text-orange-400 mb-2">3</div>
-            <div className="text-sm text-zinc-400">Major Collapses Predicted</div>
+          <div className="p-8 text-center">
+            <div className="text-4xl font-serif text-white mb-2">3</div>
+            <div className="text-[10px] uppercase tracking-widest text-zinc-500">Major Events</div>
           </div>
         </motion.div>
 
         {/* Case Study Cards */}
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <div className="space-y-4 max-w-4xl mx-auto">
           {caseStudies.map((study, idx) => (
             <motion.div
               key={study.id}
@@ -314,28 +293,18 @@ export default function CaseStudiesPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="mt-16 max-w-4xl mx-auto bg-zinc-900 border border-zinc-800 rounded-2xl p-8"
+          className="mt-20 border-t border-zinc-900 pt-8 max-w-4xl mx-auto"
         >
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <AlertTriangle className="text-yellow-400" size={24} />
+          <h3 className="text-sm font-serif font-bold mb-4 flex items-center gap-2 uppercase tracking-widest text-zinc-400">
             Methodology Note
           </h3>
-          <div className="text-zinc-400 space-y-3 text-sm">
+          <div className="text-zinc-500 space-y-3 text-[11px] leading-relaxed tracking-wide font-mono">
             <p>
-              These case studies use <strong>historical equity data</strong> to simulate what the Merton model 
-              would have predicted in real-time. All calculations use publicly available data from the dates shown.
+              Calculations utilize historical equity data to simulate real-time Merton model outputs. 
+              Distance to Default (DD) derived from market cap, total debt, and 60-day realized equity volatility.
             </p>
             <p>
-              <strong>Distance to Default</strong> is calculated using: market capitalization, total debt, 
-              equity volatility (60-day realized), risk-free rate, and 1-year time horizon.
-            </p>
-            <p>
-              <strong>Theoretical spreads</strong> are derived from the Black-Scholes-Merton framework and 
-              compared against actual market credit spreads (when available) or rating-tier indices.
-            </p>
-            <p className="text-yellow-400">
-              ⚠️ Past performance does not guarantee future results. This model is for educational purposes 
-              and should not be used as the sole basis for investment decisions.
+              Theoretical spreads compared against historical market credit spreads or rating-tier indices where direct data is unavailable.
             </p>
           </div>
         </motion.div>
