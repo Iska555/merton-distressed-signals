@@ -88,9 +88,9 @@ export default function Home() {
             <h2 className="text-4xl font-bold mb-4">
               Discover Credit Arbitrage Opportunities
             </h2>
-            <h3 className="text-zinc-400 text-lg">
+            <p className="text-zinc-400 text-lg">
               Analyze equity volatility to find mispriced corporate bonds
-            </h3>
+            </p>
           </motion.div>
 
           <TickerSearch onSearch={handleSearch} loading={loading} />
@@ -158,6 +158,7 @@ export default function Home() {
             {/* Merton Results */}
             <MertonResultsCard merton={analysis.merton} E={analysis.E} D={analysis.D} />
 
+            {/* Added SpreadChart component */}
             <SpreadChart
               theoSpread={analysis.merton.theo_spread_bps}
               marketSpread={analysis.market_spread_bps}
@@ -191,6 +192,7 @@ export default function Home() {
         )}
       </main>
 
+      {/* Added MobileNav component */}
       <MobileNav />
 
       {/* Footer */}

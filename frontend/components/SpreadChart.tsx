@@ -16,8 +16,10 @@ interface SpreadChartProps {
   theoSpread: number;
   marketSpread: number;
   volatilitySensitivity?: Array<{
-    shock_pct: number;
-    theo_spread_bps: number;
+    shock_pct?: number; // Made optional to handle union types
+    theo_spread_bps?: number; // Made optional to handle union types
+    vol_shock?: number; // Added to match backend output
+    spread?: number; // Added to match backend output
   }>;
 }
 
@@ -26,7 +28,7 @@ export default function SpreadChart({
   marketSpread,
   volatilitySensitivity,
 }: SpreadChartProps) {
-  // Generate data for the chart
+  // Use typed fallback to handle both manual and API data shapes
   const data = volatilitySensitivity || [
     { vol_shock: -20, spread: theoSpread * 0.85 },
     { vol_shock: -10, spread: theoSpread * 0.92 },
@@ -35,9 +37,10 @@ export default function SpreadChart({
     { vol_shock: 20, spread: theoSpread * 1.18 },
   ];
 
-  const chartData = data.map((d) => ({
-    name: `${d.vol_shock || d.shock_pct}%`,
-    theoretical: volatilitySensitivity ? d.theo_spread_bps : d.spread,
+  const chartData = data.map((d: any) => ({
+    // Nullish coalescing (??) handles '0' values better than logical OR (||)
+    name: `${d.vol_shock ?? d.shock_pct ?? 0}%`,
+    theoretical: d.theo_spread_bps ?? d.spread ?? d.theo_spread ?? 0,
     market: marketSpread,
   }));
 
@@ -89,13 +92,17 @@ export default function SpreadChart({
               borderRadius: '12px',
               color: '#fff',
             }}
-            formatter={(value: number) => [`${value.toFixed(0)} bps`, '']}
+            // FIX: Explicitly handle 'number | undefined' for Tooltip
+            formatter={(value: number | any) => {
+                const numValue = value ?? 0;
+                return [`${numValue.toFixed(0)} bps`, 'Theoretical Spread'];
+            }}
           />
           <ReferenceLine
             y={marketSpread}
             stroke="#ef4444"
             strokeDasharray="5 5"
-            label={{ value: 'Market Spread', fill: '#ef4444', fontSize: 12 }}
+            label={{ value: 'Market Spread', fill: '#ef4444', fontSize: 12, position: 'top' }}
           />
           <Area
             type="monotone"
@@ -112,7 +119,7 @@ export default function SpreadChart({
       </ResponsiveContainer>
 
       <div className="mt-4 text-sm text-zinc-400 text-center">
-        Theoretical spread changes with ±20% equity volatility shocks
+        Theoretical spread changes with equity volatility shocks
       </div>
     </motion.div>
   );
