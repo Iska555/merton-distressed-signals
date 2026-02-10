@@ -3,23 +3,60 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { analyzeBatch, BatchAnalysisResponse, AnalysisResponse } from '@/lib/api';
-import { TrendingUp, TrendingDown, RefreshCw, ArrowLeft } from 'lucide-react';
+import { TrendingUp, TrendingDown, RefreshCw, Clock } from 'lucide-react';
 import Link from 'next/link';
 import MobileNav from '@/components/MobileNav';
+
+const CACHE_KEY = 'market_dashboard_data';
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+interface CachedData {
+  data: BatchAnalysisResponse;
+  timestamp: number;
+}
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<BatchAnalysisResponse | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const fetchTopSignals = async () => {
+  const fetchTopSignals = async (forceRefresh = false) => {
     try {
+      // Check cache first (unless force refresh)
+      if (!forceRefresh) {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const cachedData: CachedData = JSON.parse(cached);
+          const age = Date.now() - cachedData.timestamp;
+          
+          // Use cache if less than 24 hours old
+          if (age < CACHE_DURATION) {
+            setData(cachedData.data);
+            setLastUpdated(new Date(cachedData.timestamp));
+            setLoading(false);
+            setRefreshing(false);
+            return;
+          }
+        }
+      }
+
+      // Fetch fresh data
       const tickers = [
         'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA',
         'F', 'GM', 'BAC', 'JPM', 'C', 'WFC', 'GS', 'MS',
       ];
       const result = await analyzeBatch(tickers);
+      
+      // Cache the result
+      const cacheData: CachedData = {
+        data: result,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+      
       setData(result);
+      setLastUpdated(new Date());
     } catch (err) {
       console.error('Failed to fetch signals:', err);
     } finally {
@@ -34,14 +71,31 @@ export default function DashboardPage() {
 
   const handleRefresh = () => {
     setRefreshing(true);
-    fetchTopSignals();
+    fetchTopSignals(true); // Force refresh
+  };
+
+  const formatLastUpdated = () => {
+    if (!lastUpdated) return '';
+    
+    const now = new Date();
+    const diff = now.getTime() - lastUpdated.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours === 0) {
+      return `${minutes}m ago`;
+    } else if (hours < 24) {
+      return `${hours}h ago`;
+    } else {
+      return lastUpdated.toLocaleDateString();
+    }
   };
 
   const SignalRow = ({ signal, index }: { signal: AnalysisResponse; index: number }) => (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.05 }}
+      transition={{ delay: index * 0.05, type: "spring", stiffness: 260, damping: 20 }}
       whileHover={{ scale: 1.01, x: 4 }}
       className="bg-zinc-900 border border-zinc-800 rounded-none p-5 hover:border-white transition-all cursor-pointer mb-3 border-l-2 border-l-transparent hover:border-l-white group"
     >
@@ -71,7 +125,6 @@ export default function DashboardPage() {
               </p>
             </div>
             
-            {/* Stars Container - Widened to fit content */}
             <div className="text-lg text-white font-serif tracking-widest min-w-[100px] text-right">
               {signal.signal.signal_strength}
             </div>
@@ -86,7 +139,9 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
-          <p className="text-zinc-500 text-[10px] uppercase tracking-widest animate-pulse">Scanning Credit Markets...</p>
+          <p className="text-zinc-500 text-[10px] uppercase tracking-widest animate-pulse">
+            Scanning Credit Markets...
+          </p>
         </div>
       </div>
     );
@@ -94,23 +149,33 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Container widened to max-w-[1600px] to fill the screen better */}
       <main className="container mx-auto px-6 md:px-12 py-12 max-w-[1600px]">
         
-        {/* Local Title Section */}
+        {/* Header with Last Updated */}
         <div className="flex justify-between items-end mb-16 border-b border-zinc-900 pb-6">
-           <div>
-             <h2 className="text-4xl font-serif text-white tracking-tight mb-2">Market Dashboard</h2>
-             <p className="text-xs text-zinc-500 uppercase tracking-[0.25em]">Live Credit Opportunities & Volatility Arbitrage</p>
-           </div>
-           <button 
-             onClick={handleRefresh}
-             disabled={refreshing}
-             className="text-[10px] uppercase tracking-widest text-zinc-500 hover:text-white flex items-center gap-2 transition-colors border border-zinc-800 px-4 py-2 hover:bg-zinc-900"
-           >
-             <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} />
-             {refreshing ? 'Scanning...' : 'Refresh Data'}
-           </button>
+          <div>
+            <h2 className="text-4xl font-serif text-white tracking-tight mb-2">Market Dashboard</h2>
+            <p className="text-xs text-zinc-500 uppercase tracking-[0.25em]">
+              Live Credit Opportunities & Volatility Arbitrage
+            </p>
+            {lastUpdated && (
+              <div className="flex items-center gap-2 mt-3">
+                <Clock size={12} className="text-zinc-600" />
+                <p className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono">
+                  Last updated: {formatLastUpdated()}
+                </p>
+              </div>
+            )}
+          </div>
+          
+          <button 
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="text-[10px] uppercase tracking-widest text-zinc-500 hover:text-white flex items-center gap-2 transition-colors border border-zinc-800 px-4 py-2 hover:bg-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} />
+            {refreshing ? 'Scanning...' : 'Refresh Now'}
+          </button>
         </div>
 
         {data && (
@@ -156,6 +221,13 @@ export default function DashboardPage() {
             </section>
           </div>
         )}
+
+        {/* Cache Notice */}
+        <div className="mt-16 border-t border-zinc-900 pt-8 text-center">
+          <p className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono">
+            Data cached for 24 hours • Click "Refresh Now" for latest market scan
+          </p>
+        </div>
       </main>
       
       <MobileNav />

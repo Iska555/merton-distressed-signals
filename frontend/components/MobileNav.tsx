@@ -24,17 +24,20 @@ export default function MobileNav() {
           return (
             <Link key={item.href} href={item.href} className="flex-1 group">
               <div className="flex flex-col items-center justify-center h-full relative">
-                {/* Active Top Border instead of glow */}
-                {isActive && (
-                  <div className="absolute top-0 w-full h-[2px] bg-white" />
-                )}
-                
                 <Icon 
                   size={18} 
                   strokeWidth={1.5}
-                  className={`mb-1 transition-colors ${isActive ? 'text-white' : 'text-zinc-600 group-hover:text-zinc-400'}`} 
+                  className={`mb-1 transition-all ${
+                    isActive 
+                      ? 'text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.5)]' 
+                      : 'text-zinc-600 group-hover:text-zinc-400'
+                  }`} 
                 />
-                <span className={`text-[9px] uppercase tracking-widest font-medium ${isActive ? 'text-white' : 'text-zinc-600'}`}>
+                <span className={`text-[9px] uppercase tracking-widest font-medium transition-all ${
+                  isActive 
+                    ? 'text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.5)]' 
+                    : 'text-zinc-600'
+                }`}>
                   {item.label}
                 </span>
               </div>

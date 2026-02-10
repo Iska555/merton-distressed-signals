@@ -4,8 +4,9 @@ FastAPI route definitions
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta  # 🆕 Updated import
 import traceback
+import json # 🆕 Added as requested
 
 from .models import (
     AnalyzeRequest,
@@ -28,6 +29,10 @@ from signals.generator import SignalGenerator
 from signals.sensitivity import SensitivityAnalyzer
 
 router = APIRouter()
+
+# 🆕 Simple in-memory cache (use Redis in production)
+cache = {}
+CACHE_DURATION = timedelta(hours=24)
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -164,6 +169,18 @@ async def analyze_batch(request: BatchAnalyzeRequest):
     
     Returns ranked signals with top opportunities
     """
+    # 🆕 CACHE CHECK START
+    # Create a unique key based on sorted tickers so order doesn't matter
+    normalized_tickers = sorted([t.upper() for t in request.tickers])
+    cache_key = "batch_" + "_".join(normalized_tickers)
+    
+    if cache_key in cache:
+        cached_data, timestamp = cache[cache_key]
+        # Check if cache is still valid (fresh)
+        if datetime.now() - timestamp < CACHE_DURATION:
+            return cached_data
+    # 🆕 CACHE CHECK END
+
     try:
         tickers = [t.upper() for t in request.tickers]
         
@@ -230,6 +247,10 @@ async def analyze_batch(request: BatchAnalyzeRequest):
             top_long_signals=top_long,
             top_short_signals=top_short
         )
+
+        # 🆕 CACHE SAVE START
+        cache[cache_key] = (response, datetime.now())
+        # 🆕 CACHE SAVE END
         
         return response
     

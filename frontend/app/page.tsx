@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react'; // 🆕 Added useCallback
 import { useSearchParams } from 'next/navigation';
 import TickerSearch from '@/components/TickerSearch';
 import SkeletonLoader from '@/components/SkeletonLoader';
@@ -14,12 +14,20 @@ import ErrorState from '@/components/ErrorState';
 import { analyzeTicker, analyzeSensitivity, AnalysisResponse, SensitivityResponse } from '@/lib/api';
 import { motion } from 'framer-motion';
 
+// 🆕 FIXED HANDLER: 100ms delay prevents the "Analysis Failed" race condition
 function SearchParamsHandler({ onSearch }: { onSearch: (ticker: string) => void }) {
   const searchParams = useSearchParams();
+  const ticker = searchParams.get('ticker');
+
   useEffect(() => {
-    const ticker = searchParams.get('ticker');
-    if (ticker) onSearch(ticker);
-  }, [searchParams, onSearch]);
+    if (ticker) {
+      const timeoutId = setTimeout(() => {
+        onSearch(ticker);
+      }, 100); // Small delay to ensure hydration
+      return () => clearTimeout(timeoutId);
+    }
+  }, [ticker, onSearch]);
+
   return null;
 }
 
@@ -31,7 +39,10 @@ export default function Home() {
   const [lastTicker, setLastTicker] = useState<string>('');
   const [showSensitivity, setShowSensitivity] = useState(false);
 
-  const handleSearch = async (ticker: string) => {
+  // 🆕 STABILIZED FUNCTION: Wrapped in useCallback to prevent re-render loops
+  const handleSearch = useCallback(async (ticker: string) => {
+    if (!ticker) return;
+
     setLoading(true);
     setError(null);
     setAnalysis(null);
@@ -43,12 +54,13 @@ export default function Home() {
       const result = await analyzeTicker(ticker);
       setAnalysis(result);
     } catch (err: any) {
+      console.error("Analysis Error:", err);
       const errorMessage = err.response?.data?.detail || 'Failed to analyze ticker. Please try again.';
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // Empty dependency array keeps this function stable
 
   const handleRetry = () => lastTicker && handleSearch(lastTicker);
 
@@ -80,22 +92,28 @@ export default function Home() {
       </Suspense>
 
       <main className="container mx-auto px-6 py-16 max-w-6xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-16"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-serif tracking-tight mb-4 text-white">
-              Structural Credit Analysis
-            </h2>
-            <p className="text-zinc-500 font-sans tracking-[0.2em] text-xs uppercase max-w-2xl mx-auto leading-relaxed">
-              Quantitative arbitrage detection via equity volatility mapping
-            </p>
-          </div>
+        {/* Only show Hero Text if NOT analyzing (prevents layout jump) */}
+        {!analysis && !loading && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-16"
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-4xl md:text-5xl font-serif tracking-tight mb-4 text-white">
+                Structural Credit Analysis
+              </h2>
+              <p className="text-zinc-500 font-sans tracking-[0.2em] text-xs uppercase max-w-2xl mx-auto leading-relaxed">
+                Quantitative arbitrage detection via equity volatility mapping
+              </p>
+            </div>
+          </motion.div>
+        )}
 
-          <TickerSearch onSearch={handleSearch} loading={loading} />
-        </motion.div>
+        {/* Search Bar Container */}
+        <div className={analysis ? "mb-12" : "mb-0"}>
+           <TickerSearch onSearch={handleSearch} loading={loading} />
+        </div>
 
         {error && <ErrorState error={error} onRetry={handleRetry} ticker={lastTicker} />}
         {loading && <SkeletonLoader />}
@@ -211,11 +229,17 @@ export default function Home() {
         )}
       </main>
       
+      {/* 🆕 Updated Professional Footer */}
       <footer className="border-t border-zinc-900 py-12 mt-20">
         <div className="container mx-auto px-6 text-center">
-          <p className="text-zinc-600 text-[10px] uppercase tracking-[0.4em]">
-            Merton Analytics • Wall St. Grade Models
-          </p>
+          <div className="space-y-2">
+            <p className="text-zinc-500 text-xs font-serif tracking-widest">
+              MERTON QUANTITATIVE RESEARCH
+            </p>
+            <p className="text-zinc-700 text-[9px] uppercase tracking-[0.2em]">
+              For Institutional Use Only • Not Investment Advice • Data delayed 15m
+            </p>
+          </div>
         </div>
       </footer>
       
