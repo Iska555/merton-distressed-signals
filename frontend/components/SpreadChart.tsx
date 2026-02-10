@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
   AreaChart,
   Area,
@@ -11,15 +10,14 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
+import { TrendingUp } from 'lucide-react';
 
 interface SpreadChartProps {
   theoSpread: number;
   marketSpread: number;
   volatilitySensitivity?: Array<{
-    shock_pct?: number; // Optional to handle varying backend keys
-    theo_spread_bps?: number; // Optional to handle varying backend keys
-    vol_shock?: number; // Added to match fallback data shape
-    spread?: number; // Added to match fallback data shape
+    shock_pct: number;
+    theo_spread_bps: number;
   }>;
 }
 
@@ -28,119 +26,124 @@ export default function SpreadChart({
   marketSpread,
   volatilitySensitivity,
 }: SpreadChartProps) {
-  // Use typed fallback to handle both manual and API data shapes
-  const data = volatilitySensitivity || [
-    { vol_shock: -20, spread: theoSpread * 0.85 },
-    { vol_shock: -10, spread: theoSpread * 0.92 },
-    { vol_shock: 0, spread: theoSpread },
-    { vol_shock: 10, spread: theoSpread * 1.08 },
-    { vol_shock: 20, spread: theoSpread * 1.18 },
-  ];
+  // Normalize data structure - this fixes the TypeScript error
+  const rawData = volatilitySensitivity 
+    ? volatilitySensitivity.map(d => ({
+        shock: d.shock_pct,
+        spread: d.theo_spread_bps
+      }))
+    : [
+        { shock: -20, spread: theoSpread * 0.85 },
+        { shock: -10, spread: theoSpread * 0.92 },
+        { shock: 0, spread: theoSpread },
+        { shock: 10, spread: theoSpread * 1.08 },
+        { shock: 20, spread: theoSpread * 1.18 },
+      ];
 
-  // Fix 1: Use type assertion (d: any) to handle mixed keys safely
-  const chartData = data.map((d: any) => ({
-    name: `${d.vol_shock ?? d.shock_pct ?? 0}%`,
-    theoretical: d.theo_spread_bps ?? d.spread ?? d.theo_spread ?? 0,
+  const chartData = rawData.map((d) => ({
+    name: `${d.shock > 0 ? '+' : ''}${d.shock}%`,
+    theoretical: d.spread,
     market: marketSpread,
   }));
 
   const isLongSignal = theoSpread < marketSpread;
-  
-  // Dynamic colors based on signal
-  const strokeColor = isLongSignal ? '#10b981' : '#ef4444'; 
-  const glowColor = isLongSignal 
-    ? 'rgba(16, 185, 129, 0.6)' 
-    : 'rgba(239, 68, 68, 0.6)'; 
+  const strokeColor = isLongSignal ? '#10b981' : '#ef4444';
+  const glowColor = isLongSignal ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.4 }}
-      className="bg-zinc-900 rounded-3xl p-8 border border-zinc-800"
-    >
-      <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-        <span className="text-blue-400">📊</span>
-        Spread Sensitivity to Volatility
-      </h3>
-
-      <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={chartData}>
-          <defs>
-            <linearGradient id="colorTheo" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={strokeColor} stopOpacity={0.3} />
-              <stop offset="95%" stopColor={strokeColor} stopOpacity={0} />
-            </linearGradient>
-            
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-          
-          <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-          <XAxis
-            dataKey="name"
-            stroke="#71717a"
-            style={{ fontSize: '12px' }}
-          />
-          <YAxis
-            stroke="#71717a"
-            style={{ fontSize: '12px' }}
-            label={{ 
-              value: 'Spread (bps)', 
-              angle: -90, 
-              position: 'insideLeft', 
-              fill: '#71717a' 
-            }}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: '#18181b',
-              border: '1px solid #3f3f46',
-              borderRadius: '12px',
-              color: '#fff',
-            }}
-            // Fix 2: Explicitly handle 'number | undefined' for toFixed()
-            formatter={(value: number | any) => {
-                const numValue = value ?? 0;
-                return [`${numValue.toFixed(0)} bps`, 'Theoretical'];
-            }}
-          />
-          <ReferenceLine
-            y={marketSpread}
-            stroke="#ef4444"
-            strokeDasharray="5 5"
-            label={{ 
-              value: 'Market Spread', 
-              fill: '#ef4444', 
-              fontSize: 12,
-              position: 'right'
-            }}
-          />
-          <Area
-            type="monotone"
-            dataKey="theoretical"
-            stroke={strokeColor}
-            strokeWidth={3}
-            fillOpacity={1}
-            fill="url(#colorTheo)"
-            animationDuration={1500}
-            animationBegin={300}
-            animationEasing="ease-in-out"
-            style={{
-              filter: `drop-shadow(0px 0px 8px ${glowColor})`,
-            }}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-
-      <div className="mt-4 text-sm text-zinc-400 text-center">
-        Theoretical spread changes with ±20% equity volatility shocks
+    <div className="border border-zinc-800 bg-black">
+      <div className="p-6 border-b border-zinc-800 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-zinc-900 text-white border border-zinc-800">
+            <TrendingUp size={16} />
+          </div>
+          <h3 className="font-serif text-lg tracking-wide text-white uppercase">
+            Volatility Sensitivity
+          </h3>
+        </div>
+        <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono">
+          Spread vs. Vol Shock
+        </div>
       </div>
-    </motion.div>
+
+      <div className="p-8">
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart data={chartData}>
+            <defs>
+              <linearGradient id="colorTheo" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={strokeColor} stopOpacity={0.3} />
+                <stop offset="95%" stopColor={strokeColor} stopOpacity={0} />
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            
+            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+            <XAxis
+              dataKey="name"
+              stroke="#71717a"
+              style={{ fontSize: '10px', fontFamily: 'monospace' }}
+            />
+            <YAxis
+              stroke="#71717a"
+              style={{ fontSize: '10px', fontFamily: 'monospace' }}
+              label={{ 
+                value: 'Spread (bps)', 
+                angle: -90, 
+                position: 'insideLeft', 
+                fill: '#71717a',
+                style: { fontSize: '10px', fontFamily: 'monospace' }
+              }}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#000',
+                border: '1px solid #27272a',
+                borderRadius: '0',
+                color: '#fff',
+                fontSize: '11px',
+                fontFamily: 'monospace',
+              }}
+              formatter={(value: any) => [`${Number(value).toFixed(0)} bps`, '']}
+            />
+            <ReferenceLine
+              y={marketSpread}
+              stroke="#71717a"
+              strokeDasharray="3 3"
+              label={{ 
+                value: 'Market', 
+                fill: '#71717a', 
+                fontSize: 10,
+                position: 'right',
+                fontFamily: 'monospace'
+              }}
+            />
+            <Area
+              type="monotone"
+              dataKey="theoretical"
+              stroke={strokeColor}
+              strokeWidth={2}
+              fillOpacity={1}
+              fill="url(#colorTheo)"
+              animationDuration={1500}
+              animationBegin={300}
+              animationEasing="ease-in-out"
+              style={{
+                filter: `drop-shadow(0px 0px 8px ${glowColor})`,
+              }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+
+        <div className="mt-6 text-[10px] text-zinc-600 text-center uppercase tracking-widest font-mono border-t border-zinc-900 pt-4">
+          Theoretical spread response to ±20% equity volatility shock
+        </div>
+      </div>
+    </div>
   );
 }

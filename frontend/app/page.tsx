@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import TickerSearch from '@/components/TickerSearch';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import SignalCard from '@/components/SignalCard';
@@ -25,7 +24,6 @@ function SearchParamsHandler({ onSearch }: { onSearch: (ticker: string) => void 
 }
 
 export default function Home() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResponse | null>(null);
   const [sensitivity, setSensitivity] = useState<SensitivityResponse | null>(null);
@@ -81,40 +79,45 @@ export default function Home() {
         <SearchParamsHandler onSearch={handleSearch} />
       </Suspense>
 
-      {/* HEADER REMOVED - Handled by layout.tsx */}
-
-      <main className="container mx-auto px-6 py-16">
-        <div className="mb-16">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center mb-12"
-          >
+      <main className="container mx-auto px-6 py-16 max-w-6xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-16"
+        >
+          <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-serif tracking-tight mb-4 text-white">
               Structural Credit Analysis
             </h2>
             <p className="text-zinc-500 font-sans tracking-[0.2em] text-xs uppercase max-w-2xl mx-auto leading-relaxed">
               Quantitative arbitrage detection via equity volatility mapping
             </p>
-          </motion.div>
+          </div>
 
-          {/* Search Component (Updated styles below) */}
           <TickerSearch onSearch={handleSearch} loading={loading} />
-        </div>
+        </motion.div>
 
         {error && <ErrorState error={error} onRetry={handleRetry} ticker={lastTicker} />}
         {loading && <SkeletonLoader />}
 
         {analysis && !loading && (
-          <div className="max-w-6xl mx-auto space-y-12">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-12"
+          >
             {/* Ticker Header */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
               className="text-center border-b border-zinc-900 pb-8"
             >
               <div className="flex items-center justify-center gap-4 mb-2">
-                <h3 className="text-5xl font-serif text-white tracking-tight">{analysis.company.company_name}</h3>
+                <h3 className="text-5xl font-serif text-white tracking-tight">
+                  {analysis.company.company_name}
+                </h3>
                 <WatchlistButton ticker={analysis.company.ticker} />
               </div>
               <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-[0.3em]">
@@ -122,11 +125,11 @@ export default function Home() {
               </p>
             </motion.div>
 
-            {/* Input Stats Grid - Sharp & Serif */}
+            {/* Input Stats Grid */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 260, damping: 20 }}
               className="grid grid-cols-2 md:grid-cols-4 border-t border-l border-zinc-800"
             >
               {[
@@ -135,31 +138,54 @@ export default function Home() {
                 { label: 'Equity Vol.', value: `${(analysis.sigma_E * 100).toFixed(1)}%` },
                 { label: 'Implied Rating', value: analysis.estimated_rating },
               ].map((stat, idx) => (
-                <div
+                <motion.div
                   key={stat.label}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.15 + idx * 0.05, type: "spring", stiffness: 260, damping: 20 }}
                   className="bg-black p-8 border-r border-b border-zinc-800 hover:bg-zinc-950 transition-colors"
                 >
-                  <p className="text-zinc-500 text-[9px] uppercase tracking-[0.25em] mb-3 font-bold">{stat.label}</p>
+                  <p className="text-zinc-500 text-[9px] uppercase tracking-[0.25em] mb-3 font-bold">
+                    {stat.label}
+                  </p>
                   <p className="text-3xl font-serif text-white">{stat.value}</p>
-                </div>
+                </motion.div>
               ))}
             </motion.div>
 
-            <MertonResultsCard merton={analysis.merton} E={analysis.E} D={analysis.D} />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 260, damping: 20 }}
+            >
+              <MertonResultsCard merton={analysis.merton} E={analysis.E} D={analysis.D} />
+            </motion.div>
             
-            <SpreadChart
-              theoSpread={analysis.merton.theo_spread_bps}
-              marketSpread={analysis.market_spread_bps}
-              volatilitySensitivity={sensitivity?.volatility_sensitivity}
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, type: "spring", stiffness: 260, damping: 20 }}
+            >
+              <SpreadChart
+                theoSpread={analysis.merton.theo_spread_bps}
+                marketSpread={analysis.market_spread_bps}
+                volatilitySensitivity={sensitivity?.volatility_sensitivity}
+              />
+            </motion.div>
             
-            <SignalCard
-              signal={analysis.signal.signal}
-              signalStrength={analysis.signal.signal_strength}
-              spreadDiff={analysis.signal.spread_diff_bps}
-              theoSpread={analysis.merton.theo_spread_bps}
-              marketSpread={analysis.market_spread_bps}
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, type: "spring", stiffness: 260, damping: 20 }}
+            >
+              <SignalCard
+                signal={analysis.signal.signal}
+                signalStrength={analysis.signal.signal_strength}
+                spreadDiff={analysis.signal.spread_diff_bps}
+                theoSpread={analysis.merton.theo_spread_bps}
+                marketSpread={analysis.market_spread_bps}
+              />
+            </motion.div>
 
             <div className="flex justify-center pt-8 border-t border-zinc-900">
               <motion.button
@@ -172,17 +198,27 @@ export default function Home() {
               </motion.button>
             </div>
 
-            {showSensitivity && sensitivity && <SensitivityTable sensitivity={sensitivity} />}
-          </div>
+            {showSensitivity && sensitivity && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+              >
+                <SensitivityTable sensitivity={sensitivity} />
+              </motion.div>
+            )}
+          </motion.div>
         )}
       </main>
       
-      {/* Footer */}
       <footer className="border-t border-zinc-900 py-12 mt-20">
         <div className="container mx-auto px-6 text-center">
-           <p className="text-zinc-600 text-[10px] uppercase tracking-[0.4em]">Merton Analytics • Wall St. Grade Models</p>
+          <p className="text-zinc-600 text-[10px] uppercase tracking-[0.4em]">
+            Merton Analytics • Wall St. Grade Models
+          </p>
         </div>
       </footer>
+      
       <MobileNav />
     </div>
   );
