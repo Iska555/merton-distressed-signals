@@ -128,26 +128,26 @@ Corporate credit markets exhibit systematic pricing lags relative to equity mark
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                     BACKEND (FastAPI)                       │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │  API Layer (routes.py)                              │   │
-│  │  - /analyze (single ticker)                         │   │
-│  │  - /analyze/batch (market scan)                     │   │
-│  │  - /analyze/sensitivity (robustness checks)         │   │
-│  └────────────┬────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  API Layer (routes.py)                              │    │
+│  │  - /analyze (single ticker)                         │    │
+│  │  - /analyze/batch (market scan)                     │    │
+│  │  - /analyze/sensitivity (robustness checks)         │    │
+│  └────────────┬────────────────────────────────────────┘    │
 │               │                                             │
-│  ┌────────────▼─────────────────────────────────────────┐  │
-│  │  Merton Engine (core/engine.py)                      │  │
-│  │  - Numerical solver (scipy.optimize)                 │  │
-│  │  - Distance to Default calculation                   │  │
-│  │  - Credit spread derivation                          │  │
-│  └────────────┬─────────────────────────────────────────┘  │
+│  ┌────────────▼─────────────────────────────────────────┐   │
+│  │  Merton Engine (core/engine.py)                      │   │
+│  │  - Numerical solver (scipy.optimize)                 │   │
+│  │  - Distance to Default calculation                   │   │
+│  │  - Credit spread derivation                          │   │
+│  └────────────┬─────────────────────────────────────────┘   │
 │               │                                             │
-│  ┌────────────▼─────────────────────────────────────────┐  │
-│  │  Data Fetchers                                        │  │
-│  │  - Equity data (yfinance): prices, volatility, β     │  │
-│  │  - Balance sheet: debt, assets, shares outstanding   │  │
-│  │  - Market spreads (FRED API): AAA/AA/A/BBB indices   │  │
-│  └───────────────────────────────────────────────────────┘  │
+│  ┌────────────▼─────────────────────────────────────────┐   │
+│  │  Data Fetchers                                       │   │
+│  │  - Equity data (yfinance): prices, volatility, β     │   │
+│  │  - Balance sheet: debt, assets, shares outstanding   │   │
+│  │  - Market spreads (FRED API): AAA/AA/A/BBB indices   │   │
+│  └──────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
                        │
                        ▼
