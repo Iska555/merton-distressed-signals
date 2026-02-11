@@ -2,7 +2,7 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Link from 'next/link'
-import MobileNav from '@/components/MobileNav' // 🆕 Added import
+import MobileNav from '@/components/MobileNav'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -77,7 +77,7 @@ export default function RootLayout({
 
         {children}
         
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation*/}
         <MobileNav />
       </body>
     </html>
