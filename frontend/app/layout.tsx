@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" style={{ backgroundColor: 'black' }}>
       <head>
         {/* Set default zoom to 85% on mobile */}
         <meta 
@@ -25,8 +25,11 @@ export default function RootLayout({
           content="width=device-width, initial-scale=0.85, maximum-scale=2.0, user-scalable=yes" 
         />
       </head>
-      {/* Added bg-black and text-white to the body to fix the gray bleeding behind the header */}
-      <body className={`${inter.className} bg-black text-white min-h-screen`}>
+      {/* Inline styles completely override globals.css to kill the gray gradient */}
+      <body 
+        className={`${inter.className} text-white min-h-screen`}
+        style={{ backgroundColor: 'black', backgroundImage: 'none' }}
+      >
         {/* Header */}
         <header className="border-b border-zinc-900 backdrop-blur-sm bg-black/50 sticky top-0 z-50">
           <div className="container mx-auto px-6 py-4">
