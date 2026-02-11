@@ -2,6 +2,7 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Link from 'next/link'
+import MobileNav from '@/components/MobileNav' // 🆕 Added import
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,7 +25,8 @@ export default function RootLayout({
           content="width=device-width, initial-scale=0.85, maximum-scale=2.0, user-scalable=yes" 
         />
       </head>
-      <body className={inter.className}>
+      {/* Added bg-black and text-white to the body to fix the gray bleeding behind the header */}
+      <body className={`${inter.className} bg-black text-white min-h-screen`}>
         {/* Header */}
         <header className="border-b border-zinc-900 backdrop-blur-sm bg-black/50 sticky top-0 z-50">
           <div className="container mx-auto px-6 py-4">
@@ -74,6 +76,9 @@ export default function RootLayout({
         </header>
 
         {children}
+        
+        {/* Mobile Navigation */}
+        <MobileNav />
       </body>
     </html>
   )
