@@ -28,11 +28,11 @@ This tool uses the Merton model to translate equity volatility into implied cred
 **Live Demo:** https://merton-signals.vercel.app
 
 Enter any stock ticker to see:
--**Distance to Default** - How many standard deviations from insolvency
--**Default Probability** - Percentage chance of bankruptcy (1-year)
--**Trading Signal** - LONG, SHORT, or NEUTRAL credit recommendation
--**Sensitivity Analysis** - Stress tests across volatility scenarios
--**Historical Validation** - See how the model predicted SVB, Credit Suisse, BBBY collapses
+-  **Distance to Default** - How many standard deviations from insolvency
+-  **Default Probability** - Percentage chance of bankruptcy (1-year)
+-  **Trading Signal** - LONG, SHORT, or NEUTRAL credit recommendation
+-  **Sensitivity Analysis** - Stress tests across volatility scenarios
+-  **Historical Validation** - See how the model predicted SVB, Credit Suisse, BBBY collapses
 
 **No installation required** - analyze any public company in 10 seconds.
 
