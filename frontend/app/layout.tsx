@@ -73,6 +73,11 @@ export default function RootLayout({
                     Historical
                   </span>
                 </Link>
+                <Link href="/events">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 hover:text-white transition-colors cursor-pointer">
+                    Events
+                  </span>
+                </Link>
               </div>
             </nav>
           </div>

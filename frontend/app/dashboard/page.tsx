@@ -41,11 +41,18 @@ export default function DashboardPage() {
         }
       }
 
-      // Fetch fresh data
+      // ── UPGRADED: Expanded Institutional Targeting Scope ──
       const tickers = [
+        // Tech / Mega Cap
         'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA',
-        'F', 'GM', 'BAC', 'JPM', 'C', 'WFC', 'GS', 'MS',
+        // Financials (Now protected by structural overrides)
+        'BAC', 'JPM', 'C', 'WFC', 'GS', 'MS',
+        // Industrials & Shadow Banks
+        'F', 'GM', 'BA', 'GE',
+        // High Volatility / Structural Shorts
+        'AMC', 'DISH', 'LUMN', 'CHK', 'NYCB'
       ];
+      
       const result = await analyzeBatch(tickers);
       
       // Cache the result
@@ -71,7 +78,7 @@ export default function DashboardPage() {
 
   const handleRefresh = () => {
     setRefreshing(true);
-    fetchTopSignals(true); // Force refresh
+    fetchTopSignals(true); // Force refresh bypasses local storage
   };
 
   const formatLastUpdated = () => {
@@ -192,11 +199,17 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="space-y-1">
-                <AnimatePresence>
-                  {data.top_short_signals.map((signal, idx) => (
-                    <SignalRow key={signal.company.ticker} signal={signal} index={idx} />
-                  ))}
-                </AnimatePresence>
+                {data.top_short_signals.length === 0 ? (
+                  <div className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest py-8 text-center border border-dashed border-zinc-800">
+                    No critical short signals detected in current scan.
+                  </div>
+                ) : (
+                  <AnimatePresence>
+                    {data.top_short_signals.map((signal, idx) => (
+                      <SignalRow key={signal.company.ticker} signal={signal} index={idx} />
+                    ))}
+                  </AnimatePresence>
+                )}
               </div>
             </section>
 
@@ -212,11 +225,17 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="space-y-1">
-                <AnimatePresence>
-                  {data.top_long_signals.map((signal, idx) => (
-                    <SignalRow key={signal.company.ticker} signal={signal} index={idx} />
-                  ))}
-                </AnimatePresence>
+                {data.top_long_signals.length === 0 ? (
+                  <div className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest py-8 text-center border border-dashed border-zinc-800">
+                    No critical long signals detected in current scan.
+                  </div>
+                ) : (
+                  <AnimatePresence>
+                    {data.top_long_signals.map((signal, idx) => (
+                      <SignalRow key={signal.company.ticker} signal={signal} index={idx} />
+                    ))}
+                  </AnimatePresence>
+                )}
               </div>
             </section>
           </div>

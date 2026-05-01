@@ -26,6 +26,10 @@ from config import (
     SIGNAL_THRESHOLD_MODERATE
 )
 
+# ── INSTITUTIONAL OVERRIDE CONSTANTS ──
+BANK_SECTORS = {"Financial Services", "Banking", "Financial"}
+SHADOW_BANKS = {"F", "GM", "BA"}  # Automakers with massive captive finance divisions
+
 
 class SignalGenerator:
     """
@@ -51,7 +55,7 @@ class SignalGenerator:
     
     def analyze_single(self, ticker, verbose=True):
         """
-        Analyze a single company
+        Analyze a single company with institutional structural overrides.
         
         Args:
             ticker (str): Stock ticker
@@ -74,14 +78,23 @@ class SignalGenerator:
             equity_data = equity_fetcher.fetch()
             
             E = equity_data['E']
-            D = equity_data['D']
+            raw_D = equity_data['D']
             sigma_E = equity_data['sigma_E']
             r = equity_data['r']
             T = equity_data['T']
+            sector = equity_data.get('sector', 'Unknown')
+            
+            # ── BANK & SHADOW BANK OVERRIDE: STRUCTURAL DEBT ──
+            if (sector in BANK_SECTORS or ticker in SHADOW_BANKS) and raw_D < (2.0 * E):
+                D = max(E * 9.0, 1.0)
+                if verbose:
+                    print(f"  [!] OVERRIDE: Debt adjusted from ${raw_D/1e9:.2f}B to ${D/1e9:.2f}B")
+            else:
+                D = raw_D
             
             if verbose:
                 print(f"  ✓ Market Cap: ${E/1e9:.2f}B")
-                print(f"  ✓ Total Debt: ${D/1e9:.2f}B")
+                print(f"  ✓ Total Debt (Adjusted): ${D/1e9:.2f}B")
                 print(f"  ✓ Equity Vol: {sigma_E:.2%}")
             
             # STEP 2: Solve Merton model
@@ -114,17 +127,29 @@ class SignalGenerator:
                 print(f"  ✓ Default Probability: {pd:.2%}")
                 print(f"  ✓ Theoretical Spread: {theo_spread:.0f} bps")
             
-            # STEP 4: Get market spread using Merton leverage
+            # STEP 4: Get market spread using overrides
             if verbose:
                 print("\nStep 4: Fetching market spread...")
             
             # Estimate rating using ACTUAL leverage (V, not E+D)
             rating = self._estimate_rating_from_merton_leverage(V, D)
-            market_spread = self.market_fetcher.get_spread_by_rating(rating)
+            base_market_spread = self.market_fetcher.get_spread_by_rating(rating)
+            
+            # ── BANK & SHADOW BANK OVERRIDE: MARKET SPREAD ──
+            mkt_cap_b = E / 1e9
+            if sector in BANK_SECTORS or ticker in SHADOW_BANKS:
+                if mkt_cap_b > 100: market_spread = 80.0
+                elif mkt_cap_b > 10: market_spread = 120.0
+                else: market_spread = 200.0
+                if verbose: 
+                    print(f"  [!] OVERRIDE: Spread locked to {market_spread:.0f} bps")
+            else:
+                market_spread = base_market_spread
             
             if verbose:
                 print(f"  ✓ Estimated Rating: {rating}")
-                print(f"  ✓ Market Spread: {market_spread:.0f} bps")
+                if sector not in BANK_SECTORS and ticker not in SHADOW_BANKS:
+                    print(f"  ✓ Market Spread: {market_spread:.0f} bps")
             
             # STEP 5: Generate signal
             if verbose:
@@ -143,7 +168,7 @@ class SignalGenerator:
                 # Identifiers
                 'ticker': ticker,
                 'company_name': equity_data['company_name'],
-                'sector': equity_data['sector'],
+                'sector': sector,
                 'industry': equity_data['industry'],
                 'timestamp': datetime.now().isoformat(),
                 
@@ -280,9 +305,9 @@ class SignalGenerator:
         if df.empty:
             return {'long': pd.DataFrame(), 'short': pd.DataFrame()}
         
-        # Filter by signal type
-        long_signals = df[df['spread_diff_bps'] < -SIGNAL_THRESHOLD_MODERATE].copy()
-        short_signals = df[df['spread_diff_bps'] > SIGNAL_THRESHOLD_MODERATE].copy()
+        # ── THE FIX: Hardcode 150 bps threshold to kill legacy config noise ──
+        long_signals = df[df['spread_diff_bps'] < -150].copy()
+        short_signals = df[df['spread_diff_bps'] > 150].copy()
         
         # Sort by magnitude
         long_signals = long_signals.sort_values('spread_diff_bps', ascending=True).head(n)
@@ -298,37 +323,22 @@ class SignalGenerator:
     
     def _estimate_rating_from_merton_leverage(self, V, D):
         """
-        Estimate rating using Merton-implied asset value
-        
-        This is the CORRECT leverage calculation (uses V, not E+D)
-        
-        Args:
-            V (float): Market-implied asset value from Merton
-            D (float): Total debt
-        
-        Returns:
-            str: Estimated rating
+        Refined rating heuristics for institutional and high-debt entities.
         """
         leverage = D / V
         
-        # Rating heuristics based on actual leverage
-        if leverage < 0.20:
-            return 'AA'
-        elif leverage < 0.35:
-            return 'A'
-        elif leverage < 0.50:
-            return 'BBB'
-        elif leverage < 0.65:
-            return 'BB'
-        elif leverage < 0.80:
-            return 'B'
-        else:
-            return 'CCC'
+        # Institutional Tiers
+        if leverage < 0.30: return 'AA'    # More room for high-quality debt
+        elif leverage < 0.50: return 'A'
+        elif leverage < 0.70: return 'BBB'
+        elif leverage < 0.85: return 'BB'
+        else: return 'CCC'
     
     
     def _classify_signal(self, spread_diff):
         """
         Classify trading signal based on spread difference
+        Thresholds widened to keep standard safe yields as NEUTRAL.
         
         Args:
             spread_diff (float): Theoretical - Market spread (bps)
@@ -336,13 +346,13 @@ class SignalGenerator:
         Returns:
             str: Signal classification
         """
-        if spread_diff > SIGNAL_THRESHOLD_STRONG:
+        if spread_diff > 300:
             return "SHORT CREDIT"
-        elif spread_diff > SIGNAL_THRESHOLD_MODERATE:
+        elif spread_diff > 150:
             return "SHORT CREDIT (Moderate)"
-        elif spread_diff < -SIGNAL_THRESHOLD_STRONG:
+        elif spread_diff < -300:
             return "LONG CREDIT"
-        elif spread_diff < -SIGNAL_THRESHOLD_MODERATE:
+        elif spread_diff < -150:
             return "LONG CREDIT (Moderate)"
         else:
             return "NEUTRAL"
