@@ -32,7 +32,7 @@ router = APIRouter()
 
 # 🆕 Simple in-memory cache (use Redis in production)
 cache = {}
-CACHE_DURATION = timedelta(hours=24)
+CACHE_DURATION = timedelta(minutes=30)
 
 
 @router.get("/health", response_model=HealthResponse)
