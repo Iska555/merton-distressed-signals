@@ -24,6 +24,7 @@ import numpy as np
 import pandas as pd
 
 from ..config import DATA_RAW, TIINGO_API_KEY
+from . import budget as budget_mod
 
 _CACHE = DATA_RAW / "prices"
 _CACHE.mkdir(parents=True, exist_ok=True)
@@ -48,9 +49,19 @@ class PriceSeries:
 # Providers
 # --------------------------------------------------------------------------
 
-def _cache_path(provider: str, ticker: str) -> "object":
+def _cache_path(provider: str, ticker: str, start: str = "", end: str = "") -> "object":
+    """
+    Cache key is (provider, symbol, start, end).
+
+    Keying on the window as well as the symbol means a request for a different
+    range is a cache miss rather than a silently wrong hit. Metered providers
+    are still protected from that costing a symbol slot, because the budget
+    ledger tracks unique SYMBOLS per month, not requests -- so a second window
+    for an already-fetched symbol is free.
+    """
     safe = ticker.replace("/", "_").replace("\\", "_").upper()
-    return _CACHE / provider / f"{safe}.json"
+    window = f"_{start}_{end}" if (start or end) else ""
+    return _CACHE / provider / f"{safe}{window}.json"
 
 
 def fetch_yahoo(ticker: str, start: str, end: str, *, refresh: bool = False) -> PriceSeries:
@@ -61,7 +72,7 @@ def fetch_yahoo(ticker: str, start: str, end: str, *, refresh: bool = False) -> 
     anything delisted: Phase 0 found 9/45 defaulted tickers returned data at
     all, and several of those were the wrong company.
     """
-    path = _cache_path("yahoo", ticker)
+    path = _cache_path("yahoo", ticker, start, end)
     payload: dict | None = None
     if path.exists() and not refresh:
         try:
@@ -112,17 +123,35 @@ def fetch_yahoo(ticker: str, start: str, end: str, *, refresh: bool = False) -> 
     return PriceSeries(ticker, "yahoo", series, True, "")
 
 
-def fetch_tiingo(ticker: str, start: str, end: str, *, refresh: bool = False) -> PriceSeries:
+_TIINGO_LIMITER = None
+
+
+def fetch_tiingo(
+    ticker: str,
+    start: str,
+    end: str,
+    *,
+    refresh: bool = False,
+    budget: "budget_mod.SymbolBudget | None" = None,
+    allow_reserve: bool = False,
+) -> PriceSeries:
     """
     Daily adjusted closes from Tiingo, which retains delisted tickers.
+
+    Metered: the free tier allows 500 unique symbols per calendar month. Two
+    protections apply, in this order:
+
+      1. On-disk cache, checked first and written before parsing. A rerun of
+         the pipeline consumes ZERO new unique symbols.
+      2. Symbol budget ledger, which records the spend before the request is
+         issued and raises BudgetExhausted rather than warning.
 
     Requires TIINGO_API_KEY. Without it this returns a not-configured result
     rather than raising, so the pipeline still runs on the control cohort.
     """
-    if not TIINGO_API_KEY:
-        return PriceSeries(ticker, "tiingo", None, False, "TIINGO_API_KEY not configured")
+    global _TIINGO_LIMITER
 
-    path = _cache_path("tiingo", ticker)
+    path = _cache_path("tiingo", ticker, start, end)
     payload: list | None = None
     if path.exists() and not refresh:
         try:
@@ -131,6 +160,23 @@ def fetch_tiingo(ticker: str, start: str, end: str, *, refresh: bool = False) ->
             payload = None
 
     if payload is None:
+        if not TIINGO_API_KEY:
+            return PriceSeries(
+                ticker, "tiingo", None, False, "TIINGO_API_KEY not configured"
+            )
+
+        # Spend the slot BEFORE the request. A failed request still consumed
+        # the provider's quota; assuming otherwise overruns the budget.
+        ledger = budget if budget is not None else budget_mod.SymbolBudget("tiingo")
+        try:
+            ledger.spend(ticker, allow_reserve=allow_reserve)
+        except budget_mod.BudgetExhausted as exc:
+            return PriceSeries(ticker, "tiingo", None, False, f"budget: {exc}")
+
+        if _TIINGO_LIMITER is None:
+            _TIINGO_LIMITER = budget_mod.tiingo_rate_limiter()
+        _TIINGO_LIMITER.acquire()
+
         url = (
             f"https://api.tiingo.com/tiingo/daily/{ticker.lower()}/prices"
             f"?startDate={start}&endDate={end}&format=json&resampleFreq=daily"
@@ -149,6 +195,7 @@ def fetch_tiingo(ticker: str, start: str, end: str, *, refresh: bool = False) ->
             return PriceSeries(ticker, "tiingo", None, False, f"http {exc.code}")
         except Exception as exc:  # noqa: BLE001
             return PriceSeries(ticker, "tiingo", None, False, f"{type(exc).__name__}")
+        # Written before parsing, so a schema surprise never costs the slot twice.
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload), encoding="utf-8")
 
