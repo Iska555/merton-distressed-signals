@@ -1,0 +1,9 @@
+cik,company,event_date,event_year,sic,sic_division,resolved,ticker,provenance,reason_code,xbrl_instances_seen,has_xbrl_fundamentals,public_float_usd,listing_start,listing_end,notes,size_decile
+0000012570,LEXINGTON PRECISION CORP  (CIK 0000012570),2008-04-03,2008,3060,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000877355,LANDAMERICA FINANCIAL GROUP INC  (CIK 0000877355),2008-12-01,2008,6361,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001083132,IMMUNICON CORP  (CIK 0001083132),2008-06-11,2008,3826,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001299966,"PRB Energy, Inc.  (CIK 0001299966)",2008-03-12,2008,4922,Transport & Utilities,False,,,NO_XBRL_INSTANCE,0,True,,,,no candidate symbols found,
+0000019731,CHESAPEAKE CORP /VA/  (CIK 0000019731),2009-01-05,2009,2650,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000854709,DAYTON SUPERIOR CORP  (CIK 0000854709),2009-04-20,2009,3317,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001024109,Crusader Energy Group Inc.  (CIK 0001024109),2009-03-31,2009,1311,Mining,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001167880,"PANDA ETHANOL, INC.  (CIK 0001167880)",2009-01-29,2009,2860,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,

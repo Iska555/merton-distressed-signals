@@ -45,17 +45,32 @@ _TICKER_TAG = re.compile(
 _SKIP_SUFFIXES = ("_cal.xml", "_lab.xml", "_pre.xml", "_def.xml", "_ref.xml")
 
 
+# Machine-readable outcomes, so the exclusion audit can be cross-tabulated
+# rather than read as prose. Every excluded firm carries exactly one of these.
+class ReasonCode:
+    RESOLVED_XBRL = "RESOLVED_XBRL"
+    RESOLVED_NAME_MATCH = "RESOLVED_NAME_MATCH"
+    NO_FILINGS = "NO_FILINGS"
+    NO_XBRL_INSTANCE = "NO_XBRL_INSTANCE"          # pre-XBRL era: no instance docs exist
+    NO_TRADING_SYMBOL_TAG = "NO_TRADING_SYMBOL_TAG"  # XBRL present, tag absent
+    SYMBOL_NOT_LISTED = "SYMBOL_NOT_LISTED"        # absent from the listing table
+    LISTING_EXCLUDES_EVENT = "LISTING_EXCLUDES_EVENT"  # window does not span the event
+
+
 @dataclass
 class Identity:
     cik: str
     name: str | None = None
     ticker: str | None = None
     source: str = ""
+    reason_code: str = ""
+    provenance: str = ""          # "xbrl" | "name_match" | ""
     listing_start: str | None = None
     listing_end: str | None = None
     exchange: str | None = None
     candidates: tuple[str, ...] = field(default_factory=tuple)
     notes: tuple[str, ...] = field(default_factory=tuple)
+    xbrl_instances_seen: int = 0
 
     @property
     def resolved(self) -> bool:
@@ -182,9 +197,14 @@ def _all_filings(cik: str) -> pd.DataFrame:
 
 def ticker_from_filings(
     cik: str, near_date=None, *, max_filings: int = 8
-) -> list[tuple[str, str]]:
+) -> tuple[list[tuple[str, str]], int]:
     """
     Read dei:TradingSymbol from several filing XBRL instances.
+
+    Returns (symbols, xbrl_instances_seen). The instance count separates two
+    very different failures: a pre-XBRL filer, whose filings contain no
+    instance documents at all, from a filer whose XBRL exists but omits the
+    cover-page tag. Only the first is a hard era floor.
 
     Returns every (symbol, provenance) pair found, not just the first. A firm
     that goes bankrupt changes symbol -- Bed Bath & Beyond filed as BBBY before
@@ -196,7 +216,7 @@ def ticker_from_filings(
     """
     filings = _all_filings(cik)
     if filings.empty:
-        return []
+        return [], 0
 
     wanted = filings[filings["form"].isin(["10-K", "10-Q", "8-K", "20-F", "40-F"])]
     if wanted.empty:
@@ -212,6 +232,7 @@ def ticker_from_filings(
 
     cik_int = int(str(cik).lstrip("0") or 0)
     found: dict[str, str] = {}
+    instances_seen = 0
 
     for _, row in wanted.head(max_filings).iterrows():
         accession = str(row["accessionNumber"]).replace("-", "")
@@ -230,6 +251,7 @@ def ticker_from_filings(
             if n.endswith(".xml") and not n.endswith(_SKIP_SUFFIXES)
         ]
         instances.sort(key=lambda n: (not n.endswith("_htm.xml"), len(n)))
+        instances_seen += len(instances)
 
         for name in instances[:2]:
             try:
@@ -244,7 +266,7 @@ def ticker_from_filings(
                     found[symbol] = f"{row['form']} filed {row['filingDate'].date()}"
             if found:
                 break
-    return list(found.items())
+    return list(found.items()), instances_seen
 
 
 def _variants(symbol: str) -> list[str]:
@@ -281,9 +303,8 @@ def resolve(cik: str, *, event_date=None, name: str | None = None) -> Identity:
     profile = edgar.company_profile(cik)
     display_name = name or profile.get("name")
 
-    raw_candidates: list[tuple[str, str]] = list(
-        ticker_from_filings(cik, near_date=event_date)
-    )
+    from_filings, instances_seen = ticker_from_filings(cik, near_date=event_date)
+    raw_candidates: list[tuple[str, str]] = list(from_filings)
     for symbol in profile.get("tickers") or []:
         raw_candidates.append((symbol.upper(), "company_tickers.json"))
 
@@ -309,10 +330,24 @@ def resolve(cik: str, *, event_date=None, name: str | None = None) -> Identity:
             accepted.append((variant, source, window))
 
     if not accepted:
+        # Distinguish the failure modes: a pre-XBRL filer (no instance
+        # documents exist at all) is a hard era floor, not a fixable gap.
+        if not raw_candidates:
+            if instances_seen == 0:
+                code = ReasonCode.NO_XBRL_INSTANCE
+            else:
+                code = ReasonCode.NO_TRADING_SYMBOL_TAG
+        elif any("listing starts" in n or "listing ended" in n for n in notes):
+            code = ReasonCode.LISTING_EXCLUDES_EVENT
+        else:
+            code = ReasonCode.SYMBOL_NOT_LISTED
+
         return Identity(
             cik=cik, name=display_name, ticker=None, source="unresolved",
+            reason_code=code, provenance="",
             candidates=tuple(sorted(seen)),
             notes=tuple(notes) or ("no candidate symbols found",),
+            xbrl_instances_seen=instances_seen,
         )
 
     def _history_before_event(entry) -> float:
@@ -326,7 +361,9 @@ def resolve(cik: str, *, event_date=None, name: str | None = None) -> Identity:
     symbol, source, window = max(accepted, key=_history_before_event)
     return Identity(
         cik=cik, name=display_name, ticker=symbol, source=source,
+        reason_code=ReasonCode.RESOLVED_XBRL, provenance="xbrl",
         listing_start=window["start"], listing_end=window["end"],
         exchange=window["exchange"],
         candidates=tuple(sorted(seen)), notes=tuple(notes),
+        xbrl_instances_seen=instances_seen,
     )
