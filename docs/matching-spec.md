@@ -109,12 +109,20 @@ The ratio is therefore set by:
 ratio = max(1, min(5, floor(400 / N_treatment) - 1))
 ```
 
-| N treatment | Ratio | Total symbols |
+| N treatment | Ratio | Max total symbols |
 |---|---|---|
-| ≤ 66 | 5 | ≤ 396 |
-| 67–99 | 3 | ≤ 396 |
-| 100–133 | 2 | ≤ 399 |
-| ≥ 134 | 1 | ≤ 400 |
+| ≤ 66 | 5 | 396 |
+| 67–80 | 4 | 400 |
+| 81–100 | 3 | 400 |
+| 101–133 | 2 | 399 |
+| ≥ 134 | 1 | 400 |
+
+> **Amendment, 2026-08-20** (commit following the original). The table as first
+> committed jumped from 5:1 to 3:1 and omitted the 4:1 band for N = 67–80. The
+> **formula above is normative and is unchanged**; only this illustrative table
+> was wrong. Every band stays within the 400-symbol budget either way, so no
+> value that governs the study changed. Recorded here rather than silently
+> corrected, per the amendment rule.
 
 **The treatment cohort is never truncated to preserve the ratio.** Treatment
 firms are the scarce resource and dropping them would reintroduce exactly the
