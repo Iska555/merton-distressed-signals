@@ -124,6 +124,11 @@ ratio = max(1, min(5, floor(400 / N_treatment) - 1))
 > value that governs the study changed. Recorded here rather than silently
 > corrected, per the amendment rule.
 
+**Above N = 200 the budget cannot be met at any ratio.** Even 1:1 needs 400+
+symbols. The treatment cohort is still not truncated: the run instead spans two
+calendar months, which the symbol ledger already tracks, and the split is
+disclosed on `/data`. `universe.fits_monthly_budget()` reports this case.
+
 **The treatment cohort is never truncated to preserve the ratio.** Treatment
 firms are the scarce resource and dropping them would reintroduce exactly the
 selection problem this study exists to avoid. The ratio absorbs the constraint
