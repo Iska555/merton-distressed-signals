@@ -196,14 +196,35 @@ Identity resolution produces two tiers, which are **never merged**:
 | Tier | How the ticker was obtained | Use |
 |---|---|---|
 | `xbrl` | `dei:TradingSymbol` read from the filing's own XBRL instance, validated against the listing window | **Headline analysis** |
-| `name_match` | Fuzzy match of registrant name against an external ticker/name table, validated against the listing window, match score above a threshold fixed before use | **Robustness check only** |
+| `filing_text` | Trading symbol read from Item 5 prose of the registrant's 10-K ("traded on the New York Stock Exchange under the symbol EK"), validated against the listing window | **Robustness check only** |
 
-The headline result is computed on the `xbrl` tier alone. The `name_match` tier
-is reported separately. If the two disagree, that is reported as a finding.
+The headline result is computed on the `xbrl` tier alone. The `filing_text`
+tier is reported separately. If the two disagree, that is reported as a finding.
 
 Tiers are not pooled to improve N.
 
----
+> **Amendment, 2026-08-20.** The tier originally specified as `name_match`
+> (fuzzy match of registrant name against an external ticker/name table) is
+> **not implementable and has been replaced by `filing_text`.**
+>
+> Two independent reasons. Tiingo's public listing file carries only
+> `ticker, exchange, assetType, priceCurrency, startDate, endDate` — **no
+> company names at all**, so there is nothing to match a name against.
+> OpenFIGI, the obvious substitute, returns "No identifier found" for every
+> delisted bankruptcy symbol tested (HTZGQ, BBBYQ, SIVBQ, LEHMQ, WAMUQ, RADCQ,
+> WEWKQ, JCPNQ) while resolving live symbols normally.
+>
+> `filing_text` is a strictly **stronger** second tier than the one it
+> replaces: it is document-sourced from the registrant's own filing rather
+> than inferred from a name similarity score, so no match threshold has to be
+> chosen. It remains tier 2 because it is a regular expression over prose
+> rather than a tagged fact.
+>
+> This is why the tier exists at all: the SEC's 2019 FAST Act Modernization
+> rule introduced both the cover-page "Trading Symbol(s)" column and its
+> Inline XBRL tag. Before 2019 the ticker appears **nowhere on the cover
+> page** — verified directly on Kodak's 2011 10-K — so the `xbrl` tier cannot
+> reach 2011-2021 events at all, and Item 5 prose is the only remaining route.
 
 ## 7. Pre-registered primary analysis
 
