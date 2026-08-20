@@ -1,9 +1,191 @@
 cik,company,event_date,event_year,sic,sic_division,resolved,ticker,provenance,reason_code,xbrl_instances_seen,has_xbrl_fundamentals,public_float_usd,listing_start,listing_end,notes,size_decile
+0000007431,ARMSTRONG WORLD INDUSTRIES INC  (AWI)  (CIK 0000007431),2006-08-18,2006,3089,Manufacturing,False,,,LISTING_EXCLUDES_EVENT,0,True,7000000000.0,,,"AWI rejected: listing starts 2006-10-18, after event 2006-08-18 | AWIQ rejected: not in listing table",10
+0000745655,INTERCELL INTERNATIONAL CORP  (CIK 0000745655),2006-04-07,2006,4813,Transport & Utilities,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000843964,HEARTLAND PARTNERS L P  (CIK 0000843964),2006-04-26,2006,6552,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000935493,WAVE WIRELESS CORP  (CIK 0000935493),2006-11-01,2006,3663,Manufacturing,False,,,NO_XBRL_INSTANCE,0,True,,,,no candidate symbols found,
+0001029738,LIFESTREAM TECHNOLOGIES INC  (CIK 0001029738),2006-12-01,2006,3841,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001091325,INTELISYS AVIATION SYSTEMS OF AMERICA INC  (CIK 0001091325),2006-07-07,2006,7389,Services,False,,,NO_XBRL_INSTANCE,0,True,5200000.0,,,no candidate symbols found,2
+0001210936,EASY GARDENER PRODUCTS LTD  (CIK 0001210936),2006-04-20,2006,2870,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001332376,Hartford Life Global Funding Trust 2005-082  (CIK 0001332376),2006-01-27,2006,6189,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001335833,Hartford Life Global Funding Trust 2005-096  (CIK 0001335833),2006-02-27,2006,6189,"Finance, Insurance, Real Estate",False,,,ERROR,0,False,,,,JSONDecodeError: Expecting value: line 1 column 1 (char 0),
+0001341849,Hartford Life Global Funding Trust 2005-126  (CIK 0001341849),2006-04-26,2006,6189,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000019161,CHAMPION PARTS INC  (CIK 0000019161),2007-10-10,2007,3714,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000353482,VIRAGEN INC  (CIK 0000353482),2007-10-23,2007,2836,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000846815,COLLINS & AIKMAN CORP  (CIK 0000846815),2007-10-16,2007,3714,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000925178,MOVIE GALLERY INC  (CIK 0000925178),2007-10-17,2007,7841,Services,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001060390,TWEETER HOME ENTERTAINMENT GROUP INC  (CIK 0001060390),2007-06-11,2007,5731,Retail Trade,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001092605,EMERGE INTERACTIVE INC  (CIK 0001092605),2007-03-16,2007,7389,Services,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001132590,"GEM SOLUTIONS, INC.  (CIK 0001132590)",2007-09-27,2007,7373,Services,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001283683,HOMEBANC CORP  (CIK 0001283683),2007-08-15,2007,6798,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001385542,HSI Asset Loan Obligation Trust 2007-AR1  (CIK 0001385542),2007-08-09,2007,6189,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001397057,Morgan Stanley Mortgage Loan Trust 2007-7AX  (CIK 0001397057),2007-08-10,2007,6189,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
 0000012570,LEXINGTON PRECISION CORP  (CIK 0000012570),2008-04-03,2008,3060,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
-0000877355,LANDAMERICA FINANCIAL GROUP INC  (CIK 0000877355),2008-12-01,2008,6361,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
-0001083132,IMMUNICON CORP  (CIK 0001083132),2008-06-11,2008,3826,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
-0001299966,"PRB Energy, Inc.  (CIK 0001299966)",2008-03-12,2008,4922,Transport & Utilities,False,,,NO_XBRL_INSTANCE,0,True,,,,no candidate symbols found,
+0000720145,CIPRICO INC  (CIK 0000720145),2008-07-28,2008,3576,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000812708,WELLMAN INC  (CIK 0000812708),2008-02-28,2008,2820,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000906337,PROXYMED INC /FT LAUDERDALE/  (CIK 0000906337),2008-07-23,2008,7374,Services,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001043055,LEINER HEALTH PRODUCTS INC  (CIK 0001043055),2008-03-10,2008,2834,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001082084,BROOKE CAPITAL CORP  (CIK 0001082084),2008-10-29,2008,6311,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001124394,HydroGen CORP  (CIK 0001124394),2008-10-23,2008,3510,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001232229,SYNTAX-BRILLIAN CORP  (CIK 0001232229),2008-07-08,2008,3663,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001349120,"Hawaiian Telcom Communications, Inc.  (CIK 0001349120)",2008-12-01,2008,4813,Transport & Utilities,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001401300,"Tropicana Entertainment, LLC  (CIK 0001401300)",2008-05-06,2008,7011,Services,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
 0000019731,CHESAPEAKE CORP /VA/  (CIK 0000019731),2009-01-05,2009,2650,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
-0000854709,DAYTON SUPERIOR CORP  (CIK 0000854709),2009-04-20,2009,3317,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
-0001024109,Crusader Energy Group Inc.  (CIK 0001024109),2009-03-31,2009,1311,Mining,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
-0001167880,"PANDA ETHANOL, INC.  (CIK 0001167880)",2009-01-29,2009,2860,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000357097,ISOLAGEN INC  (CIK 0000357097),2009-06-16,2009,2834,Manufacturing,False,,,NO_XBRL_INSTANCE,0,True,16800000.0,,,no candidate symbols found,4
+0000840216,CALIFORNIA COASTAL COMMUNITIES INC  (CIK 0000840216),2009-11-02,2009,1531,Construction,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000895648,GENERAL GROWTH PROPERTIES INC  (CIK 0000895648),2009-04-16,2009,6798,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,True,522600000.0,,,no candidate symbols found,10
+0000944522,VION PHARMACEUTICALS INC  (CIK 0000944522),2009-12-18,2009,2836,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001022080,MIDWAY GAMES INC  (CIK 0001022080),2009-02-12,2009,7372,Services,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001074436,"a21, Inc.  (CIK 0001074436)",2009-01-16,2009,7389,Services,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001104161,IMPART MEDIA GROUP INC  (CIK 0001104161),2009-02-27,2009,8741,Services,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001174527,CITADEL BROADCASTING CORP  (CIK 0001174527),2009-12-23,2009,4832,Transport & Utilities,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001330340,"Platinum Research Organization, Inc.  (CIK 0001330340)",2009-02-18,2009,3470,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000030419,R H DONNELLEY CORP  (CIK 0000030419),2010-01-15,2010,7310,Services,False,,,NO_XBRL_INSTANCE,0,True,46034327.0,,,no candidate symbols found,6
+0000314132,FLEETWOOD ENTERPRISES INC/DE/  (CIK 0000314132),2010-08-23,2010,3716,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000874501,AMBAC FINANCIAL GROUP INC  (AMBC)  (CIK 0000874501),2010-11-10,2010,6351,"Finance, Insurance, Real Estate",False,,,LISTING_EXCLUDES_EVENT,0,True,313633817.0,,,"OSG rejected: listing starts 2015-12-01, after event 2010-11-10 | OSGQ rejected: not in listing table",9
+0000923473,PALM HARBOR HOMES INC /FL/  (CIK 0000923473),2010-11-30,2010,2452,Manufacturing,False,,,ERROR,0,False,,,,JSONDecodeError: Expecting value: line 1 column 1 (char 0),
+0001059397,KOLORFUSION INTERNATIONAL INC  (CIK 0001059397),2010-08-02,2010,2750,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001095274,FIRST NATIONAL BANCSHARES INC /SC/  (CIK 0001095274),2010-07-21,2010,6021,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001122887,JAVA DETOUR INC.  (CIK 0001122887),2010-09-10,2010,5400,Retail Trade,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001180743,"CERAGENIX PHARMACEUTICALS, INC.  (CIK 0001180743)",2010-06-03,2010,3841,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001305748,HEALTHCARE PROVIDERS DIRECT INC.  (CIK 0001305748),2010-07-16,2010,5047,Wholesale Trade,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001380712,1st Pacific Bancorp  (CIK 0001380712),2010-05-13,2010,6022,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000004515,AMERICAN AIRLINES INC  (CIK 0000004515),2011-11-29,2011,4512,Transport & Utilities,False,,,NO_TRADING_SYMBOL_TAG,2,True,,,,no candidate symbols found,
+0000058592,4 KIDS ENTERTAINMENT INC  (CIK 0000058592),2011-04-06,2011,6794,"Finance, Insurance, Real Estate",False,,,NO_TRADING_SYMBOL_TAG,2,True,12084530.0,,,no candidate symbols found,3
+0000754597,HABERSHAM BANCORP  (CIK 0000754597),2011-02-23,2011,6022,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000835012,COMMONWEALTH BANKSHARES INC  (CIK 0000835012),2011-09-30,2011,6021,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,True,,,,no candidate symbols found,
+0000940510,BORDERS GROUP INC  (CIK 0000940510),2011-12-22,2011,5940,Retail Trade,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001051379,MIDWEST BANC HOLDINGS INC  (CIK 0001051379),2011-03-29,2011,6021,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001096481,ANGIOTECH PHARMACEUTICALS INC  (CIK 0001096481),2011-02-01,2011,3841,Manufacturing,False,,,NO_XBRL_INSTANCE,0,True,,,,no candidate symbols found,
+0001162245,FPB BANCORP INC  (CIK 0001162245),2011-07-18,2011,6021,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001295879,CommunitySouth Financial CORP  (CIK 0001295879),2011-01-24,2011,6021,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001360581,"FGBC Bancshares, Inc.  (CIK 0001360581)",2011-05-25,2011,6021,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0000031235,EASTMAN KODAK CO  (KODK)  (CIK 0000031235),2012-01-19,2012,3861,Manufacturing,False,,,LISTING_EXCLUDES_EVENT,0,True,364000000.0,,,"KODK rejected: listing starts 2013-09-23, after event 2012-01-19 | KODKQ rejected: not in listing table",9
+0000276750,AMBER RESOURCES CO OF COLORADO  (CIK 0000276750),2012-12-10,2012,1311,Mining,False,,,NO_TRADING_SYMBOL_TAG,6,True,,,,no candidate symbols found,
+0000732717,"AT&T INC.  (T, TBB, TBC, T-PA, T-PC)  (CIK 0000732717)",2012-01-13,2012,4813,Transport & Utilities,True,T,xbrl,RESOLVED_XBRL,0,True,207000000000.0,1984-07-19,2026-08-18,"TQ rejected: not in listing table | TBB rejected: listing starts 2017-11-06, after event 2012-01-13 | TBBQ rejected: not in listing table",10
+0000853695,DRI CORP  (CIK 0000853695),2012-03-29,2012,3669,Manufacturing,False,,,NO_XBRL_INSTANCE,0,True,18769005.0,,,no candidate symbols found,4
+0000911631,TRIAD GUARANTY INC  (CIK 0000911631),2012-12-12,2012,6351,"Finance, Insurance, Real Estate",False,,,NO_TRADING_SYMBOL_TAG,4,True,1894339.0,,,no candidate symbols found,1
+0001010286,FiberTower CORP  (CIK 0001010286),2012-07-18,2012,4812,Transport & Utilities,False,,,NO_XBRL_INSTANCE,0,True,,,,no candidate symbols found,
+0001068912,FIRST PLACE FINANCIAL CORP /DE/  (CIK 0001068912),2012-10-29,2012,6035,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001160165,"ShengdaTech, Inc.  (CIK 0001160165)",2012-10-17,2012,2890,Manufacturing,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001282607,COLONY RESORTS LVH ACQUISITIONS LLC  (CIK 0001282607),2012-01-12,2012,7011,Services,False,,,NO_XBRL_INSTANCE,0,True,,,,no candidate symbols found,
+0001382805,"Game Trading Technologies, Inc.  (CIK 0001382805)",2012-02-02,2012,5734,Retail Trade,False,,,SYMBOL_NOT_LISTED,2,True,,,,GMTD rejected: not in listing table | GMTDQ rejected: not in listing table,
+0000006201,AMR CORP  (AAL)  (CIK 0000006201),2013-10-23,2013,4512,Transport & Utilities,True,AAL,xbrl,RESOLVED_XBRL,2,True,7400000000.0,2005-09-27,2026-08-18,AALQ rejected: not in listing table,10
+0000314606,GEOKINETICS INC  (CIK 0000314606),2013-03-12,2013,1311,Mining,False,,,ERROR,0,True,3300000.0,,,JSONDecodeError: Expecting value: line 1 column 1 (char 0),1
+0000810208,"AuraSound, Inc.  (CIK 0000810208)",2013-01-31,2013,3651,Manufacturing,False,,,NO_TRADING_SYMBOL_TAG,4,True,6210507.0,,,no candidate symbols found,2
+0000885322,ANCHOR BANCORP WISCONSIN INC  (CIK 0000885322),2013-08-13,2013,6036,"Finance, Insurance, Real Estate",False,,,LISTING_EXCLUDES_EVENT,101,True,287100000.0,,,"ABCW rejected: listing starts 2016-01-04, after event 2013-08-13 | ABCWQ rejected: not in listing table",9
+0001020448,IMPERIAL PETROLEUM RECOVERY CORP  (CIK 0001020448),2013-04-05,2013,3533,Manufacturing,False,,,NO_TRADING_SYMBOL_TAG,4,True,1452845.0,,,no candidate symbols found,1
+0001064015,AMERITRANS CAPITAL CORP  (CIK 0001064015),2013-05-01,2013,,Unknown,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001127360,Colorado 2000C Limited Partnership  (CIK 0001127360),2013-09-18,2013,1381,Mining,False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001176325,Skinny Nutritional Corp.  (CIK 0001176325),2013-05-08,2013,5141,Wholesale Trade,False,,,NO_XBRL_INSTANCE,0,True,21828577.0,,,no candidate symbols found,4
+0001331427,"AgFeed Industries, Inc.  (CIK 0001331427)",2013-07-15,2013,0200,"Agriculture, Forestry, Fishing",False,,,NO_XBRL_INSTANCE,0,True,,,,no candidate symbols found,
+0001392902,TECTON CORP  (CIK 0001392902),2013-01-22,2013,1000,Mining,False,,,NO_XBRL_INSTANCE,0,True,57015231.0,,,no candidate symbols found,6
+0000030302,ALCO STORES INC  (CIK 0000030302),2014-10-14,2014,5331,Retail Trade,False,,,NO_TRADING_SYMBOL_TAG,2,True,46102992.0,,,no candidate symbols found,6
+0000739878,"KID BRANDS, INC  (CIK 0000739878)",2014-06-19,2014,3990,Manufacturing,False,,,SYMBOL_NOT_LISTED,2,True,23000000.0,,,KID rejected: not in listing table | KIDQ rejected: not in listing table,5
+0000924095,WATERSIDE CAPITAL CORP  (MVCO)  (CIK 0000924095),2014-06-03,2014,,Unknown,False,,,LISTING_EXCLUDES_EVENT,0,True,2633599.0,,,"MVCO rejected: listing starts 2017-10-10, after event 2014-06-03 | MVCOQ rejected: not in listing table",1
+0001014052,"Digerati Technologies, Inc.  (DTGI)  (CIK 0001014052)",2014-01-23,2014,4813,Transport & Utilities,True,DTGI,xbrl,RESOLVED_XBRL,0,True,19283849.0,2013-02-21,2026-08-18,DTGIQ rejected: not in listing table,4
+0001047919,AMBIENT CORP /NY  (CIK 0001047919),2014-07-29,2014,4813,Transport & Utilities,False,,,NO_TRADING_SYMBOL_TAG,4,True,7923077.0,,,no candidate symbols found,3
+0001112412,ENDEAVOUR INTERNATIONAL CORP  (CIK 0001112412),2014-10-14,2014,1311,Mining,False,,,NO_XBRL_INSTANCE,0,True,64300000.0,,,no candidate symbols found,7
+0001140414,"Legend Oil & Gas, Ltd.  (CIK 0001140414)",2014-09-25,2014,1381,Mining,False,,,NO_TRADING_SYMBOL_TAG,4,True,192600.0,,,no candidate symbols found,1
+0001275712,"GSE Holding, Inc.  (CIK 0001275712)",2014-05-05,2014,3081,Manufacturing,False,,,NO_TRADING_SYMBOL_TAG,4,True,51842369.0,,,no candidate symbols found,6
+0001337885,"dELiAs, Inc.  (CIK 0001337885)",2014-12-10,2014,5961,Retail Trade,False,,,NO_XBRL_INSTANCE,0,True,60484379.0,,,no candidate symbols found,7
+0001405424,VISION INDUSTRIES CORP  (CIK 0001405424),2014-09-25,2014,3537,Manufacturing,False,,,NO_TRADING_SYMBOL_TAG,4,True,542513.0,,,no candidate symbols found,1
+0000029834,Escalera Resources Co.  (CIK 0000029834),2015-11-09,2015,1311,Mining,False,,,NO_TRADING_SYMBOL_TAG,4,True,34351704.0,,,no candidate symbols found,5
+0000357108,ISC8 INC. /DE  (CIK 0000357108),2015-01-12,2015,7373,Services,False,,,NO_XBRL_INSTANCE,0,True,,,,no candidate symbols found,
+0000840889,DORAL FINANCIAL CORP  (CIK 0000840889),2015-03-02,2015,6029,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,True,108399062.0,,,no candidate symbols found,8
+0001014763,"AMARILLO BIOSCIENCES INC  (AIMD, AIMDW)  (CIK 0001014763)",2015-01-28,2015,2834,Manufacturing,True,AIMD,xbrl,RESOLVED_XBRL,8,True,4400000.0,2013-11-04,2026-08-18,"AIMDQ rejected: not in listing table | AIMDW rejected: listing starts 2022-08-09, after event 2015-01-28 | AIMDWQ rejected: not in listing table",2
+0001081074,"Armada Oil, Inc.  (CIK 0001081074)",2015-08-31,2015,1311,Mining,False,,,NO_TRADING_SYMBOL_TAG,6,True,7800000.0,,,no candidate symbols found,3
+0001107332,DENDREON CORP  (CIK 0001107332),2015-06-03,2015,2834,Manufacturing,False,,,NO_XBRL_INSTANCE,0,True,636254809.0,,,no candidate symbols found,10
+0001293310,KALOBIOS PHARMACEUTICALS INC  (CIK 0001293310),2015-12-30,2015,2834,Manufacturing,False,,,NO_XBRL_INSTANCE,0,True,84020909.0,,,no candidate symbols found,7
+0001336545,"AMERICAN APPAREL, INC  (CIK 0001336545)",2015-10-08,2015,6770,"Finance, Insurance, Real Estate",False,,,NO_TRADING_SYMBOL_TAG,2,True,85370030.0,,,no candidate symbols found,7
+0001393631,Xhibit Corp.  (CIK 0001393631),2015-01-23,2015,7310,Services,False,,,ERROR,0,True,75805581.0,,,JSONDecodeError: Expecting value: line 1 column 1 (char 0),7
+0001477472,"Active Health Foods, Inc.  (CIK 0001477472)",2015-12-14,2015,2060,Manufacturing,False,,,NO_TRADING_SYMBOL_TAG,4,True,1559093142.0,,,no candidate symbols found,10
+0000077159,PENN VIRGINIA CORP  (CIK 0000077159),2016-05-12,2016,1311,Mining,False,,,LISTING_EXCLUDES_EVENT,6,True,669492116.0,,,"PVAH rejected: not in listing table | PVAHQ rejected: not in listing table | PVA rejected: listing ended 2016-01-12, before event 2016-05-12",10
+0000778438,"Berry Petroleum Company, LLC  (CIK 0000778438)",2016-05-11,2016,1311,Mining,False,,,NO_TRADING_SYMBOL_TAG,6,True,,,,no candidate symbols found,
+0000922475,ITT EDUCATIONAL SERVICES INC  (CIK 0000922475),2016-09-26,2016,8200,Services,False,,,NO_XBRL_INSTANCE,0,True,92483588.0,,,no candidate symbols found,7
+0001068874,IMPLANT SCIENCES CORP  (CIK 0001068874),2016-10-11,2016,3829,Manufacturing,True,IMSCQ,xbrl,RESOLVED_XBRL,2,True,39852000.0,2016-01-04,2017-08-28,IMSC rejected: not in listing table,5
+0001157516,ATLAS AMERICA PUBLIC #10 LTD.  (CIK 0001157516),2016-07-28,2016,1381,Mining,False,,,NO_TRADING_SYMBOL_TAG,10,True,,,,no candidate symbols found,
+0001293310,KALOBIOS PHARMACEUTICALS INC  (CIK 0001293310),2016-06-22,2016,2834,Manufacturing,False,,,NO_TRADING_SYMBOL_TAG,4,True,84020909.0,,,no candidate symbols found,7
+0001342514,Atlas America Series 26-2005 L.P.  (CIK 0001342514),2016-07-28,2016,1311,Mining,False,,,NO_TRADING_SYMBOL_TAG,10,True,,,,no candidate symbols found,
+0001399542,Atlas Resources Public #17-2007 (A) L.P.  (CIK 0001399542),2016-07-28,2016,1311,Mining,False,,,NO_TRADING_SYMBOL_TAG,10,True,,,,no candidate symbols found,
+0001432987,Atlas Resources Public #18-2008 (A) L.P.  (CIK 0001432987),2016-07-28,2016,1311,Mining,False,,,NO_TRADING_SYMBOL_TAG,10,True,,,,no candidate symbols found,
+0001532930,Seventy Seven Energy Inc.  (CIK 0001532930),2016-06-07,2016,1389,Mining,False,,,NO_TRADING_SYMBOL_TAG,2,True,5200000.0,,,no candidate symbols found,2
+0000002178,"ADAMS RESOURCES & ENERGY, INC.  (AE)  (CIK 0000002178)",2017-04-24,2017,5172,Wholesale Trade,False,,,NO_TRADING_SYMBOL_TAG,4,True,87396622.0,,,no candidate symbols found,7
+0000278041,INTERNATIONAL SHIPHOLDING CORP  (CIK 0000278041),2017-03-07,2017,4412,Transport & Utilities,False,,,NO_XBRL_INSTANCE,0,True,37462385.0,,,no candidate symbols found,5
+0000886328,E DIGITAL CORP  (CIK 0000886328),2017-07-07,2017,3674,Manufacturing,False,,,NO_TRADING_SYMBOL_TAG,8,True,12606154.0,,,no candidate symbols found,3
+0001040719,WALTER INVESTMENT MANAGEMENT CORP  (CIK 0001040719),2017-12-01,2017,6162,"Finance, Insurance, Real Estate",False,,,NO_TRADING_SYMBOL_TAG,2,True,24100000.0,,,no candidate symbols found,5
+0001116521,AVAYA INC  (CIK 0001116521),2017-01-19,2017,3661,Manufacturing,False,,,ERROR,0,True,,,,JSONDecodeError: Expecting value: line 1 column 1 (char 0),
+0001311230,"TerraVia Holdings, Inc.  (CIK 0001311230)",2017-08-02,2017,2860,Manufacturing,False,,,NO_XBRL_INSTANCE,0,True,204100000.0,,,no candidate symbols found,8
+0001384072,"Vanguard Natural Resources, LLC  (CIK 0001384072)",2017-02-02,2017,1311,Mining,False,,,NO_TRADING_SYMBOL_TAG,2,True,50323068.0,,,no candidate symbols found,6
+0001434589,T3M INC.  (CIK 0001434589),2017-05-19,2017,3711,Manufacturing,False,,,NO_TRADING_SYMBOL_TAG,57,True,7300000.0,,,no candidate symbols found,2
+0001496631,First NBC Bank Holding Co  (CIK 0001496631),2017-05-04,2017,6022,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,True,561988908.0,,,no candidate symbols found,10
+0001554923,Aina Le'a Inc.  (CIK 0001554923),2017-06-30,2017,6500,"Finance, Insurance, Real Estate",False,,,SYMBOL_NOT_LISTED,8,True,53653975.0,,,AIZY rejected: not in listing table | AIZYQ rejected: not in listing table,6
+0000034115,CLAIRES STORES INC  (CIK 0000034115),2018-03-19,2018,5600,Retail Trade,False,,,SYMBOL_NOT_LISTED,2,True,,,,CLE rejected: not in listing table | CLEQ rejected: not in listing table,
+0000316300,EXCO RESOURCES INC  (CIK 0000316300),2018-01-17,2018,1311,Mining,False,,,NO_XBRL_INSTANCE,0,True,1501809.0,,,no candidate symbols found,1
+0000868725,"RENTECH, INC.  (CIK 0000868725)",2018-04-09,2018,2870,Manufacturing,False,,,LISTING_EXCLUDES_EVENT,2,True,55000000.0,,,"RTK rejected: listing ended 2017-10-13, before event 2018-04-09 | RTKQ rejected: not in listing table",6
+0001040719,WALTER INVESTMENT MANAGEMENT CORP  (CIK 0001040719),2018-01-19,2018,6162,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,True,24100000.0,,,no candidate symbols found,5
+0001294250,"Rand Logistics, Inc.  (CIK 0001294250)",2018-01-30,2018,4400,Transport & Utilities,True,RLOGQ,xbrl,RESOLVED_XBRL,4,True,11038088.0,2004-11-17,2018-03-02,,3
+0001347613,"SYNERGY PHARMACEUTICALS, INC.  (CIK 0001347613)",2018-12-13,2018,2834,Manufacturing,False,,,NO_XBRL_INSTANCE,0,True,893167759.0,,,no candidate symbols found,10
+0001397516,REX ENERGY CORP  (CIK 0001397516),2018-05-18,2018,1311,Mining,True,REXX,xbrl,RESOLVED_XBRL,4,True,46993210.0,2007-07-25,2018-05-21,"REXXQ rejected: listing starts 2018-05-21, after event 2018-05-18",6
+0001407805,ROCKIES REGION 2007 LP  (CIK 0001407805),2018-11-05,2018,1311,Mining,False,,,NO_TRADING_SYMBOL_TAG,4,True,,,,no candidate symbols found,
+0001464865,"Lone Star Gold, Inc.  (ASII)  (CIK 0001464865)",2018-02-08,2018,1000,Mining,False,,,NO_TRADING_SYMBOL_TAG,4,True,687000.0,,,no candidate symbols found,1
+0001576778,"UBL Interactive,Inc.  (CIK 0001576778)",2018-01-26,2018,7389,Services,False,,,NO_TRADING_SYMBOL_TAG,4,True,4234880.0,,,no candidate symbols found,2
+0000002034,ACETO CORP  (CIK 0000002034),2019-09-20,2019,5122,Wholesale Trade,False,,,NO_XBRL_INSTANCE,0,True,267428195.0,,,no candidate symbols found,9
+0000350403,PHI INC  (PHIG)  (CIK 0000350403),2019-03-15,2019,4522,Transport & Utilities,True,PHIIQ,xbrl,RESOLVED_XBRL,4,True,161759638.0,1994-07-14,2019-08-30,PHII rejected: not in listing table,8
+0000872248,PETROQUEST ENERGY INC  (CIK 0000872248),2019-01-31,2019,1311,Mining,False,,,NO_TRADING_SYMBOL_TAG,4,True,5424000.0,,,no candidate symbols found,2
+0001040719,DITECH HOLDING Corp  (CIK 0001040719),2019-02-11,2019,6162,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,True,24100000.0,,,no candidate symbols found,5
+0001265107,MONITRONICS INTERNATIONAL INC  (CIK 0001265107),2019-07-01,2019,7380,Services,False,,,NO_TRADING_SYMBOL_TAG,2,True,22600000.0,,,no candidate symbols found,4
+0001382911,"Orexigen Therapeutics, Inc.  (CIK 0001382911)",2019-05-23,2019,2834,Manufacturing,False,,,NO_XBRL_INSTANCE,0,True,48200000.0,,,no candidate symbols found,6
+0001409916,Nobilis Health Corp.  (CIK 0001409916),2019-09-27,2019,8062,Services,False,,,NO_XBRL_INSTANCE,0,True,147829527.0,,,no candidate symbols found,8
+0001516479,"Insys Therapeutics, Inc.  (CIK 0001516479)",2019-06-10,2019,2834,Manufacturing,False,,,ERROR,0,True,196000000.0,,,JSONDecodeError: Expecting value: line 1 column 1 (char 0),8
+0001552845,Natur International Corp.  (CIK 0001552845),2019-05-28,2019,8082,Services,True,NTRU,xbrl,RESOLVED_XBRL,4,True,622238.0,2012-12-04,2026-08-18,NTRUQ rejected: not in listing table,1
+0001584952,EP Energy Corp  (CIK 0001584952),2019-10-04,2019,1311,Mining,False,,,NO_TRADING_SYMBOL_TAG,2,True,20418558.0,,,no candidate symbols found,4
+0000003116,AKORN INC  (CIK 0000003116),2020-05-21,2020,2834,Manufacturing,True,AKRXQ,xbrl,RESOLVED_XBRL,16,True,497200000.0,2002-08-02,2020-12-17,AKRX rejected: not in listing table,9
+0000711665,"Gadsden Properties, Inc.  (CIK 0000711665)",2020-10-13,2020,6500,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,True,3400000.0,,,no candidate symbols found,2
+0000886835,SUPERIOR ENERGY SERVICES INC  (CIK 0000886835),2020-12-07,2020,1389,Mining,True,SPNX,xbrl,RESOLVED_XBRL,16,True,,1992-07-07,2021-05-17,SPNXQ rejected: not in listing table | SPN rejected: not in listing table | SPNQ rejected: not in listing table,
+0001009672,CARBO CERAMICS INC  (CIK 0001009672),2020-04-03,2020,3290,Manufacturing,False,,,NO_TRADING_SYMBOL_TAG,2,True,24740589.0,,,no candidate symbols found,5
+0001157987,MERRILL LYNCH DEPOSITOR INC PREFERREDPLUS TRUST SER CZN 1  (CIK 0001157987),2020-04-17,2020,6189,"Finance, Insurance, Real Estate",False,,,NO_XBRL_INSTANCE,0,False,,,,no candidate symbols found,
+0001399935,Francesca's Holdings CORP  (CIK 0001399935),2020-12-04,2020,5600,Retail Trade,False,,,NO_XBRL_INSTANCE,0,True,7100000.0,,,no candidate symbols found,2
+0001461993,"MELINTA THERAPEUTICS, INC. /NEW/  (CIK 0001461993)",2020-04-20,2020,2834,Manufacturing,False,,,NO_TRADING_SYMBOL_TAG,2,True,180300000.0,,,no candidate symbols found,8
+0001516332,"Blue Water Global Group, Inc.  (CIK 0001516332)",2020-11-04,2020,5812,Retail Trade,False,,,NO_XBRL_INSTANCE,0,True,789665.0,,,no candidate symbols found,1
+0001575360,"GUE Liquidation Companies, Inc.  (CIK 0001575360)",2020-01-02,2020,5960,Retail Trade,False,,,ERROR,0,True,80900000.0,,,JSONDecodeError: Expecting value: line 1 column 1 (char 0),7
+0001636509,"Vitalibis, Inc.  (CIK 0001636509)",2020-06-16,2020,6799,"Finance, Insurance, Real Estate",False,,,NO_TRADING_SYMBOL_TAG,10,True,2566514.0,,,no candidate symbols found,1
+0000314808,"Valaris plc  (VAL, VAL-WT)  (CIK 0000314808)",2021-03-05,2021,1381,Mining,True,VALPQ,xbrl,RESOLVED_XBRL,16,True,2500000000.0,1991-01-02,2021-05-17,VALP rejected: not in listing table | VALQ rejected: not in listing table | VAL WS rejected: not in listing table,10
+0000883943,CHRISTOPHER & BANKS CORP  (CIK 0000883943),2021-01-14,2021,5621,Retail Trade,True,CBKCQ,xbrl,RESOLVED_XBRL,16,True,2600000.0,1992-03-31,2026-08-18,CBKC rejected: not in listing table,1
+0000922358,"FERRELLGAS PARTNERS L P  (FGPR, FGPRB)  (CIK 0000922358)",2021-01-11,2021,5900,Retail Trade,False,,,LISTING_EXCLUDES_EVENT,2,True,40534833.0,,,"FGPR rejected: listing starts 2021-04-05, after event 2021-01-11 | FGPRQ rejected: not in listing table",5
+0001109189,"BASIC ENERGY SERVICES, INC.  (CIK 0001109189)",2021-08-18,2021,1389,Mining,False,,,SYMBOL_NOT_LISTED,16,True,3880964.0,,,BASX* rejected: not in listing table | BASX*Q rejected: not in listing table,2
+0001326089,Sundance Energy Inc.  (CIK 0001326089),2021-03-10,2021,1311,Mining,False,,,LISTING_EXCLUDES_EVENT,16,True,19711397.0,,,"SNDE rejected: not in listing table | SNDEQ rejected: listing starts 2021-03-29, after event 2021-03-10",4
+0001459482,"Chineseinvestors.com, Inc.  (CIK 0001459482)",2021-01-22,2021,8200,Services,False,,,NO_XBRL_INSTANCE,0,True,15136493.0,,,no candidate symbols found,3
+0001525773,Intelsat S.A.  (CIK 0001525773),2021-12-20,2021,4899,Transport & Utilities,False,,,NO_TRADING_SYMBOL_TAG,16,True,50200000.0,,,no candidate symbols found,6
+0001582919,Flitways Technology Inc.  (CIK 0001582919),2021-01-21,2021,7389,Services,False,,,NO_XBRL_INSTANCE,0,True,20500000.0,,,no candidate symbols found,4
+0001627606,DAVIDsTEA Inc.  (DTEAF)  (CIK 0001627606),2021-03-24,2021,5400,Retail Trade,False,,,NO_TRADING_SYMBOL_TAG,4,False,13200483.0,,,no candidate symbols found,3
+0001692144,Life Partners Position Holder Trust  (CIK 0001692144),2021-04-01,2021,6311,"Finance, Insurance, Real Estate",False,,,NO_TRADING_SYMBOL_TAG,16,True,,,,no candidate symbols found,
+0000866609,ION GEOPHYSICAL CORP  (CIK 0000866609),2022-04-13,2022,1382,Mining,False,,,SYMBOL_NOT_LISTED,16,True,26800000.0,,,IO rejected: not in listing table | IOQ rejected: not in listing table,5
+0001069996,FedNat Holding Co  (CIK 0001069996),2022-12-12,2022,6331,"Finance, Insurance, Real Estate",True,FNHCQ,xbrl,RESOLVED_XBRL,16,True,68298592.0,1998-11-05,2023-11-08,FNHC rejected: not in listing table,7
+0001274032,"Simply, Inc.  (CIK 0001274032)",2022-06-16,2022,5065,Wholesale Trade,True,SIMPQ,xbrl,RESOLVED_XBRL,16,True,11274449.0,2004-06-17,2026-08-18,SIMP rejected: not in listing table,3
+0001466301,"Clovis Oncology, Inc.  (CIK 0001466301)",2022-12-13,2022,2834,Manufacturing,True,CLVSQ,xbrl,RESOLVED_XBRL,16,True,671298229.0,2011-11-16,2023-07-25,"CLVS rejected: listing starts 2023-01-03, after event 2022-12-13",10
+0001539894,"Atlas Financial Holdings, Inc.  (AFHIF)  (CIK 0001539894)",2022-03-01,2022,6331,"Finance, Insurance, Real Estate",True,AFHIQ,xbrl,RESOLVED_XBRL,16,True,4900000.0,2020-11-06,2026-05-28,AFHI rejected: not in listing table,2
+0001587246,"Cypress Environmental Partners, L.P.  (CIK 0001587246)",2022-05-11,2022,7389,Services,True,CELPQ,xbrl,RESOLVED_XBRL,16,True,10620356.0,2014-01-15,2022-06-22,CELP rejected: not in listing table,3
+0001648428,"Sequential Brands Group, Inc.  (CIK 0001648428)",2022-02-25,2022,2300,Manufacturing,False,,,NO_XBRL_INSTANCE,0,True,9808087.0,,,no candidate symbols found,3
+0001681941,iFresh Inc  (CIK 0001681941),2022-09-06,2022,5411,Retail Trade,True,IFMK,xbrl,RESOLVED_XBRL,10,True,16000000.0,2017-02-01,2026-08-18,IFMKQ rejected: not in listing table,3
+0001784168,"Electric Last Mile Solutions, Inc.  (ELMSQ)  (CIK 0001784168)",2022-06-14,2022,3711,Manufacturing,True,ELMSQ,xbrl,RESOLVED_XBRL,16,True,348536525.0,2020-09-21,2026-08-18,ELMS rejected: not in listing table | ELMSW rejected: not in listing table | ELMSWQ rejected: not in listing table,9
+0001830180,"ENJOY TECHNOLOGY, INC./DE  (CIK 0001830180)",2022-06-30,2022,7389,Services,False,,,ERROR,0,True,370000000.0,,,JSONDecodeError: Expecting value: line 1 column 1 (char 0),9
+0000028823,"DIEBOLD NIXDORF, Inc  (DBD)  (CIK 0000028823)",2023-06-01,2023,3578,Manufacturing,False,,,LISTING_EXCLUDES_EVENT,16,True,1062492335.0,,,"DBD rejected: listing starts 2023-08-15, after event 2023-06-01 | DBDQ rejected: not in listing table",10
+0000814549,EBIX INC  (EBIXQ)  (CIK 0000814549),2023-12-19,2023,7373,Services,True,EBIXQ,xbrl,RESOLVED_XBRL,16,True,296000000.0,1990-03-26,2026-08-18,EBIX rejected: not in listing table,9
+0001021096,"Troika Media Group, Inc.  (CIK 0001021096)",2023-12-07,2023,4841,Transport & Utilities,True,TRKAQ,xbrl,RESOLVED_XBRL,16,True,,2021-04-20,2024-04-09,TRKA rejected: not in listing table,
+0001169245,PhaseBio Pharmaceuticals Inc  (PHASQ)  (CIK 0001169245),2023-01-17,2023,2834,Manufacturing,True,PHASQ,xbrl,RESOLVED_XBRL,16,True,168900000.0,2018-10-18,2026-08-18,PHAS rejected: not in listing table,8
+0001445499,IMPEL PHARMACEUTICALS INC  (CIK 0001445499),2023-12-20,2023,2834,Manufacturing,True,IMPLQ,xbrl,RESOLVED_XBRL,16,True,119700000.0,2021-04-23,2024-04-05,IMPL rejected: not in listing table,8
+0001504167,"Timber Pharmaceuticals, Inc.  (CIK 0001504167)",2023-11-17,2023,2834,Manufacturing,True,TMBRQ,xbrl,RESOLVED_XBRL,16,True,20000000.0,2015-06-09,2024-05-09,TMBR rejected: not in listing table,4
+0001617669,"Unique Fabricating, Inc.  (UFABQ)  (CIK 0001617669)",2023-11-08,2023,3714,Manufacturing,True,UFABQ,xbrl,RESOLVED_XBRL,16,True,28300000.0,2015-07-01,2026-08-18,UFAB rejected: not in listing table,5
+0001739426,RVL Pharmaceuticals plc  (RVLPQ)  (CIK 0001739426),2023-10-13,2023,2834,Manufacturing,True,RVLPQ,xbrl,RESOLVED_XBRL,16,True,44900000.0,2018-10-18,2026-08-18,RVLP rejected: not in listing table,5
+0001805087,"GELESIS HOLDINGS, INC.  (GLSHQ)  (CIK 0001805087)",2023-10-31,2023,2834,Manufacturing,False,,,NO_TRADING_SYMBOL_TAG,16,True,84333000.0,,,no candidate symbols found,7
+0001835567,"Pear Therapeutics, Inc.  (CIK 0001835567)",2023-04-07,2023,8000,Services,True,PEARQ,xbrl,RESOLVED_XBRL,16,True,126800000.0,2021-03-31,2024-05-24,PEAR rejected: not in listing table | PEARW rejected: not in listing table | PEARWQ rejected: not in listing table,8
+0000077281,PENNSYLVANIA REAL ESTATE INVESTMENT TRUST  (CIK 0000077281),2024-04-01,2024,6798,"Finance, Insurance, Real Estate",True,PRETQ,xbrl,RESOLVED_XBRL,16,True,17400000.0,1973-05-03,2024-04-01,PRET rejected: not in listing table | PRETLQ rejected: not in listing table | PRETL rejected: not in listing table,4
+0000834285,"REPUBLIC FIRST BANCORP INC  (FRBK, FRBKQ)  (CIK 0000834285)",2024-04-29,2024,6022,"Finance, Insurance, Real Estate",True,FRBKQ,xbrl,RESOLVED_XBRL,16,True,212546594.0,1995-08-18,2026-08-18,FRBK rejected: not in listing table,9
+0001017491,"SEELOS THERAPEUTICS, INC.  (SEEL)  (CIK 0001017491)",2024-11-22,2024,2834,Manufacturing,True,SEELQ,xbrl,RESOLVED_XBRL,16,True,144900000.0,1999-04-19,2026-08-18,SEEL rejected: not in listing table,8
+0001277250,"Charge Enterprises, Inc.  (CIK 0001277250)",2024-03-12,2024,4822,Transport & Utilities,True,CRGEQ,xbrl,RESOLVED_XBRL,16,True,454400000.0,2017-10-05,2024-05-06,CRGE rejected: not in listing table,9
+0001391127,"Edgio, Inc.  (EGIO)  (CIK 0001391127)",2024-09-09,2024,7389,Services,True,EGIOQ,xbrl,RESOLVED_XBRL,16,True,498000000.0,2007-06-08,2026-08-18,EGIO rejected: not in listing table,9
+0001467154,"NVN Liquidation, Inc.  (CIK 0001467154)",2024-01-30,2024,2834,Manufacturing,True,NOVNQ,xbrl,RESOLVED_XBRL,4,True,49300000.0,2023-07-26,2024-05-01,NOVN rejected: not in listing table,6
+0001578742,"GPB Automotive Portfolio, LP  (CIK 0001578742)",2024-12-05,2024,5500,Retail Trade,False,,,ERROR,0,True,,,,JSONDecodeError: Expecting value: line 1 column 1 (char 0),
+0001640265,"GPB Holdings II, LP  (CIK 0001640265)",2024-12-05,2024,8742,Services,False,,,NO_TRADING_SYMBOL_TAG,16,True,,,,no candidate symbols found,
+0001784851,"Shapeways Holdings, Inc.  (SHPWQ)  (CIK 0001784851)",2024-07-03,2024,3990,Manufacturing,True,SHPWQ,xbrl,RESOLVED_XBRL,16,True,20400000.0,2019-11-14,2026-08-18,SHPW rejected: not in listing table | SHPWW rejected: not in listing table | SHPWWQ rejected: not in listing table,4
+0001826671,"Near Intelligence, Inc.  (CIK 0001826671)",2024-03-27,2024,7374,Services,True,NIRWQ,xbrl,RESOLVED_XBRL,16,True,172327500.0,2021-03-01,2024-03-27,NIRL rejected: not in listing table | NIRW rejected: not in listing table | NIR rejected: not in listing table,8
