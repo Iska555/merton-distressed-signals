@@ -432,10 +432,31 @@ def ticker_from_filing_text(
     if not documents:
         return []
 
+    # Read filings from BOTH ends: those nearest the event (which name the
+    # symbol the firm actually traded under then) and the most recent (which
+    # give the terminal symbol the price vendor keys its history by). Both are
+    # returned as candidates; the listing-window ranking in resolve() decides.
+    # Reading only the latest picks up post-event renames -- Ambac's FY2025
+    # 10-K reports OSG, accurate today and wrong for a 2010 bankruptcy.
+    if near_date is not None and len(documents) > max_filings:
+        target = pd.Timestamp(near_date)
+        by_event = sorted(
+            documents,
+            key=lambda d: abs((pd.Timestamp(d["date"]) - target).days)
+            if d.get("date") else 10**9,
+        )
+        keep, seen_ids = [], set()
+        for document in by_event[:max_filings] + documents[:max_filings]:
+            key = (document["accession"], document["filename"])
+            if key not in seen_ids:
+                seen_ids.add(key)
+                keep.append(document)
+        documents = keep
+
     cik_int = int(str(cik).lstrip("0") or 0)
     found: dict[str, str] = {}
 
-    for document in documents[:max_filings]:
+    for document in documents[:max_filings * 2]:
         accession = document["accession"].replace("-", "")
         try:
             raw = _get(
@@ -567,15 +588,44 @@ def resolve(cik: str, *, event_date=None, name: str | None = None,
             xbrl_instances_seen=instances_seen,
         )
 
-    def _history_before_event(entry) -> float:
-        _, _, window = entry
-        if not window.get("start"):
-            return 0.0
-        start = pd.Timestamp(window["start"])
-        anchor = pd.Timestamp(event_date) if event_date is not None else pd.Timestamp.today()
-        return float((anchor - start).days)
+    def _terminal_for_event(entry) -> tuple:
+        """
+        Rank candidates: prefer the symbol that DIED WITH THE FIRM.
 
-    symbol, source, window = max(accepted, key=_history_before_event)
+        Among symbols whose window covers the event, the right one ends soonest
+        after it. Preferring the longest history instead picks up whatever the
+        registrant trades as today, which is wrong whenever the entity was
+        renamed or re-tickered:
+
+          Ambac's FY2025 10-K says "The Company's common stock trades on the
+          NYSE under the symbol OSG"; its FY2024 10-K says AMBC. Both are
+          accurate for their filing. For the November 2010 bankruptcy the
+          answer is ABKFQ, whose listing ends in 2013 -- while OSG runs to the
+          present and would win any longest-history rule.
+
+        Same shape for KaloBios (KBIO ends 2017-08, event 2015-12) against
+        Humanigen's HGEN, and Walter Investment (WAC ends 2018-02) against
+        Ditech's DHCP.
+
+        Secondary key keeps the longest pre-event history, which breaks ties
+        between a primary listing and a brief OTC quotation of the same firm.
+        """
+        _, _, window = entry
+        anchor = (pd.Timestamp(event_date) if event_date is not None
+                  else pd.Timestamp.today())
+
+        end = pd.Timestamp(window["end"]) if window.get("end") else None
+        # Days from the event to delisting; still-listed symbols score worst.
+        days_to_end = (float((end - anchor).days) if end is not None
+                       else float("inf"))
+        if days_to_end < 0:
+            days_to_end = float("inf")   # ended before the event: not this firm
+
+        start = pd.Timestamp(window["start"]) if window.get("start") else None
+        history = float((anchor - start).days) if start is not None else 0.0
+        return (days_to_end, -history)
+
+    symbol, source, window = min(accepted, key=_terminal_for_event)
     code = (ReasonCode.RESOLVED_FILING_TEXT if tier == "filing_text"
             else ReasonCode.RESOLVED_XBRL)
     return Identity(
