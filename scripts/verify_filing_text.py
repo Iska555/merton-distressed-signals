@@ -83,6 +83,11 @@ def sample_and_verify(n: int, seed: int) -> pd.DataFrame:
     rows = []
     for i, record in enumerate(sample.itertuples(index=False), start=1):
         cik, symbol, name = record.cik, record.ticker, record.company
+        # Re-resolve with CURRENT code rather than trusting the stored symbol,
+        # so the measured error rate describes the tier as it stands now.
+        current = [sym for sym, _ in identity.ticker_from_filing_text(
+            cik, registrant=str(name))]
+        symbol = current[0] if current else None
         documents = identity._fts_documents(cik)
         sentence, source_doc = "", ""
 
@@ -110,6 +115,9 @@ def sample_and_verify(n: int, seed: int) -> pd.DataFrame:
         window = identity.listing_window(str(symbol)) or {}
         rows.append({
             "cik": cik, "company": name, "symbol": symbol,
+            "symbol_in_audit": record.ticker,
+            "all_current_candidates": "|".join(current),
+            "public_float_usd": record.public_float_usd,
             "heuristic": verdict,
             "listing_start": window.get("start"), "listing_end": window.get("end"),
             "exchange": window.get("exchange"),

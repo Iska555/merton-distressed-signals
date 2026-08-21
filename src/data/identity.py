@@ -306,6 +306,57 @@ _TEXT_SYMBOL_PATTERNS = [
 # ever containing the phrase -- which is why Dendreon first failed to resolve.
 _TEXT_FORMS = ["10-K", "10-K/A", "20-F"]
 
+# Language showing the sentence is about the REGISTRANT's own stock. Required,
+# because hand-verification found the tier picking up other companies' tickers.
+# Rockies Region 2007 LP yielded PDCE from "The common stock of PDC is traded
+# ... under the symbol 'PDCE'" -- PDC Energy being its managing general
+# partner, while the partnership itself has no listed stock. The listing-window
+# check waves such a symbol through, because it IS a real contemporaneous
+# ticker; it just belongs to someone else.
+_FIRST_PERSON = re.compile(
+    r"\b(our|the Company'?s?|the Registrant'?s?|the Partnership'?s?|we|us)\b",
+    re.IGNORECASE,
+)
+
+# "the common stock of SOMEONE ELSE is traded" -- the construction that failed.
+_THIRD_PARTY = re.compile(
+    r"(?:common\s+stock|shares|units)\s+of\s+"
+    r"([A-Z][A-Za-z0-9&.\- ]{1,40}?)\s+(?:is|are|was|were|trade|trades)"
+)
+
+_NAME_STOPWORDS = {
+    "inc", "corp", "corporation", "company", "co", "llc", "lp", "ltd", "plc",
+    "holdings", "holding", "group", "the", "of", "and", "sa", "nv", "ag",
+    "trust", "partners", "partnership", "international", "industries", "cik",
+}
+
+
+def _name_tokens(name: str) -> set[str]:
+    words = re.findall(r"[A-Za-z]+", (name or "").lower())
+    return {w for w in words if w not in _NAME_STOPWORDS and len(w) > 2}
+
+
+def _is_about_registrant(window: str, registrant: str | None) -> bool:
+    """
+    Does this sentence describe the registrant's own security?
+
+    Accepts first-person framing ("our common shares commenced trading ... under
+    the symbol XCOO") or the registrant's own name ("Doral Financial's common
+    stock ... is traded ... under the symbol DRL"). Rejects a sentence whose
+    grammatical subject is a different named company.
+    """
+    third_party = _THIRD_PARTY.search(window)
+    if third_party:
+        subject = _name_tokens(third_party.group(1))
+        mine = _name_tokens(registrant or "")
+        # A named subject sharing no word with the registrant is someone else.
+        if subject and mine and not (subject & mine):
+            return False
+
+    if _FIRST_PERSON.search(window):
+        return True
+    return bool(_name_tokens(registrant or "") & _name_tokens(window))
+
 
 def _strip_markup(document: str) -> str:
     text = re.sub(r"<[^>]+>", " ", document)
@@ -359,7 +410,7 @@ def _fts_documents(cik: str, phrase: str = "under the symbol",
 
 
 def ticker_from_filing_text(
-    cik: str, near_date=None, *, max_filings: int = 3
+    cik: str, near_date=None, *, max_filings: int = 3, registrant: str | None = None
 ) -> list[tuple[str, str]]:
     """
     Read the trading symbol from the prose of a periodic report.
@@ -395,13 +446,18 @@ def ticker_from_filing_text(
             continue
         text = _strip_markup(raw.decode("utf-8", "replace"))
         for pattern in _TEXT_SYMBOL_PATTERNS:
-            match = pattern.search(text)
-            if match:
+            for match in pattern.finditer(text):
                 symbol = match.group(1).strip().upper()
-                if symbol and symbol not in found:
-                    found[symbol] = (
-                        f"{document['form']} text, filed {document['date']}"
-                    )
+                if not symbol or symbol in found:
+                    continue
+                window = text[max(0, match.start() - 220):match.end() + 60]
+                if not _is_about_registrant(window, registrant):
+                    continue
+                found[symbol] = (
+                    f"{document['form']} text, filed {document['date']}"
+                )
+                break
+            if found:
                 break
     return list(found.items())
 

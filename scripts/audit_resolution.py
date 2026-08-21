@@ -129,7 +129,15 @@ def collect_candidates(start_year: int, end_year: int, per_year: int) -> pd.Data
         print(f"  {year}: {len(frame)} candidates sampled", flush=True)
     if not frames:
         return pd.DataFrame()
-    return pd.concat(frames, ignore_index=True)
+    combined = pd.concat(frames, ignore_index=True)
+
+    # Spec T1: event date is the EARLIEST Item 1.03 filing PER CIK. Dedup must
+    # be global, not per-year: Walter Investment filed in 2017 and again in
+    # 2018, then again in 2019 under its new name Ditech Holding, all on CIK
+    # 0001040719. Per-year dedup let one registrant enter the cohort three
+    # times, where it would be double-counted and could consume controls twice.
+    combined = combined.sort_values(["cik", "filed_date"])
+    return combined.drop_duplicates(subset="cik", keep="first").reset_index(drop=True)
 
 
 def audit(start_year: int, end_year: int, per_year: int) -> pd.DataFrame:
