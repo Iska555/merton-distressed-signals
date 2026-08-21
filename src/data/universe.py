@@ -222,7 +222,7 @@ def match_controls(
     treatment: pd.DataFrame,
     *,
     ratio: int | None = None,
-    excluded_ciks: set[str] | None = None,
+    event_dates: dict | None = None,
     caliper: int = 1,
     verbose: bool = True,
 ) -> tuple[pd.DataFrame, list[MatchResult]]:
@@ -255,9 +255,14 @@ def match_controls(
         print(f"Matching {len(treatment)} treatment firms at {ratio}:1 "
               f"({len(treatment) * (ratio + 1)} symbols)", flush=True)
 
-    # Never usable as controls: every firm that ever appears as a bankruptcy
-    # candidate (spec C2), plus the treatment firms themselves.
-    forbidden = set(excluded_ciks or set()) | set(treatment["cik"])
+    # Spec C2 (amended 2026-08-20): a control must be alive and not yet in
+    # default at the matched treatment firm's t=0. A firm that defaults LATER
+    # is retained and censored, because excluding it would use future
+    # information to make a present selection -- leaving a control group known
+    # ex post never to have failed, and biasing the false-positive rate low.
+    known_events = {str(k).zfill(10): pd.Timestamp(v)
+                    for k, v in (event_dates or {}).items()}
+    treatment_ciks = set(treatment["cik"])
     used: set[str] = set()
 
     rows, results = [], []
@@ -284,9 +289,15 @@ def match_controls(
             continue
         own = own.iloc[0]
 
+        # Already-defaulted-by-t0 firms are ineligible; later defaulters are not.
+        defaulted_by_now = {
+            cik for cik, when in known_events.items()
+            if when <= record.event_date
+        }
         candidates = pool[
             (pool["sic_division"] == own["sic_division"])          # exact sector
-            & (~pool["cik"].isin(forbidden))
+            & (~pool["cik"].isin(treatment_ciks))
+            & (~pool["cik"].isin(defaulted_by_now))
             & (~pool["cik"].isin(used))
             & ((pool["size_decile"] - own["size_decile"]).abs() <= caliper)
             & ((pool["leverage_decile"] - own["leverage_decile"]).abs() <= caliper)
@@ -310,7 +321,13 @@ def match_controls(
         used.update(chosen["cik"])
 
         for control in chosen.itertuples(index=False):
+            later_event = known_events.get(control.cik)
             rows.append({
+                # Recorded, never used to filter (spec 1.3).
+                "control_defaulted_later": later_event is not None,
+                "control_event_date": (str(later_event.date())
+                                       if later_event is not None else None),
+                "censored_at": str(record.event_date.date()),
                 "treatment_cik": record.cik,
                 "event_date": str(record.event_date.date()),
                 "control_cik": control.cik,

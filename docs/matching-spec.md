@@ -48,11 +48,37 @@ A firm enters the eligible control pool if all hold:
 | # | Criterion |
 |---|---|
 | C1 | Files 10-K/10-Q with the SEC (US domestic filer). **20-F and 40-F filers are excluded** — they report under the IFRS taxonomy and expose none of the us-gaap concepts the pipeline reads (verified: Credit Suisse has zero usable debt concepts). |
-| C2 | **Never** appears in the Item 1.03 event list at any date within `[study start − 12m, study end + 12m]`. A firm that defaults later is not a control. |
+| C2 | Has **no** Item 1.03 event on or before the matched treatment firm's `t = 0`. A firm that defaults **later** is retained — see §1.3. |
 | C3 | SEC XBRL company facts exist covering `t − 24m` of the treatment firm it is matched to. |
 | C4 | Total assets and total liabilities both resolvable at `t − 24m`. |
 | C5 | Total assets at `t − 24m` ≥ **$50M**. |
 | C6 | A ticker resolves with a listing window spanning `[t − 36m, t]`. |
+
+### 1.3 Controls that default later are kept and censored
+
+> **Amendment, 2026-08-20.** C2 originally excluded any firm appearing in the
+> event list anywhere in the study window. That was wrong, and this amendment
+> reverses it. Matched sets **do** change, which is why it is recorded here in
+> its own commit before the sample is built.
+
+Excluding a control because it defaults *after* the treatment firm's event uses
+future information to make a present selection. The surviving control group
+would then consist of firms known ex post never to have failed — unusually
+durable ones. Their distance-to-default distributions would separate from the
+treatment cohort more cleanly than they should, and the **false-positive rate,
+the single number this whole rework exists to produce, would come out biased
+low**. That is the same survivorship bias the study exists to avoid, re-entering
+through the control side.
+
+The rule is therefore:
+
+- A control must be alive and **not yet in default at the treatment firm's
+  `t = 0`**.
+- A control that defaults **after** `t = 0` is **retained**.
+- Every control's observation window is **censored at the treatment firm's
+  `t = 0`** regardless of what happens afterwards.
+- Its later outcome is recorded in two fields, `control_defaulted_later` and
+  `control_event_date`, and reported — never used to filter.
 
 ---
 
@@ -64,9 +90,46 @@ data already **filed and public** at that date is visible.
 
 | Variable | Definition | Buckets |
 |---|---|---|
+| **Calendar time** | Fiscal quarter containing `t − 24m` | **Exact match required.** See §2.0 |
 | **Sector** | SIC division from the EDGAR registrant SIC code | 10 SEC divisions. **Exact match required.** |
 | **Size** | `log(total assets)` | Decile, computed on the pooled eligible universe at `t − 24m` |
 | **Leverage** | `total liabilities / total assets` | Decile, computed on the same pooled universe |
+
+### 2.0 Calendar time is a hard matching variable
+
+> **Amendment, 2026-08-20.** Calendar time was absent from the original table.
+> The implementation already enforced it — controls are drawn from the filer
+> universe of the anchor quarter — so the code was stricter than the spec. This
+> amendment pre-registers the behaviour rather than leaving it an
+> implementation accident. No matched set changes.
+
+Resolution rate rises steeply across the window (37% in 2012–18, 50% in
+2019–21, 90% in 2022–24), so the treatment cohort piles up in 2022–24. That is
+a specific and unusual credit regime: the fastest tightening cycle in forty
+years, the March 2023 regional bank failures, and a concentrated wave of
+rate-sensitive bankruptcies. 2012–2021 is a near-zero-rate era with suppressed
+default rates.
+
+Without calendar matching, a 2023 defaulter would be compared against a 2016
+survivor. Market-wide equity volatility differs enormously between those dates,
+distance to default is a direct function of volatility, and the cohorts would
+appear to separate for reasons having nothing to do with firm-specific credit
+risk. **That would publish a confound as a finding.**
+
+Controls are therefore drawn only from the filer universe of the treatment
+firm's anchor quarter, and both cohorts are aligned in event time on the
+treatment firm's event date.
+
+### 2.0.1 Era-stratified reporting is mandatory
+
+Every headline metric is reported **stratified by era cohort** — 2012–18,
+2019–21, 2022–24 — with N for each, in addition to any pooled figure.
+
+**If the strata disagree, that is the result.** "Distance to default
+discriminates well in a tightening cycle and poorly under ZIRP" is a more
+useful finding than a pooled AUC describing no actual regime, and it must not
+be averaged away. The era gradient appears on `/data` as a chart, not a
+sentence.
 
 ### 2.1 Why size is measured from assets, not market capitalisation
 

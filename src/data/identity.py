@@ -26,6 +26,7 @@ import csv
 import io
 import json
 import re
+import urllib.parse
 import urllib.request
 import zipfile
 from dataclasses import dataclass, field
@@ -312,78 +313,96 @@ def _strip_markup(document: str) -> str:
     return re.sub(r"\s+", " ", text)
 
 
+def _fts_documents(cik: str, phrase: str = "under the symbol",
+                   forms: str = "10-K", limit: int = 8) -> list[dict]:
+    """
+    Ask EDGAR full-text search which documents contain the phrase.
+
+    Turns the text tier from "download several multi-megabyte 10-Ks and scan
+    them" into "one API call, then fetch the single document that actually
+    contains the sentence". Measured at 1.6s per firm against ~3.5 minutes for
+    the blind-download approach.
+
+    FTS covers 2001 onward, which fully spans the 2012-2024 study window. The
+    response carries no highlight snippet, but each hit's `_id` is
+    `accession:filename`, which pinpoints the document -- more useful than a
+    snippet, since surrounding context is needed to parse the symbol anyway.
+    """
+    params = urllib.parse.urlencode({
+        "q": f'"{phrase}"', "ciks": str(cik).zfill(10), "forms": forms,
+    })
+    try:
+        raw = _get(f"https://efts.sec.gov/LATEST/search-index?{params}")
+        payload = json.loads(raw.decode("utf-8", "replace"))
+    except Exception:  # noqa: BLE001
+        return []
+
+    out = []
+    for hit in payload.get("hits", {}).get("hits", []):
+        identifier = hit.get("_id", "")
+        if ":" not in identifier:
+            continue
+        accession, filename = identifier.split(":", 1)
+        # Exhibits (indentures, credit agreements) name symbols too, but are
+        # not the registrant's own market-for-common-equity statement.
+        if re.search(r"ex-?\d|_ex\d", filename, re.IGNORECASE):
+            continue
+        source = hit.get("_source", {})
+        out.append({
+            "accession": accession,
+            "filename": filename,
+            "date": source.get("file_date", ""),
+            "form": source.get("form", ""),
+        })
+    out.sort(key=lambda d: d["date"], reverse=True)
+    return out[:limit]
+
+
 def ticker_from_filing_text(
-    cik: str, near_date=None, *, max_filings: int = 4
+    cik: str, near_date=None, *, max_filings: int = 3
 ) -> list[tuple[str, str]]:
     """
     Read the trading symbol from the prose of a periodic report.
 
     Provenance tier `filing_text`, kept strictly separate from the `xbrl` tier.
-    It is document-sourced from the registrant's own filing, so it is far
-    stronger evidence than a fuzzy name match against an external table -- but
-    it is a regex over prose, so it is still a lower tier than a tagged fact.
+    Document-sourced from the registrant's own filing, so far stronger evidence
+    than a fuzzy name match against an external table -- but a regex over prose,
+    so still a lower tier than a tagged fact.
 
-    Recovers exactly the symbols the XBRL route cannot: Kodak's 2011 10-K
-    yields EK, its real pre-bankruptcy ticker, rather than the post-emergence
-    KODK that the listing window correctly rejects.
+    Reads the LATEST filings first, not those nearest the event. The price
+    vendor stores a delisted firm's entire history under its TERMINAL symbol:
+    Bed Bath & Beyond's 31 years sit under BBBYQ, and plain BBBY is absent
+    altogether. The pre-bankruptcy 10-K says "BBBY", which is contemporaneously
+    accurate and useless for retrieval; the post-filing 10-K says "BBBYQ",
+    which is what the data is actually keyed by. Candidates from several
+    filings are returned and the listing-window check disambiguates.
     """
-    filings = _all_filings(cik)
-    if filings.empty:
+    documents = _fts_documents(cik)
+    if not documents:
         return []
-
-    wanted = filings[filings["form"].isin(_TEXT_FORMS)]
-    if wanted.empty:
-        return []
-    if near_date is not None:
-        target = pd.Timestamp(near_date)
-        wanted = wanted.assign(
-            _gap=(wanted["filingDate"] - target).abs()
-        ).sort_values("_gap")
-    else:
-        wanted = wanted.sort_values("filingDate", ascending=False)
 
     cik_int = int(str(cik).lstrip("0") or 0)
     found: dict[str, str] = {}
 
-    for _, row in wanted.head(max_filings).iterrows():
-        accession = str(row["accessionNumber"]).replace("-", "")
+    for document in documents[:max_filings]:
+        accession = document["accession"].replace("-", "")
         try:
             raw = _get(
-                f"https://www.sec.gov/Archives/edgar/data/{cik_int}/{accession}/index.json"
+                f"https://www.sec.gov/Archives/edgar/data/{cik_int}/"
+                f"{accession}/{document['filename']}"
             )
-            listing = json.loads(raw.decode("utf-8", "replace"))
         except Exception:  # noqa: BLE001
             continue
-
-        items = [
-            item for item in listing.get("directory", {}).get("item", [])
-            if item.get("name", "").endswith((".htm", ".txt"))
-        ]
-        # The main document is the largest; exhibits are smaller.
-        items.sort(key=lambda i: -int(i.get("size") or 0))
-
-        for item in items[:2]:
-            try:
-                document = _get(
-                    f"https://www.sec.gov/Archives/edgar/data/{cik_int}/"
-                    f"{accession}/{item['name']}"
-                ).decode("utf-8", "replace")
-            except Exception:  # noqa: BLE001
-                continue
-            text = _strip_markup(document)
-            for pattern in _TEXT_SYMBOL_PATTERNS:
-                match = pattern.search(text)
-                if match:
-                    symbol = match.group(1).strip().upper()
-                    if symbol and symbol not in found:
-                        found[symbol] = (
-                            f"{row['form']} text, filed {row['filingDate'].date()}"
-                        )
-                    break
-            if found:
+        text = _strip_markup(raw.decode("utf-8", "replace"))
+        for pattern in _TEXT_SYMBOL_PATTERNS:
+            match = pattern.search(text)
+            if match:
+                symbol = match.group(1).strip().upper()
+                if symbol and symbol not in found:
+                    found[symbol] = (
+                        f"{document['form']} text, filed {document['date']}"
+                    )
                 break
-        if found:
-            break
     return list(found.items())
 
 

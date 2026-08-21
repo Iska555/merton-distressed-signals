@@ -110,16 +110,43 @@ class TestWithoutReplacement:
         matched, _ = U.match_controls(treatment, ratio=3, verbose=False)
         assert not set(matched["control_cik"]) & set(treatment["cik"])
 
-    def test_forbidden_ciks_are_excluded(self, patched):
-        """Spec C2: a firm that defaults later is not a control."""
+    def test_firms_already_defaulted_are_excluded(self, patched):
+        """Spec C2 as amended: ineligible only if it defaulted ON OR BEFORE t0."""
         patched(_universe(60))
-        banned = {"0000001011", "0000001021", "0000001031"}
+        already = {"0000001011": "2019-01-01", "0000001021": "2018-06-01"}
         treatment = pd.DataFrame({
             "cik": ["0000001001"], "event_date": ["2020-06-01"], "sic": ["3674"],
         })
         matched, _ = U.match_controls(treatment, ratio=5,
-                                      excluded_ciks=banned, verbose=False)
-        assert not set(matched["control_cik"]) & banned
+                                      event_dates=already, verbose=False)
+        assert not set(matched["control_cik"]) & set(already)
+
+    def test_later_defaulters_are_kept_and_flagged(self, patched):
+        """
+        Spec 1.3: excluding a control because it defaults AFTER t0 uses future
+        information to make a present selection, leaving a control group known
+        ex post never to have failed and biasing the false-positive rate low.
+        """
+        patched(_universe(60))
+        later = {"0000001011": "2022-01-01", "0000001021": "2023-06-01"}
+        treatment = pd.DataFrame({
+            "cik": ["0000001001"], "event_date": ["2020-06-01"], "sic": ["3674"],
+        })
+        matched, _ = U.match_controls(treatment, ratio=5,
+                                      event_dates=later, verbose=False)
+        kept = set(matched["control_cik"]) & set(later)
+        assert kept, "later-defaulting controls must be retained"
+        flagged = matched[matched.control_cik.isin(kept)]
+        assert flagged["control_defaulted_later"].all()
+        assert flagged["control_event_date"].notna().all()
+
+    def test_every_control_is_censored_at_treatment_t0(self, patched):
+        patched(_universe(60))
+        treatment = pd.DataFrame({
+            "cik": ["0000001001"], "event_date": ["2020-06-01"], "sic": ["3674"],
+        })
+        matched, _ = U.match_controls(treatment, ratio=3, verbose=False)
+        assert (matched["censored_at"] == "2020-06-01").all()
 
 
 class TestCaliper:
@@ -253,3 +280,63 @@ class TestEmptyInputs:
         matched, results = U.match_controls(treatment, ratio=5, verbose=False)
         assert matched.empty
         assert results[0].notes
+
+
+class TestCalendarTimeMatching:
+    """
+    Spec 2.0. Without this, a 2023 defaulter is compared against a 2016
+    survivor. Market-wide equity volatility differs enormously between those
+    dates, DD is a direct function of volatility, and the cohorts separate for
+    reasons unrelated to firm-specific credit risk -- publishing a confound as
+    a finding.
+    """
+
+    def test_controls_come_from_the_anchor_quarter_universe(self, monkeypatch):
+        asked: list = []
+
+        def _spy(date, **kwargs):
+            asked.append(U.quarter_of(date))
+            return _universe(60)
+
+        monkeypatch.setattr(U, "eligible_universe_at", _spy)
+        treatment = pd.DataFrame({
+            "cik": ["0000001001", "0000001002"],
+            "event_date": ["2023-04-15", "2016-09-20"],
+            "sic": ["3674", "3674"],
+        })
+        U.match_controls(treatment, ratio=2, verbose=False)
+        # t-24m of 2016-09-20 is 2014Q3; of 2023-04-15 is 2021Q2.
+        assert (2014, 3) in asked
+        assert (2021, 2) in asked
+
+    def test_each_treatment_firm_records_its_own_anchor_quarter(self, monkeypatch):
+        monkeypatch.setattr(U, "eligible_universe_at",
+                            lambda date, **kw: _universe(60))
+        treatment = pd.DataFrame({
+            "cik": ["0000001001", "0000001002"],
+            "event_date": ["2023-04-15", "2016-09-20"],
+            "sic": ["3674", "3674"],
+        })
+        matched, _ = U.match_controls(treatment, ratio=2, verbose=False)
+        by_firm = matched.groupby("treatment_cik")["anchor_quarter"].unique()
+        assert set(by_firm["0000001002"]) == {"2014Q3"}
+        assert set(by_firm["0000001001"]) == {"2021Q2"}
+
+    def test_a_control_is_never_drawn_from_another_era(self, monkeypatch):
+        """Distinct pools per quarter; no cross-era leakage."""
+        def _pool(date, **kwargs):
+            year, quarter = U.quarter_of(date)
+            offset = 1000 if year < 2018 else 9000
+            return _universe(40, start=offset)
+
+        monkeypatch.setattr(U, "eligible_universe_at", _pool)
+        treatment = pd.DataFrame({
+            "cik": ["0000009001", "0000001001"],
+            "event_date": ["2023-04-15", "2016-09-20"],
+            "sic": ["3674", "3674"],
+        })
+        matched, _ = U.match_controls(treatment, ratio=3, verbose=False)
+        old = matched[matched.treatment_cik == "0000001001"]["control_cik"]
+        new = matched[matched.treatment_cik == "0000009001"]["control_cik"]
+        assert all(c.startswith("00000010") for c in old)
+        assert all(c.startswith("00000090") for c in new)
