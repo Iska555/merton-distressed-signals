@@ -154,3 +154,77 @@ From `docs/RESOLUTION_AUDIT.md`, all reaching visible UI:
   Merton is least applicable — which flatters the headline result and weakens
   the sector panel. Both directions stated.
 - **Era.** See D3.
+
+---
+
+## D6 — The project is a measurement-and-discrimination study, not a detector
+
+**Decided 2026-08-20, following from D1.**
+
+Demoting the circularity (D1) removes the alpha gap entirely. There is no
+model-versus-market exhibit anywhere on the site, by that decision. So the
+project **no longer detects credit mispricing, and cannot, with free data.**
+
+What remains — "distance to default predicts default" — is legitimate and also
+crowded. Bharath & Shumway (2008), Campbell, Hilscher & Szilagyi (2008), and
+Duffie, Saita & Wang (2007) all covered it. A site headlining that finding in
+2026 reads as a competent replication and nothing more.
+
+The contribution has moved to what the rework itself produced, in order:
+
+1. **The measurement problem.** A quantified, tiered, reason-coded account of
+   why studying delisted bankrupt firms from free public data is far harder
+   than the literature admits: the two XBRL thresholds, the 2019 FAST Act
+   cover-page change, the era gradient, the float gradient, the vendor coverage
+   floor, and the ticker-recycling traps. Most papers dispose of sample
+   construction in a paragraph and none publish the exclusion cross-tab.
+2. **The base-rate and precision result.** At a realistic default rate, a
+   respectable AUC still yields poor precision. The sharpest practical finding.
+3. **The three-estimator horse race on 2012–2024.** Bharath & Shumway ran
+   1980–2003. The naive-versus-iterative comparison has not been replicated
+   across ZIRP into the tightening cycle.
+
+Consequences:
+
+- **Rename the project.** "Distressed Credit Detector" describes something the
+  code does not do.
+- **Rewrite the research question on `/`** around measurement and the cost of
+  discrimination, not arbitrage.
+- **`/data` is promoted to a primary exhibit**, built with the same care as
+  `/discrimination`. Under the old framing it was an appendix; under this one
+  it carries the first contribution.
+
+---
+
+## D7 — Two-month run at 3:1, rather than cutting controls
+
+**Decided 2026-08-20.**
+
+The full cohort will not fit one month's 500 unique-symbol allowance. The
+choice was between cutting the control ratio to 1:1–2:1 and splitting the fetch
+across two calendar months.
+
+**Controls win the trade.** The marginal treatment firm beyond roughly 100 adds
+little: the event-time DD path is already tightly estimated there. The marginal
+control buys two things the study actually needs — precision on the
+false-positive rate, and **match quality**. At 1:1 the nearest available firm is
+taken whether or not it is a good match, because there is no alternative. Bad
+matches on sector, size and leverage contaminate every downstream comparison,
+and no amount of treatment N repairs that.
+
+Sequencing:
+
+| | |
+|---|---|
+| **Month 1** | Resolve the cohort, fetch treatment prices, construct match candidates |
+| **Month 2** | Fetch control prices at 3:1 |
+
+This ordering is natural rather than a workaround: matching cannot be finalised
+until the treatment cohort is fixed. Analysis modules and the frontend are
+built against the treatment panel and clearly-labelled placeholder controls in
+the interval, so nothing is idle.
+
+**If treatment is ever capped, it is capped by random draw with a committed
+seed** — never by matchability, which would select for ordinary mid-cap
+non-financials and add a fifth selection layer on top of the four already
+documented (era, size, sector, vendor coverage).
