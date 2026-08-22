@@ -29,6 +29,7 @@ import time
 
 import pandas as pd
 
+from src.analysis import crosstabs as X
 from src.config import DATA_PROCESSED, RANDOM_SEED
 from src.data import edgar, identity
 
@@ -265,25 +266,29 @@ def summarise(frame: pd.DataFrame) -> None:
     if not resolvable.empty:
         print(f"\n   EFFECTIVE EARLIEST RESOLVABLE EVENT YEAR: {int(resolvable.index.min())}")
 
-    print("\n-- resolution rate by SIC division --")
-    by_sector = frame.groupby("sic_division").agg(
-        n=("cik", "size"), resolved=("resolved", "sum")
-    )
-    by_sector["rate"] = by_sector["resolved"] / by_sector["n"]
-    for sector, row in by_sector.sort_values("rate", ascending=False).iterrows():
-        print(f"   {sector:34s} n={int(row['n']):4d}  {row['rate']:6.1%}")
+    # Every cross-tab is reported WITHIN era as well as pooled. Era is the
+    # dominant axis here -- two filing-rule changes drive resolution from 13%
+    # to 69% across the window -- so a pooled gradient in size or sector is
+    # era measured a second time until conditioning shows otherwise. A pooled
+    # size gradient published at N=190 turned out to be exactly that.
+    strata = X.normalise(frame)
 
-    if frame["size_decile"].notna().any():
-        print("\n-- resolution rate by public-float decile (1=smallest) --")
-        by_size = frame.dropna(subset=["size_decile"]).groupby("size_decile", observed=True).agg(
-            n=("cik", "size"), resolved=("resolved", "sum")
-        )
-        by_size["rate"] = by_size["resolved"] / by_size["n"]
-        for decile, row in by_size.iterrows():
-            print(f"   decile {decile:>2}  n={int(row['n']):4d}  {row['rate']:6.1%}")
-        missing = frame["public_float_usd"].isna().sum()
-        print(f"   (no public float reported: {missing} firms, "
-              f"{frame.loc[frame['public_float_usd'].isna(), 'resolved'].mean():.1%} resolved)")
+    print("\n-- resolution by SIC division, WITHIN era --")
+    print(X.format_crosstab(X.conditional_crosstab(strata, "sic_division")))
+
+    print("\n-- resolution by public-float band, WITHIN era --")
+    print(X.format_crosstab(
+        X.conditional_crosstab(strata, "float_band", X.FLOAT_ORDER)))
+
+    avail = X.float_availability(strata)
+    if avail:
+        print("\n-- is 'reports no public float' just 'has no XBRL'? --")
+        for g in avail["grid"]:
+            print(f"   any_xbrl={str(g['any_xbrl']):5s} n={g['n']:4d}  "
+                  f"reports float {g['reports_float']:4d} ({g['share']:5.1%})")
+        print(f"   the two agree on {avail['agreement']:.1%} of rows. "
+              "dei:EntityPublicFloat is an XBRL tag, so a pre-XBRL filer lands "
+              "in 'none reported' by construction, not by being small.")
 
     return by_year
 

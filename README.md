@@ -82,15 +82,28 @@ filings — is not unreliable before 2019; the datum does not exist. What surviv
 is Item 5 prose: *"traded on the New York Stock Exchange under the symbol EK."*
 
 Resolution rises steeply and monotonically across the window — **12.8%** in
-2010–11 to **68.7%** in 2022–24, on 346 sampled filings. It also varies by
-sector: financials resolve at 26.8% against 56.2% for manufacturing, so the
-cohort under-samples exactly the sector where Merton is least applicable.
+2010–11 to **68.7%** in 2022–24, on 346 sampled filings.
 
-It does **not** vary with size in the way an earlier draft of this README
-claimed. That figure was measured on 190 candidates and did not survive at 346;
-the corrected bands show no monotone trend. What remains is a filer-type effect:
-registrants reporting no public float at all — shells, trusts and partnerships —
-resolve at 18.3%. Full cross-tabs, with cell counts, on `/measurement`.
+Era is so dominant that it contaminates everything measured beside it, so every
+cross-tab is reported *within* era strata with cell counts, and a rate is
+withheld where the interval is too wide to read. Conditioned that way, a sector
+effect survives — mining resolves below its own era in every era where the cell
+can be read, manufacturing above — and two earlier claims do not:
+
+- **Size.** An earlier draft reported float ≥ $200M resolving at 79% against 51%
+  below. It does not replicate, and of the four eras in which all three bands can
+  be read, the rate rises with size in exactly one. The first retraction of this
+  claim, which blamed small-sample noise, was itself wrong about the mechanism;
+  `docs/DECISIONS.md` D5 identifies the causes separately.
+- **Financials resolving worst.** That rested on one cell of fourteen firms in
+  the era where nothing resolves. What survives is a composition fact rather
+  than a rate: financials are 11.8% of candidates and 9.4% of the resolved set,
+  so the cohort under-samples the sector where Merton is least applicable.
+
+The size variable turned out to be part of the same finding as era rather than a
+second one: public float comes from `dei:EntityPublicFloat`, an XBRL tag, so a
+pre-2011 filer reports no float **by construction**. Float availability and XBRL
+presence agree on 86.7% of candidates. Full cross-tabs on `/measurement`.
 
 ### 2. Two data traps that would have poisoned the study silently
 
@@ -171,10 +184,13 @@ variables and bucket boundaries, caliper, ratio, covariate measurement date,
 replacement policy, tie-break order, subsidiary adjudication, provenance tiers and
 the primary analysis.
 
-Four amendments have been made since, each in its own commit with a stated reason
+Five amendments have been made since, each in its own commit with a stated reason
 and disclosed on `/data`. The consequential one reversed control eligibility so that
 firms defaulting *after* a treatment firm's event are retained and censored rather
 than excluded — excluding them uses future information to make a present selection.
+The most recent (§8.3) extends era-conditional reporting from headline metrics to
+every descriptive cross-tab, after a published finding turned out to be the era
+gradient measured a second time under another name.
 
 Thresholds are never chosen by maximising a metric on the study sample. Sliders on
 the site are reader-driven inputs, not fitted values.
@@ -189,7 +205,8 @@ pip install -r backend/requirements.txt
 python -m scripts.audit_resolution --start 2010 --end 2024 --per-year 25
 python -m scripts.verify_filing_text --n 80
 python -m scripts.build_site_data
-python -m scripts.smell_test          # read the numbers; do not just check exit code
+python -m scripts.smell_test              # read the numbers; do not just check exit code
+python -m scripts.check_published_figures # every prose figure must reproduce
 
 cd frontend && npm install && npm run build
 ```
@@ -203,6 +220,13 @@ It exists because the 2.67× debt double-count that shipped in the predecessor w
 caught by a human reading Ford's `$435.67B` and finding it absurd, not by a test.
 Tests verify the code does what the code intends; they do not verify the numbers.
 
+`scripts/check_published_figures.py` closes the other half of that gap. It states
+each claim the way it appears in visible UI, next to the computation that has to
+reproduce it, and names the file the sentence lives in when one stops being true.
+It exists because stale figures have twice survived a re-run here — once in a
+sector table that was hand-edited for one section and not another, once in two
+within-era orderings written from a glance at a console rather than computed.
+
 ### Environment
 
 ```bash
@@ -214,10 +238,13 @@ cp .env.example backend/.env   # then fill in
 | `FRED_API_KEY` | For cohort spreads | Read at build time only; never reaches a browser |
 | `TIINGO_API_KEY` | For delisted prices | Metered: 500 unique symbols per calendar month |
 
-> **Security note.** A FRED API key was committed to this repository's history in
-> commit `6ca8476`. It must be revoked and reissued at
-> <https://fredstlouisfed.org/docs/api/api_key.html>. Removing the file from the
-> working tree does not remove it from history.
+> **Security note — resolved 2026-08-23.** A FRED API key was committed to this
+> repository's history in commit `6ca8476`. Untracking the file in `f778738`
+> did not remediate it: `git show 6ca8476:backend/.env` still returns the value,
+> and anyone who clones the repository has it. **The key has now been revoked
+> and reissued** — the exposed value returns HTTP 400 from the FRED API, so the
+> string still in history is inert. The lesson stands: removing a secret from
+> the working tree is not revocation, and only revocation ends the exposure.
 
 ---
 

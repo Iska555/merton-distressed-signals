@@ -24,19 +24,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from src.analysis import crosstabs as X
 from src.config import DATA_PROCESSED, ROOT
 
 OUT = ROOT / "frontend" / "public" / "data"
-
-SIZE_BANDS = [
-    (0, 50e6, "under $50M"),
-    (50e6, 200e6, "$50M–200M"),
-    (200e6, 1e9, "$200M–1B"),
-    (1e9, float("inf"), "over $1B"),
-]
-
-ERA_BANDS = [(2006, 2011), (2012, 2018), (2019, 2021), (2022, 2024)]
-
 
 def git_commit() -> str:
     try:
@@ -66,12 +57,7 @@ def _clean(obj):
 
 def build_measurement(audit: pd.DataFrame) -> dict:
     """Everything the /measurement page renders."""
-    audit = audit.copy()
-    audit["event_year"] = pd.to_numeric(audit["event_year"], errors="coerce")
-    audit["resolved"] = audit["resolved"].astype(str).str.lower().isin(["true", "1"])
-    audit["public_float_usd"] = pd.to_numeric(
-        audit.get("public_float_usd"), errors="coerce"
-    )
+    audit = X.normalise(audit)
 
     total = len(audit)
     resolved = int(audit["resolved"].sum())
@@ -89,12 +75,12 @@ def build_measurement(audit: pd.DataFrame) -> dict:
     by_year.sort(key=lambda r: r["year"])
 
     by_era = []
-    for lo, hi in ERA_BANDS:
+    for lo, hi, label in X.ERAS:
         chunk = audit[audit["event_year"].between(lo, hi)]
         if chunk.empty:
             continue
         by_era.append({
-            "label": f"{lo}–{hi}",
+            "label": label,
             "n": len(chunk),
             "resolved": int(chunk["resolved"].sum()),
             "rate": float(chunk["resolved"].mean()),
@@ -103,21 +89,14 @@ def build_measurement(audit: pd.DataFrame) -> dict:
         })
 
     by_size = []
-    for lo, hi, label in SIZE_BANDS:
-        chunk = audit[audit["public_float_usd"].between(lo, hi, inclusive="left")]
+    for label in X.FLOAT_ORDER:
+        chunk = audit[audit["float_band"] == label]
         if chunk.empty:
             continue
         by_size.append({
             "label": label, "n": len(chunk),
             "resolved": int(chunk["resolved"].sum()),
             "rate": float(chunk["resolved"].mean()),
-        })
-    no_float = audit[audit["public_float_usd"].isna()]
-    if not no_float.empty:
-        by_size.append({
-            "label": "none reported", "n": len(no_float),
-            "resolved": int(no_float["resolved"].sum()),
-            "rate": float(no_float["resolved"].mean()),
         })
 
     by_sector = []
@@ -157,6 +136,18 @@ def build_measurement(audit: pd.DataFrame) -> dict:
         "by_era": by_era,
         "by_size": by_size,
         "by_sector": by_sector,
+        # Era-conditional versions of the two tables above. Era is the dominant
+        # axis of this sample, so a pooled gradient in size or sector may be
+        # era measured a second time. Publishing both lets a reader see a
+        # pooled difference dissolve when era is held fixed.
+        "by_size_era": X.conditional_crosstab(audit, "float_band", X.FLOAT_ORDER),
+        "by_sector_era": X.conditional_crosstab(
+            audit, "sic_division",
+            [r["sector"] for r in sorted(by_sector, key=lambda r: -r["n"])]),
+        "float_availability": X.float_availability(audit),
+        "min_reportable": {
+            "max_wilson_width": X.MAX_REPORTABLE_WIDTH,
+        },
         "reason_codes": reasons,
         "exclusion_families": families,
         "chapter_22_count": chapter22,

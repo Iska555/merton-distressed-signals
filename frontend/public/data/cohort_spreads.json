@@ -36,7 +36,7 @@
       "observation_date": "2026-08-20"
     }
   },
-  "retrieved_utc": "2026-08-22T15:23:54+00:00",
+  "retrieved_utc": "2026-08-22T17:45:11+00:00",
   "latest_observation": "2026-08-20",
   "source": "ICE BofA option-adjusted spread indices via FRED",
   "caveat": "Cohort index averages across many unrelated issuers, not any single firm's bond. Issuer-level pricing requires TRACE, which is not freely available."

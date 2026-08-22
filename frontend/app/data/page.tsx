@@ -254,13 +254,21 @@ export default function DataPage() {
           </table>
         </div>
         <p className="prose">
-          Four amendments have been made since, each in its own commit with a stated
+          Five amendments have been made since, each in its own commit with a stated
           reason: the ratio table corrected, the provenance tier renamed, calendar
-          time promoted to an explicit matching variable, and the control-eligibility
+          time promoted to an explicit matching variable, the control-eligibility
           rule reversed so that firms defaulting <em>after</em> a treatment
-          firm&rsquo;s event are retained and censored rather than excluded. That last
-          one changes matched sets, and excluding them would have biased the
-          false-positive rate — the single number this study exists to produce — low.
+          firm&rsquo;s event are retained and censored rather than excluded, and
+          era-conditional reporting extended from headline metrics to every
+          descriptive cross-tab.
+        </p>
+        <p className="prose">
+          The fourth changes matched sets: excluding later-defaulting controls would
+          have biased the false-positive rate — the single number this study exists
+          to produce — low. The fifth was forced by a published finding that turned
+          out to be the era gradient measured a second time under another name; the
+          original rule covered headline metrics but not the audit&rsquo;s own
+          cross-tabs, so it was extended rather than narrowed.
         </p>
       </section>
 
@@ -282,9 +290,16 @@ export default function DataPage() {
             of sampling firms still listed today.
           </p>
           <p>
-            <strong>Selection into the cohort is not random.</strong> Resolution
-            varies by era, size and sector. The cohort skews large, late and less
-            financial than the population of defaults it is drawn from.
+            <strong>Selection into the cohort is not random.</strong> It is
+            overwhelmingly a matter of <em>when</em> a firm failed: resolution
+            runs from 12.8% to 68.7% across the window, so the cohort is heavily
+            late. Once era is held fixed, most other apparent gradients stop
+            being gradients — a size effect published earlier does not replicate
+            at all. A sector effect does survive: mining resolves below its own
+            era throughout. The cohort also under-samples financials, which
+            flatters the headline result. Every cross-tab on{' '}
+            <Link href="/measurement">Measurement</Link> is reported within era
+            strata with its cell counts, for this reason.
           </p>
           <p>
             <strong>The benchmark is a cohort, not an issuer.</strong> Issuer-level

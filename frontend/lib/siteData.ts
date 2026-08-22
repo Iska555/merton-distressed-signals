@@ -28,6 +28,31 @@ export interface BandRow { label: string; n: number; resolved: number; rate: num
 export interface SectorRow { sector: string; n: number; resolved: number; rate: number }
 export interface ReasonRow { code: string; n: number; share: number; family: string }
 
+/** One cell of an era-conditional cross-tab. `reportable` is false when the
+ *  95% Wilson interval is too wide to separate this band from another; the
+ *  counts are still shown, only the rate is withheld. */
+export interface Cell {
+  n: number
+  resolved: number
+  rate: number | null
+  lo: number | null
+  hi: number | null
+  reportable: boolean
+}
+export interface ConditionalRow { label: string; cells: Cell[]; pooled: Cell }
+export interface ConditionalTable {
+  key: string
+  eras: string[]
+  rows: ConditionalRow[]
+  all: { cells: Cell[]; pooled: Cell }
+}
+export interface FloatAvailability {
+  grid: { any_xbrl: boolean; n: number; reports_float: number; share: number | null }[]
+  by_era: { label: string; n: number; reports_float: number; any_xbrl: number }[]
+  agreement: number | null
+  n: number
+}
+
 export interface Measurement {
   total_candidates: number
   resolved: number
@@ -36,6 +61,10 @@ export interface Measurement {
   by_era: EraRow[]
   by_size: BandRow[]
   by_sector: SectorRow[]
+  by_size_era: ConditionalTable
+  by_sector_era: ConditionalTable
+  float_availability: FloatAvailability
+  min_reportable: { max_wilson_width: number }
   reason_codes: ReasonRow[]
   exclusion_families: Record<string, number>
   chapter_22_count: number

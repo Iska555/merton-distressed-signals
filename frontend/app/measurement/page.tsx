@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import ConditionalTable from '@/components/ConditionalTable'
 import { getManifest, getMeasurement, pct } from '@/lib/siteData'
 
 function Bar({ rate }: { rate: number }) {
@@ -44,6 +45,7 @@ export default function MeasurementPage() {
     )
   }
 
+  const fa = m.float_availability
   const unavailable = m.exclusion_families['data_unavailability'] ?? 0
   const inapplicable = m.exclusion_families['model_inapplicability'] ?? 0
 
@@ -58,9 +60,10 @@ export default function MeasurementPage() {
         <p className="lede">
           Of {m.total_candidates} bankruptcy filings sampled from{' '}
           {m.window.sampled_from}–{m.window.sampled_to}, {m.resolved} could be
-          resolved to a ticker whose price history is actually retrievable. The
-          survivors are systematically larger, later, and less financial than the
-          population they came from.
+          resolved to a ticker whose price history is actually retrievable.{' '}
+          <strong>Which ones survive is overwhelmingly a matter of when they
+          failed</strong>, and once that is held fixed most of the other
+          differences on this page stop being differences.
         </p>
       </header>
 
@@ -158,83 +161,169 @@ export default function MeasurementPage() {
       </section>
 
       <section className="section">
-        <h2>Size — no measurable gradient</h2>
+        <h2>Everything else is reported inside era</h2>
         <p className="prose">
-          Among firms reporting a public float there is <strong>no monotone
-          trend</strong>. The only real gap is for registrants reporting no float
-          at all — shells, liquidating trusts and partnerships — which is a
-          filer-type effect rather than a size one, and those are excluded on
-          modelling grounds regardless.
+          Era is the dominant axis of this dataset, so any variable correlated
+          with era will reproduce the era gradient under its own name. Three
+          cross-tabs were once reported here as independent gradients. At least
+          one was era measured a second time.{' '}
+          <strong>Size, sector and filer type are therefore published within era
+          strata, with the cell count beside every figure</strong>, and a rate is
+          withheld where the interval is too wide to say anything.
         </p>
+
+        {fa && fa.agreement !== null && (
+          <div className="callout">
+            <p className="eyebrow">
+              The size variable is partly an artefact of the filing rules
+            </p>
+            <p>
+              Public float is read from{' '}
+              <span className="mono">dei:EntityPublicFloat</span>, which is an
+              XBRL tag. A filer with no XBRL instance therefore has no float{' '}
+              <em>by construction</em> — not because it is small, but because it
+              filed before 2011. The two line up on{' '}
+              <strong>{pct(fa.agreement, 1)}</strong> of {fa.n} candidates.
+            </p>
+            <div className="scroll-x">
+              <table className="data">
+                <thead>
+                  <tr>
+                    <th>Filer has XBRL</th>
+                    <th style={{ textAlign: 'right' }}>N</th>
+                    <th style={{ textAlign: 'right' }}>Reports a public float</th>
+                    <th style={{ textAlign: 'right' }}>Share</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fa.grid.map((g) => (
+                    <tr key={String(g.any_xbrl)}>
+                      <td className="mono">{g.any_xbrl ? 'yes' : 'no'}</td>
+                      <td className="num">{g.n}</td>
+                      <td className="num">{g.reports_float}</td>
+                      <td className="num">{pct(g.share, 1)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p>
+              So the &ldquo;none reported&rdquo; band of a size table is largely
+              the pre-XBRL population wearing a different label. That is a
+              finding about the public record rather than about firm size, which
+              is this study&rsquo;s actual subject.
+            </p>
+          </div>
+        )}
+      </section>
+
+      <section className="section">
+        <h2>Size — no gradient survives conditioning</h2>
+        <p className="prose">
+          In only one of the four eras where all three bands can be read does
+          the rate rise with size. In two the middle band is highest; in one it
+          is lowest. There is no consistent ordering at any level of
+          conditioning — the pooled column on the right shows why the
+          conditional cells matter.
+        </p>
+
+        <ConditionalTable
+          table={m.by_size_era}
+          label="Public float at last 10-K"
+          maxWidth={m.min_reportable.max_wilson_width}
+        />
+
         <div className="callout callout-neutral">
-          <p className="eyebrow">Corrected</p>
+          <p className="eyebrow">Corrected twice — what actually changed</p>
           <p>
-            An earlier run of this audit, on 190 candidates, reported that float
-            ≥ $200M resolved at 79% against 51% below, and concluded the cohort
-            skewed large. At 346 candidates that ordering does not hold and the
-            trend disappears. It was small-sample noise at roughly ten to twenty-five
-            observations per cell. Cross-tabs on this page are now published only
-            with their cell counts beside them.
+            An earlier run on 190 candidates reported float ≥ $200M resolving at
+            79% against 51% below, and concluded the cohort skewed large. That
+            was retracted here as small-sample noise.{' '}
+            <strong>That retraction was right about the conclusion and wrong
+            about the reason</strong>, and three things had moved at once, so
+            nothing was identified. Holding each fixed in turn:
           </p>
-        </div>
-        <div className="scroll-x">
-          <table className="data">
-            <thead>
-              <tr>
-                <th>Public float at last 10-K</th>
-                <th style={{ textAlign: 'right' }}>Candidates</th>
-                <th style={{ textAlign: 'right' }}>Resolved</th>
-                <th style={{ textAlign: 'right' }}>Rate</th>
-                <th style={{ width: 160 }}>&nbsp;</th>
-              </tr>
-            </thead>
-            <tbody>
-              {m.by_size.map((b) => (
-                <tr key={b.label}>
-                  <td className="mono">{b.label}</td>
-                  <td className="num">{b.n}</td>
-                  <td className="num">{b.resolved}</td>
-                  <td className="num">{pct(b.rate, 0)}</td>
-                  <td><Bar rate={b.rate} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <ul className="prose">
+            <li>
+              <strong>The exclusion-taxonomy fix is not implicated.</strong> Run
+              it on the same 346 candidates before and after and every float band
+              is identical except &ldquo;none reported&rdquo;. It recovered five
+              firms, all of them in that band.
+            </li>
+            <li>
+              <strong>The year range is not implicated.</strong> The old sample
+              ran 2006–2024. Restricted to 2010–2024 to match, its top band goes{' '}
+              <em>up</em>, to 18 of 22.
+            </li>
+            <li>
+              <strong>The resolver got stricter, and that is most of it.</strong>{' '}
+              Nine firms present in both runs flipped from resolved to
+              unresolved, seven of them to{' '}
+              <span className="mono">AMBIGUOUS_OVERLAPPING</span> — the
+              mutual-exclusivity guard added after the old run. On the seventeen
+              top-band firms common to both samples, 15 of 17 became 11 of 17.
+              Those resolutions were withdrawn because they were unsafe, not
+              because the sample changed.
+            </li>
+            <li>
+              <strong>The rest is ordinary imprecision.</strong> 18 of 22 against
+              38 of 65 is not a significant difference (Fisher exact,{' '}
+              <span className="tnum">p = 0.07</span>). The two intervals overlap.
+            </li>
+          </ul>
+          <p>
+            The honest account is not that the finding collapsed. It is that a
+            point estimate was published without its interval, from a cell whose
+            95% bounds ran from 61% to 93%. Nothing on this page now shows a rate
+            without the count it rests on.
+          </p>
         </div>
       </section>
 
       <section className="section">
-        <h2>The sector gradient</h2>
+        <h2>Sector — one effect survives, one does not</h2>
         <p className="prose">
-          Financials resolve poorly and are a large share of candidates. The cohort
-          therefore under-samples exactly the sector where the Merton model is
-          least applicable — which flatters the headline result and weakens the
-          sector panel. Both directions are stated rather than only the convenient
-          one.
+          Sector composition varies sharply across eras: financials are 30% of
+          2010–11 candidates and 5% of 2015–18; mining is 35% of 2015–18 and
+          almost absent from 2022–24. A pooled sector rate is therefore partly a
+          statement about when each sector failed.
         </p>
-        <div className="scroll-x">
-          <table className="data">
-            <thead>
-              <tr>
-                <th>SIC division</th>
-                <th style={{ textAlign: 'right' }}>Candidates</th>
-                <th style={{ textAlign: 'right' }}>Resolved</th>
-                <th style={{ textAlign: 'right' }}>Rate</th>
-                <th style={{ width: 160 }}>&nbsp;</th>
-              </tr>
-            </thead>
-            <tbody>
-              {m.by_sector.map((s) => (
-                <tr key={s.sector}>
-                  <td>{s.sector}</td>
-                  <td className="num">{s.n}</td>
-                  <td className="num">{s.resolved}</td>
-                  <td className="num">{pct(s.rate, 0)}</td>
-                  <td><Bar rate={s.rate} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+        <ConditionalTable
+          table={m.by_sector_era}
+          label="SIC division"
+          maxWidth={m.min_reportable.max_wilson_width}
+        />
+
+        <div className="callout">
+          <p className="eyebrow">Survives conditioning</p>
+          <p>
+            <strong>Mining resolves below its own era in every era where the
+            cell can be read</strong> — 0 of 13, then 38% against an era average
+            of 48%, then 47% against 57%. <strong>Manufacturing sits above its
+            era in all five</strong>, every cell reportable, from 22% against
+            13% to 82% against 69%. Those are sector effects, not era in
+            disguise.
+          </p>
+        </div>
+
+        <div className="callout callout-neutral">
+          <p className="eyebrow">Does not survive conditioning</p>
+          <p>
+            The claim that financials resolve worst was carried by{' '}
+            <strong>a single cell of fourteen firms in the worst era</strong>. In
+            2010–11 financials are 1 of 14 against an era average of 13% — barely
+            a gap — and every later financials cell is too small to report at
+            all. The pooled figure is composition: financials are concentrated in
+            the era where nothing resolves.
+          </p>
+          <p>
+            What remains true is a fact about the cohort rather than about
+            resolution: financials are 11.8% of candidates and 9.4% of the
+            resolved set, so the study still under-samples the sector where
+            Merton is least applicable. That direction is stated because it
+            flatters the headline result.
+          </p>
         </div>
       </section>
 

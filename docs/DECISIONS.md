@@ -143,33 +143,90 @@ embarrassment.
 
 ---
 
-## D5 — Known exclusion biases, published either way
+## D5 — Known exclusion biases, reported conditional on era
 
-> **Corrected 2026-08-22 at N = 346.** The size claim below was measured at
-> N = 190 and did not survive the larger sample. It is corrected rather than
-> quietly dropped, because the original figure reached the README and the site.
+> **Corrected twice.** The size claim below was first published at N = 190,
+> then retracted at N = 346 as "small-sample noise". The retraction reached the
+> right conclusion by the wrong route: three things had changed between the two
+> runs, so nothing was identified. Both the original claim and the first
+> retraction reached the README and the site, so both are recorded here.
 
-From `docs/RESOLUTION_AUDIT.md` (N = 346), all reaching visible UI:
+**Decided 2026-08-22.**
+
+### The rule
+
+**Era is the dominant axis of this dataset. No cross-tab is published as a
+finding until it has been reported within era strata, with cell counts beside
+every figure.**
+
+Two SEC filing-rule changes — XBRL instances from roughly 2011, the cover-page
+trading symbol from 2019 — drive resolution from 12.8% to 68.7% across the
+window. Any variable correlated with era will therefore reproduce the era
+gradient under its own name, and a pooled cross-tab may be reporting era a
+second time. Three cross-tabs were once published here as independent
+gradients. Two of them were not.
+
+Implemented in `src/analysis/crosstabs.py`, which is the single definition of
+the era and float bands used by the audit script, the site build and this
+document. `tests/test_crosstabs.py` asserts that a gradient which exists only
+through era composition shows flat cells once conditioned.
+
+### What holds
 
 - **Era. The strongest and only monotone gradient.** 12.8% (2010–11), 19.7%
   (2012–14), 47.9% (2015–18), 56.9% (2019–21), 68.7% (2022–24). See D3.
 
-- **Size — the earlier claim was small-sample noise.** At N = 190 this was
-  reported as "float ≥ $200M resolves at 79%, < $200M at 51%". At N = 346 the
-  bands are **45.5% (under $50M), 60.7% ($50–200M), 58.5% (≥ $200M)** — no
-  monotone trend, and the ordering is not even the one previously claimed.
-  What survives is the gap for firms reporting **no public float at all**
-  (18.3%), which is a filer-type effect — shells, trusts and partnerships —
-  not a size effect. **The cohort does not measurably skew large.**
+- **Mining and manufacturing are real sector effects.** Mining resolves below
+  its own era in every era where the cell can be read (0 of 13; 38% against an
+  era average of 48%; 47% against 57%). Manufacturing sits above its era in all
+  five, every cell reportable. These survive conditioning.
 
-- **Sector.** Financials resolve at 26.8% and mining at 30.1%, against 56.2%
-  for manufacturing. The cohort under-samples exactly the sector where Merton
-  is least applicable — which flatters the headline result and weakens the
-  sector panel. Both directions stated.
+- **Cohort composition, independent of resolution rates.** Financials are 11.8%
+  of candidates and 9.4% of the resolved set, so the study under-samples the
+  sector where Merton is least applicable. That is a fact about the cohort and
+  is stated because it flatters the headline result.
 
-The lesson is recorded because it will recur: a gradient measured on ~10
-observations per cell is not a finding. Cross-tabs are only published with
-their cell counts beside them.
+### What does not hold
+
+- **Size.** No gradient survives conditioning. Of the four eras in which all
+  three bands can be read, the rate rises with size in exactly one (2022–24);
+  in two the middle band is highest, and in 2012–14 it is lowest. Pooled bands
+  are 45.5% / 60.7% / 58.5% (under $50M / $50–200M / ≥ $200M). **The cohort
+  does not measurably skew large.**
+
+- **Financials resolving worst.** The pooled 34.1% rests on a single cell of
+  fourteen firms in 2010–11, where the era average is 13% anyway. Every later
+  financials cell is too small to report. The pooled gap is composition:
+  financials are 30% of 2010–11 candidates and 5% of 2015–18.
+
+- **"No public float reported" as a filer-type effect.** This was the surviving
+  half of the first retraction and it is also mostly era. Public float is read
+  from `dei:EntityPublicFloat`, an XBRL tag, so a pre-2011 filer reports no
+  float *by construction* rather than by being a shell or a trust. Float
+  availability and XBRL presence agree on **86.7%** of 346 candidates. The
+  no-float band is largely the pre-XBRL population wearing a different label.
+
+### Why the first retraction was not identified
+
+Three things moved between the two runs. Holding each fixed in turn:
+
+| Candidate cause | Verdict |
+|---|---|
+| The exclusion-taxonomy fix (D5 predecessor) | **Not implicated.** Before and after on the same 346 candidates, every float band is identical except "none reported". It recovered 5 firms, all in that band. |
+| The year range (2006–2024 → 2010–2024) | **Not implicated.** Restricted to 2010–2024 the old top band goes *up*, to 18 of 22. |
+| The resolver becoming stricter | **Most of it.** Nine firms present in both runs flipped resolved → unresolved, seven to `AMBIGUOUS_OVERLAPPING`, the mutual-exclusivity guard added after the old run. On the 17 top-band firms common to both samples, 15 of 17 became 11 of 17. |
+| Ordinary imprecision | **The remainder.** 18 of 22 against 38 of 65 is not significant (Fisher exact, p = 0.07). |
+
+So the finding did not "collapse". A point estimate was published without its
+interval, from a cell whose 95% Wilson bounds ran from 61% to 93%, and then
+several of the resolutions underneath it were correctly withdrawn.
+
+### The limit of the fix
+
+Suppressing rates on wide intervals is a floor, not a safeguard. The retracted
+cell — 19 of 24 — has an interval only 31 points wide and would still be
+reported under the current rule. `tests/test_crosstabs.py` asserts exactly that,
+so nobody later mistakes the rule for protection it does not give.
 
 ---
 
