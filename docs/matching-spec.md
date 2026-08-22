@@ -396,6 +396,38 @@ WAC ends 2018-02-09 as Ditech's DHCP begins 2018-02-06. A wrong-company match
 produces overlap. The test uses only data already fetched and needs no prose
 heuristic.
 
+## 8.3 Every cross-tab is conditional on era, with cell counts
+
+> **Amendment, 2026-08-23.** §2.0.1 already required era stratification for
+> headline metrics. It did not cover the *descriptive* cross-tabs of the
+> resolution audit, and that gap produced a published finding that was era
+> measured a second time under another name. The rule is extended rather than
+> narrowed, because the failure was one of scope.
+
+Era is the dominant axis of this dataset: two filing-rule changes drive
+resolution from 12.8% to 68.7% across the window. Any variable correlated with
+era therefore reproduces the era gradient under its own name.
+
+1. **No cross-tab is published as a finding until it has been reported within
+   era strata.** The pooled column may appear beside the conditional cells, and
+   should, so a reader can watch a pooled difference dissolve.
+2. **Every cell carries its count**, in the form `resolved/candidates`.
+3. **A rate is withheld where its 95% Wilson interval exceeds 50 points.**
+   Suppression is on interval width rather than a count threshold because an
+   extreme rate is estimated precisely even at small n: 0 of 13 says something,
+   6 of 13 does not.
+4. **Where a variable's availability is itself an artefact of the era
+   transition, that is stated on the same page as the table.** The instance
+   here is public float, read from `dei:EntityPublicFloat` — an XBRL tag, so a
+   pre-2011 filer reports no float by construction.
+
+Rule 3 is a floor, not a safeguard, and is documented as one. The claim that
+prompted this amendment rested on 19 of 24, whose interval is 31 points wide and
+which would still be reportable today.
+
+Definitions live once, in `src/analysis/crosstabs.py`, shared by the audit
+script, the site build and the write-up, so the three cannot drift.
+
 ## 8. Recorded regardless of outcome
 
 The following are published whichever way they come out:
@@ -403,6 +435,7 @@ The following are published whichever way they come out:
 - Count of treatment candidates at every filter stage, with reason codes
 - Controls found per treatment firm, and every shortfall against the target
 - Covariate balance before and after matching (standardised mean differences)
-- Resolution rate cross-tabulated by event year, SIC division and size decile
+- Resolution rate cross-tabulated by SIC division and float band, **within era
+  strata and with cell counts**, per §8.3
 - The realised ratio and its quota constraint
 - Any amendment to this specification
