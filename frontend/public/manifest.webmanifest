@@ -1,0 +1,16 @@
+{
+  "name": "Distressed Credit Signals",
+  "short_name": "DCS",
+  "description": "Evidence and tools for measuring distressed credit signals.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#FFFFFF",
+  "theme_color": "#C0272D",
+  "icons": [
+    {
+      "src": "/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
