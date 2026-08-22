@@ -54,6 +54,55 @@ A firm enters the eligible control pool if all hold:
 | C5 | Total assets at `t − 24m` ≥ **$50M**. |
 | C6 | A ticker resolves with a listing window spanning `[t − 36m, t]`. |
 
+### 1.2.1 Registrants without common equity are out of scope
+
+> **Amendment, 2026-08-20.** Added after hand-verification found Rockies Region
+> 2007 LP resolving to PDCE — the ticker of PDC Energy, its managing general
+> partner — because the partnership's own filing discusses the GP's stock,
+> that being the only stock in the document.
+
+A registrant with **no common shares outstanding** (`dei:EntityCommonStockSharesOutstanding`
+and the us-gaap equivalents all absent or zero) is excluded **before identity
+resolution is attempted**. This covers limited partnerships, royalty and
+statutory trusts, financing subsidiaries and special-purpose entities.
+
+The reason is modelling, not identification. Merton prices equity as a **call
+option on firm assets**. A limited partnership interest or a trust unit is not
+that instrument. Even with a perfectly correct symbol, such an entity does not
+belong in the treatment cohort.
+
+This exclusion is therefore reported under **model inapplicability**, not data
+unavailability (§8.1).
+
+### 1.2.2 Chapter 22: which event survives deduplication
+
+> **Amendment, 2026-08-20.** Global per-CIK deduplication fixed double-counting
+> but did not say *which* event to keep. It must be pre-registered, because the
+> choice changes the panel.
+
+A firm filing Item 1.03 more than once is a **Chapter 22** — a second
+bankruptcy — not a duplicate row. Walter Investment (2017, 2018) re-emerged and
+filed again as Ditech Holding (2019), all on CIK 0001040719. These are common
+enough in a 2012–2024 sample to matter.
+
+**Rule: the FIRST Item 1.03 filing per CIK is the event.** Subsequent filings
+are recorded in `subsequent_event_dates` and `n_bankruptcy_events`, reported,
+and never used to select.
+
+Justification: the research question is about **detecting the onset of
+distress**. The first filing is the onset the model should have caught; keeping
+the last would discard exactly the transition under study.
+
+Rejected alternatives, recorded so the choice is visible:
+
+| Option | Why not |
+|---|---|
+| Keep the last filing | Discards the original onset of distress — the event the model is being tested on |
+| Retain both as separate events | Defensible, but the second event's `t − 36m` window overlaps the first's post-event period, so the "pre-distress" baseline is already distressed |
+| Exclude Chapter 22 firms entirely | Discards genuine defaults and adds a further selection layer |
+
+The **Chapter 22 rate is reported on `/data`** regardless.
+
 ### 1.3 Controls that default later are kept and censored
 
 > **Amendment, 2026-08-20.** C2 originally excluded any firm appearing in the
@@ -308,6 +357,44 @@ sample.** Thresholds shown in the interactive confusion matrix on
 say so.
 
 ---
+
+## 8.1 Exclusions are reported in two families, never pooled
+
+> **Amendment, 2026-08-20.**
+
+A single undifferentiated exclusion count is misleading, because the two
+families have **opposite implications**:
+
+| Family | Meaning | Implication |
+|---|---|---|
+| **Data unavailability** | The firm belongs in the study; the sources cannot support it | A **limitation**. Bounds what can be claimed, and may be biased |
+| **Model inapplicability** | The sources are fine; the firm is not a Merton object | A **scope definition**. Correct exclusion, not a shortfall |
+
+Assignment:
+
+- *Unavailability*: `NO_FILINGS`, `NO_XBRL_INSTANCE`, `NO_TRADING_SYMBOL_TAG`,
+  `SYMBOL_NOT_LISTED`, `LISTING_EXCLUDES_EVENT`, `AMBIGUOUS_OVERLAPPING`
+- *Inapplicability*: `NO_COMMON_EQUITY`
+
+**Financials sit across both** and are handled by the sector panel rather than
+a code: their data is available and Merton is estimable, but deposit funding
+and off-balance-sheet exposure make the asset-value interpretation unsound.
+That is discussed, not silently excluded.
+
+## 8.2 Symbol candidates must be mutually exclusive in time
+
+> **Amendment, 2026-08-20.**
+
+A registrant cannot trade under two symbols at once. Where a CIK yields two or
+more candidate symbols that both survive the listing-window check **and whose
+trading windows overlap**, at most one can belong to the registrant. Such a
+case is flagged `AMBIGUOUS_OVERLAPPING` and **not auto-ranked**, because the
+data does not say which is right and ranking would silently choose.
+
+A genuine re-ticker produces a **handoff**, not an overlap: Walter Investment's
+WAC ends 2018-02-09 as Ditech's DHCP begins 2018-02-06. A wrong-company match
+produces overlap. The test uses only data already fetched and needs no prose
+heuristic.
 
 ## 8. Recorded regardless of outcome
 

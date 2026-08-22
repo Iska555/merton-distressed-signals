@@ -56,6 +56,32 @@ class ReasonCode:
     NO_TRADING_SYMBOL_TAG = "NO_TRADING_SYMBOL_TAG"  # XBRL present, tag absent
     SYMBOL_NOT_LISTED = "SYMBOL_NOT_LISTED"        # absent from the listing table
     LISTING_EXCLUDES_EVENT = "LISTING_EXCLUDES_EVENT"  # window does not span the event
+    AMBIGUOUS_OVERLAPPING = "AMBIGUOUS_OVERLAPPING"    # 2+ candidates traded concurrently
+    NO_COMMON_EQUITY = "NO_COMMON_EQUITY"              # LP/trust/SPE: not a Merton object
+
+
+# Two families of exclusion, with opposite implications, reported separately
+# on /data. Conflating them into one count is misleading: the first is a
+# limitation of the sources, the second is a definition of scope.
+UNAVAILABILITY_CODES = {
+    ReasonCode.NO_FILINGS,
+    ReasonCode.NO_XBRL_INSTANCE,
+    ReasonCode.NO_TRADING_SYMBOL_TAG,
+    ReasonCode.SYMBOL_NOT_LISTED,
+    ReasonCode.LISTING_EXCLUDES_EVENT,
+    ReasonCode.AMBIGUOUS_OVERLAPPING,
+}
+INAPPLICABILITY_CODES = {
+    ReasonCode.NO_COMMON_EQUITY,
+}
+
+
+def exclusion_family(code: str) -> str:
+    if code in UNAVAILABILITY_CODES:
+        return "data_unavailability"
+    if code in INAPPLICABILITY_CODES:
+        return "model_inapplicability"
+    return "resolved" if str(code).startswith("RESOLVED") else "other"
 
 
 @dataclass
@@ -139,6 +165,64 @@ def listing_window(ticker: str) -> dict | None:
         "start": row["startDate"] or None,
         "end": row["endDate"] or None,
     }
+
+
+def windows_overlap(a: dict, b: dict, *, grace_days: int = 45) -> int:
+    """
+    Days two listing windows overlap. Negative or zero means a clean handoff.
+
+    The distinction that matters: a genuine re-ticker produces a HANDOFF -- the
+    old symbol ends as the new one begins, because a registrant cannot trade
+    under two symbols at once. A wrong-company match produces OVERLAP.
+
+    That test lives in data already fetched and needs no prose heuristic, which
+    is why it is a better guard than any sentence rule.
+    """
+    a_start = pd.Timestamp(a["start"]) if a.get("start") else pd.Timestamp("1900-01-01")
+    a_end = pd.Timestamp(a["end"]) if a.get("end") else pd.Timestamp("2100-01-01")
+    b_start = pd.Timestamp(b["start"]) if b.get("start") else pd.Timestamp("1900-01-01")
+    b_end = pd.Timestamp(b["end"]) if b.get("end") else pd.Timestamp("2100-01-01")
+    overlap = (min(a_end, b_end) - max(a_start, b_start)).days
+    return max(0, overlap - grace_days)
+
+
+def has_common_equity(cik: str) -> bool:
+    """
+    Does this registrant have common stock at all?
+
+    Limited partnerships, royalty and statutory trusts, financing subsidiaries
+    and special-purpose entities file with the SEC, have no listed common
+    equity of their own, and their filings routinely discuss the PARENT's or
+    general partner's stock -- because that is the only stock in the document.
+    Rockies Region 2007 LP yielded PDCE that way, PDC Energy being its managing
+    general partner.
+
+    That is a whole population, not an incident, and it is excluded
+    structurally rather than caught downstream by a sentence guard.
+
+    The deeper reason is modelling, not identification: Merton prices equity as
+    a call option on firm assets. A limited partnership interest or a trust
+    unit is not that instrument. Even with a perfectly correct symbol, such an
+    entity does not belong in the treatment cohort.
+    """
+    cik = str(cik).zfill(10)
+    for taxonomy, concept in (
+        ("dei", "EntityCommonStockSharesOutstanding"),
+        ("us-gaap", "CommonStockSharesOutstanding"),
+        ("us-gaap", "CommonStockSharesIssued"),
+    ):
+        try:
+            payload = edgar._cached_json(
+                f"https://data.sec.gov/api/xbrl/companyconcept/"
+                f"CIK{cik}/{taxonomy}/{concept}.json",
+                f"concept/{cik}_{taxonomy}_{concept}.json",
+            )
+        except Exception:  # noqa: BLE001 - 404 means never tagged
+            continue
+        for unit, values in (payload.get("units") or {}).items():
+            if any((v.get("val") or 0) > 0 for v in values):
+                return True
+    return False
 
 
 def covers_event(ticker: str, event_date, *, grace_days: int = 45) -> tuple[bool, str]:
@@ -502,7 +586,8 @@ def _variants(symbol: str) -> list[str]:
 
 
 def resolve(cik: str, *, event_date=None, name: str | None = None,
-            allow_text_tier: bool = True) -> Identity:
+            allow_text_tier: bool = True, require_common_equity: bool = True,
+            flag_overlapping: bool = True) -> Identity:
     """
     Best available ticker for a CIK, validated against the listing window.
 
@@ -517,6 +602,19 @@ def resolve(cik: str, *, event_date=None, name: str | None = None,
     cik = str(cik).zfill(10)
     profile = edgar.company_profile(cik)
     display_name = name or profile.get("name")
+
+    # Structural exclusion, before any resolution work. A registrant with no
+    # common shares outstanding has no common stock to resolve, and is not a
+    # Merton object regardless of what symbol its filings mention. Cheap: one
+    # 3KB companyconcept request, and it skips the expensive text tier for a
+    # whole population that would fail it anyway.
+    if require_common_equity and not has_common_equity(cik):
+        return Identity(
+            cik=cik, name=display_name, ticker=None, source="unresolved",
+            reason_code=ReasonCode.NO_COMMON_EQUITY, provenance="",
+            notes=("no common shares outstanding reported: limited partnership, "
+                   "trust, or special-purpose entity -- not a Merton object",),
+        )
 
     from_filings, instances_seen = ticker_from_filings(cik, near_date=event_date)
 
@@ -624,6 +722,32 @@ def resolve(cik: str, *, event_date=None, name: str | None = None,
         start = pd.Timestamp(window["start"]) if window.get("start") else None
         history = float((anchor - start).days) if start is not None else 0.0
         return (days_to_end, -history)
+
+    # Mutual-exclusivity check, BEFORE ranking. A registrant cannot trade under
+    # two symbols at once, so two surviving candidates whose windows overlap
+    # cannot both be its. A genuine re-ticker shows a handoff instead: Walter
+    # Investment's WAC ends 2018-02-09 as Ditech's DHCP begins 2018-02-06.
+    #
+    # Flagged for review rather than auto-ranked. Ranking would silently pick
+    # one, and the whole point is that the data does not say which.
+    if flag_overlapping and len(accepted) > 1:
+        overlaps = []
+        for i in range(len(accepted)):
+            for j in range(i + 1, len(accepted)):
+                days = windows_overlap(accepted[i][2], accepted[j][2])
+                if days > 0:
+                    overlaps.append(
+                        f"{accepted[i][0]} and {accepted[j][0]} traded "
+                        f"concurrently for {days} days"
+                    )
+        if overlaps:
+            return Identity(
+                cik=cik, name=display_name, ticker=None, source="ambiguous",
+                reason_code=ReasonCode.AMBIGUOUS_OVERLAPPING, provenance="",
+                candidates=tuple(sorted(seen)),
+                notes=tuple(overlaps + notes)[:6],
+                xbrl_instances_seen=instances_seen,
+            )
 
     symbol, source, window = min(accepted, key=_terminal_for_event)
     code = (ReasonCode.RESOLVED_FILING_TEXT if tier == "filing_text"

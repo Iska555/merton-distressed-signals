@@ -137,7 +137,21 @@ def collect_candidates(start_year: int, end_year: int, per_year: int) -> pd.Data
     # 0001040719. Per-year dedup let one registrant enter the cohort three
     # times, where it would be double-counted and could consume controls twice.
     combined = combined.sort_values(["cik", "filed_date"])
-    return combined.drop_duplicates(subset="cik", keep="first").reset_index(drop=True)
+
+    # Spec 1.2.2 -- Chapter 22. A firm filing Item 1.03 more than once has gone
+    # bankrupt twice; it is not a duplicate row. Walter Investment (2017, 2018)
+    # re-emerged and filed again as Ditech Holding (2019), all on CIK
+    # 0001040719. The FIRST filing is the event, because the research question
+    # is about detecting the ONSET of distress; keeping the last would discard
+    # exactly the transition under study. Subsequent filings are recorded.
+    counts = combined.groupby("cik")["filed_date"].agg(["count", list])
+    first = combined.drop_duplicates(subset="cik", keep="first").set_index("cik")
+    first["n_bankruptcy_events"] = counts["count"]
+    first["subsequent_event_dates"] = counts["list"].apply(
+        lambda dates: "|".join(sorted(dates)[1:])
+    )
+    first["is_chapter_22"] = first["n_bankruptcy_events"] > 1
+    return first.reset_index()
 
 
 def audit(start_year: int, end_year: int, per_year: int) -> pd.DataFrame:
@@ -177,6 +191,10 @@ def audit(start_year: int, end_year: int, per_year: int) -> pd.DataFrame:
                 "ticker": ident.ticker,
                 "provenance": ident.provenance,
                 "reason_code": ident.reason_code,
+                "exclusion_family": identity.exclusion_family(ident.reason_code),
+                "n_bankruptcy_events": getattr(row, "n_bankruptcy_events", 1),
+                "is_chapter_22": getattr(row, "is_chapter_22", False),
+                "subsequent_event_dates": getattr(row, "subsequent_event_dates", ""),
                 "xbrl_instances_seen": ident.xbrl_instances_seen,
                 "has_xbrl_fundamentals": has_facts,
                 "public_float_usd": float_usd,
@@ -214,6 +232,19 @@ def summarise(frame: pd.DataFrame) -> None:
     counts = frame["reason_code"].value_counts()
     for code, n in counts.items():
         print(f"   {str(code):26s} {n:5d}  ({n / total:5.1%})")
+
+    print("\n-- exclusions by family (spec 8.1) --")
+    families = frame["exclusion_family"].value_counts()
+    for family, n in families.items():
+        print(f"   {str(family):24s} {n:5d}  ({n / total:5.1%})")
+    unavail = int((frame["exclusion_family"] == "data_unavailability").sum())
+    inapp = int((frame["exclusion_family"] == "model_inapplicability").sum())
+    print(f"   -> {unavail} excluded by SOURCE LIMITS (a limitation)")
+    print(f"   -> {inapp} excluded as NOT MERTON OBJECTS (a scope definition)")
+    if "is_chapter_22" in frame:
+        ch22 = int(frame["is_chapter_22"].sum())
+        print(f"\n-- Chapter 22 (spec 1.2.2): {ch22} of {total} "
+              f"({ch22 / total:.1%}) filed Item 1.03 more than once --")
 
     print("\n-- resolution rate by event year --")
     by_year = frame.groupby("event_year").agg(
