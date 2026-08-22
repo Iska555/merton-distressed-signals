@@ -148,7 +148,10 @@ def collect_candidates(start_year: int, end_year: int, per_year: int) -> pd.Data
     first = combined.drop_duplicates(subset="cik", keep="first").set_index("cik")
     first["n_bankruptcy_events"] = counts["count"]
     first["subsequent_event_dates"] = counts["list"].apply(
-        lambda dates: "|".join(sorted(dates)[1:])
+        # filed_date may arrive as Timestamp or str depending on the FTS page;
+        # coerce before joining. The smoke test missed this because it happened
+        # to contain no Chapter 22 firms, so the join never saw a real element.
+        lambda dates: "|".join(str(d)[:10] for d in sorted(dates)[1:])
     )
     first["is_chapter_22"] = first["n_bankruptcy_events"] > 1
     return first.reset_index()
