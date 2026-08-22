@@ -1,9 +1,38 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import Link from 'next/link'
 import { getManifest, getMeasurement, pct } from '@/lib/siteData'
+
+interface Corroboration {
+  rows: {
+    grade: string
+    fred_bps: number
+    damodaran_bps: number
+    difference_bps: number
+    ratio: number | null
+  }[]
+  fred_observation: string
+  damodaran_vintage: string
+  note: string
+}
+
+function readCorroboration(): Corroboration | null {
+  try {
+    return JSON.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), 'public', 'data', 'spread_corroboration.json'),
+        'utf-8',
+      ),
+    ) as Corroboration
+  } catch {
+    return null
+  }
+}
 
 export default function DataPage() {
   const manifest = getManifest()
   const m = getMeasurement()
+  const corr = readCorroboration()
 
   return (
     <div className="wrap">
@@ -102,6 +131,56 @@ export default function DataPage() {
           <p className="prose">No manifest found. Run <span className="mono">python -m scripts.build_site_data</span>.</p>
         )}
       </section>
+
+      {corr && (
+        <section className="section">
+          <h2>Validation: two unrelated sources agree on units</h2>
+          <p className="prose">
+            A factor-of-100 error in a percent-to-basis-point conversion is easy to
+            make and invisible once made, because the resulting numbers still look
+            like spreads. This checks the FRED figures against Damodaran&rsquo;s
+            synthetic-rating spread column, which is built from traded bonds and has
+            no connection to FRED.
+          </p>
+          <div className="scroll-x">
+            <table className="data">
+              <thead>
+                <tr>
+                  <th>Grade</th>
+                  <th style={{ textAlign: 'right' }}>FRED ({corr.fred_observation})</th>
+                  <th style={{ textAlign: 'right' }}>
+                    Damodaran ({corr.damodaran_vintage})
+                  </th>
+                  <th style={{ textAlign: 'right' }}>Difference</th>
+                </tr>
+              </thead>
+              <tbody>
+                {corr.rows.map((r) => (
+                  <tr key={r.grade}>
+                    <td className="mono">{r.grade}</td>
+                    <td className="num">{r.fred_bps.toFixed(0)}</td>
+                    <td className="num">{r.damodaran_bps}</td>
+                    <td
+                      className="num"
+                      style={{
+                        color:
+                          Math.abs(r.difference_bps) > 100 ? 'var(--muted)' : 'inherit',
+                      }}
+                    >
+                      {r.difference_bps > 0 ? '+' : ''}
+                      {r.difference_bps.toFixed(0)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="prose">
+            Investment grade agrees within a few basis points across two independent
+            sources, which is strong evidence the conversion is correct. {corr.note}
+          </p>
+        </section>
+      )}
 
       <section className="section">
         <h2>Exclusions, split by cause</h2>

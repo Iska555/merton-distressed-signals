@@ -186,6 +186,42 @@ def windows_overlap(a: dict, b: dict, *, grace_days: int = 45) -> int:
     return max(0, overlap - grace_days)
 
 
+def common_equity_status(cik: str) -> str:
+    """
+    Tri-state: "present", "absent", or "no_xbrl".
+
+    The distinction matters because it decides which EXCLUSION FAMILY the firm
+    lands in, and the two have opposite implications. A registrant whose XBRL
+    exists but reports no common shares is a partnership or trust -- excluded on
+    modelling grounds, a scope definition. A registrant with no XBRL at all is a
+    pre-2011 filer -- excluded because the data does not exist, a limitation.
+
+    Collapsing them was a real defect: the first audit put 72% of 2010-11
+    candidates in NO_COMMON_EQUITY, including Corus Bankshares and AMCORE
+    Financial, both banks with ordinary common stock and simply no XBRL.
+    """
+    cik = str(cik).zfill(10)
+    if has_common_equity(cik):
+        return "present"
+
+    # No common-equity tag. Does this filer expose ANY XBRL fundamentals?
+    for taxonomy, concept in (("us-gaap", "Assets"),
+                              ("us-gaap", "Liabilities"),
+                              ("us-gaap", "LiabilitiesAndStockholdersEquity")):
+        try:
+            payload = edgar._cached_json(
+                f"https://data.sec.gov/api/xbrl/companyconcept/"
+                f"CIK{cik}/{taxonomy}/{concept}.json",
+                f"concept/{cik}_{taxonomy}_{concept}.json",
+            )
+        except Exception:  # noqa: BLE001
+            continue
+        if any(payload.get("units") or {}):
+            # XBRL exists, common equity genuinely absent: not a Merton object.
+            return "absent"
+    return "no_xbrl"
+
+
 def has_common_equity(cik: str) -> bool:
     """
     Does this registrant have common stock at all?
@@ -608,12 +644,16 @@ def resolve(cik: str, *, event_date=None, name: str | None = None,
     # Merton object regardless of what symbol its filings mention. Cheap: one
     # 3KB companyconcept request, and it skips the expensive text tier for a
     # whole population that would fail it anyway.
-    if require_common_equity and not has_common_equity(cik):
+    # Only short-circuit when XBRL EXISTS and common equity is genuinely absent.
+    # A filer with no XBRL at all falls through to normal resolution, so it is
+    # recorded as missing data rather than mislabelled a non-Merton object.
+    if require_common_equity and common_equity_status(cik) == "absent":
         return Identity(
             cik=cik, name=display_name, ticker=None, source="unresolved",
             reason_code=ReasonCode.NO_COMMON_EQUITY, provenance="",
-            notes=("no common shares outstanding reported: limited partnership, "
-                   "trust, or special-purpose entity -- not a Merton object",),
+            notes=("XBRL present but no common shares outstanding reported: "
+                   "limited partnership, trust, or special-purpose entity -- "
+                   "not a Merton object",),
         )
 
     from_filings, instances_seen = ticker_from_filings(cik, near_date=event_date)

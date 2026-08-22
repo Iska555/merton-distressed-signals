@@ -153,7 +153,12 @@
   "source": {
     "table": "Damodaran synthetic rating, interest coverage to rating",
     "publisher": "NYU Stern, Aswath Damodaran",
-    "url": "https://pages.stern.nyu.edu/~adamodar/",
-    "verified_against": "PENDING - re-check thresholds against the current published file before publication"
+    "large_url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ratings.html",
+    "small_url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/smallrating.htm",
+    "large_vintage": "January 2026",
+    "small_vintage": "January 2017",
+    "large_verified": "2026-08-22, all 14 threshold rows checked against source, zero mismatches",
+    "small_verified": "2026-08-22, all 14 threshold rows checked against source, zero mismatches, but the table itself is a January 2017 analysis and is NINE YEARS older than the large-firm table",
+    "financial_table": "A separate table for financial service firms exists (January 2026, AAA above coverage 3.0, BBB at 0.9-1.2, D at or below 0.05). It is deliberately NOT used: financials are excluded from the pre-registered primary metric on Merton-inapplicability grounds."
   }
 }

@@ -36,16 +36,72 @@ __all__ = ["ShadowRating", "shadow_rating", "RATING_SCALE", "SOURCE"]
 SOURCE = {
     "table": "Damodaran synthetic rating, interest coverage to rating",
     "publisher": "NYU Stern, Aswath Damodaran",
-    "url": "https://pages.stern.nyu.edu/~adamodar/",
-    "verified_against": "PENDING - re-check thresholds against the current "
-                        "published file before publication",
+    "large_url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ratings.html",
+    "small_url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/smallrating.htm",
+    "large_vintage": "January 2026",
+    "small_vintage": "January 2017",
+    "large_verified": "2026-08-22, all 14 threshold rows checked against source, "
+                      "zero mismatches",
+    "small_verified": "2026-08-22, all 14 threshold rows checked against source, "
+                      "zero mismatches, but the table itself is a January 2017 "
+                      "analysis and is NINE YEARS older than the large-firm table",
+    "financial_table": "A separate table for financial service firms exists "
+                       "(January 2026, AAA above coverage 3.0, BBB at 0.9-1.2, "
+                       "D at or below 0.05). It is deliberately NOT used: "
+                       "financials are excluded from the pre-registered primary "
+                       "metric on Merton-inapplicability grounds.",
 }
 
-# Assets, not market cap: market cap is a price, and prices are what the Merton
-# side of the comparison is built from. Using it here would reintroduce a
-# common input to both sides. Damodaran's bands are stated on market cap, so
-# this is a documented substitution, not a transcription.
+# Damodaran publishes a spread beside each rating. It is NOT used as a spread
+# source anywhere -- cohort spreads come from FRED for both size bands, because
+# the small-firm table's spread column is a 2017 snapshot and stale for
+# benchmarking. These are retained solely as an INDEPENDENT CORROBORATION that
+# the FRED percent-to-basis-point conversion carries no factor-of-100 error.
+DAMODARAN_SPREAD_BPS_JAN2026 = {
+    "AAA": 40, "AA": 55, "A+": 70, "A": 78, "A-": 89, "BBB": 111,
+    "BB+": 138, "BB": 184, "B+": 275, "B": 321, "B-": 509,
+    "CCC": 885, "CC": 1261, "C": 1600, "D": 1900,
+}
+
+# ---------------------------------------------------------------------------
+# Size band
+# ---------------------------------------------------------------------------
+# Damodaran's boundary is $5bn of MARKET CAP. This module uses TOTAL ASSETS,
+# and the substitution is deliberate and consequential enough to state twice.
+#
+# Why not market cap: market cap is a price, and the equity-implied spread on
+# the other side of this comparison is built from that same price. A market-cap
+# band would move both sides together. In a distress event equity collapses,
+# the theoretical spread widens, the firm drops a band, the benchmark widens
+# too, and the divergence being measured is damped exactly when it should open.
+# The bias runs toward FALSE NEGATIVES, the worst direction for a screen.
+#
+# What the band is worth: at coverage 3.0 the large table returns A- and the
+# small table returns BB, a three-notch gap from the same input. Across the
+# plausible coverage range the gap runs 1 to 3 notches. It is not a detail.
+#
+# Why this level: $5bn of assets is NOT equivalent to $5bn of market cap, and
+# the two cannot be reconciled without market caps for the whole universe,
+# which the price-API symbol quota forbids. So the level is a judgement, stated
+# as one. It sits near the 75th percentile of non-financial filers with at
+# least $50M of assets (measured 2023Q1: p75 = $4.73bn), so it separates
+# roughly the top quartile. The numeral matching Damodaran's is a coincidence,
+# not a claimed equivalence.
+#
+# The real defence is the sensitivity: `shadow_rating(..., force_band=...)`
+# flips a firm's band so the effect on any conclusion can be measured directly.
 LARGE_CAP_ASSET_THRESHOLD = 5_000_000_000
+
+# Measured on the 2023Q1 point-in-time universe, non-financials, assets >= $50M.
+BAND_DIAGNOSTICS = {
+    "universe_quarter": "2023Q1",
+    "universe_n": 3132,
+    "p50_assets_usd": 1_100_000_000,
+    "p75_assets_usd": 4_730_000_000,
+    "p85_assets_usd": 10_350_000_000,
+    "share_large_at_threshold": 0.242,
+    "share_within_30pct_of_boundary": 0.085,
+}
 
 # (minimum coverage, rating). Descending; first match wins.
 _LARGE_CAP = [
@@ -83,6 +139,8 @@ class ShadowRating:
     interest_coverage: float | None
     notch: int = 0
     notch_reason: str = ""
+    near_size_boundary: bool = False
+    band_forced: bool = False
     cohort_index: str = ""
     usable: bool = True
     notes: tuple[str, ...] = field(default_factory=tuple)
@@ -95,6 +153,8 @@ class ShadowRating:
             "interest_coverage": self.interest_coverage,
             "notch": self.notch,
             "notch_reason": self.notch_reason,
+            "near_size_boundary": self.near_size_boundary,
+            "band_forced": self.band_forced,
             "cohort_index": self.cohort_index,
             "usable": self.usable,
             "notes": list(self.notes),
@@ -123,6 +183,7 @@ def shadow_rating(
     total_debt: float | None = None,
     ebitda: float | None = None,
     revenue: float | None = None,
+    force_band: str | None = None,
 ) -> ShadowRating:
     """
     Assign a benchmark rating from filing fundamentals alone.
@@ -144,8 +205,25 @@ def shadow_rating(
             notes=("total assets missing or non-positive",),
         )
 
-    large_cap = total_assets >= LARGE_CAP_ASSET_THRESHOLD
+    if force_band in ("large", "small"):
+        # Sensitivity path: flip the band deliberately to measure what the
+        # threshold choice is worth. Recorded so a forced result can never be
+        # mistaken for a natural one.
+        large_cap = force_band == "large"
+        notes.append(f"size band FORCED to {force_band} for sensitivity")
+    else:
+        large_cap = total_assets >= LARGE_CAP_ASSET_THRESHOLD
     size_band = "large" if large_cap else "small"
+
+    # Firms near the boundary have a rating that is partly an artefact of where
+    # the cutoff was drawn. Flagged rather than silently assigned.
+    distance = abs(total_assets - LARGE_CAP_ASSET_THRESHOLD) / LARGE_CAP_ASSET_THRESHOLD
+    near_boundary = distance <= 0.30
+    if near_boundary and force_band is None:
+        notes.append(
+            f"within {distance:.0%} of the size boundary; rating is sensitive "
+            "to the threshold choice"
+        )
 
     # Interest coverage, the primary axis.
     if ebit is None or interest_expense is None:
@@ -192,6 +270,8 @@ def shadow_rating(
         interest_coverage=None if coverage == float("inf") else coverage,
         notch=steps,
         notch_reason=reason,
+        near_size_boundary=near_boundary,
+        band_forced=force_band is not None,
         cohort_index=COHORT_INDEX.get(final, "BBB"),
         usable=True,
         notes=tuple(notes),

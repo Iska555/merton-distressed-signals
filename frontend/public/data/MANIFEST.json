@@ -1,10 +1,10 @@
 {
-  "generated_utc": "2026-08-22T10:24:06+00:00",
-  "git_commit": "1539460",
+  "generated_utc": "2026-08-22T15:20:13+00:00",
+  "git_commit": "8b45536",
   "files": {
     "measurement.json": {
       "source": "data/processed/resolution_audit.csv",
-      "rows_in": 8,
+      "rows_in": 346,
       "description": "Symbol-resolution audit of 8-K Item 1.03 bankruptcy candidates: resolution rate by era, public-float band and SIC division, with exclusion reason codes split into data unavailability vs model inapplicability.",
       "retrieved": "SEC EDGAR full-text search and XBRL company facts"
     },
@@ -22,7 +22,12 @@
       "source": "FRED ICE BofA option-adjusted spread indices",
       "rows_in": 7,
       "description": "Latest OAS per rating cohort. Index averages across many unrelated issuers, NOT any single firm's bond.",
-      "retrieved": "2026-08-22T10:24:10+00:00"
+      "retrieved": "2026-08-22T15:20:17+00:00"
+    },
+    "spread_corroboration.json": {
+      "source": "FRED ICE BofA OAS vs Damodaran synthetic-rating spreads",
+      "rows_in": 7,
+      "description": "Validation check on the percent-to-basis-point conversion, against an independent source."
     }
   }
 }

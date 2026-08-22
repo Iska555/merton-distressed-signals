@@ -1,0 +1,56 @@
+{
+  "rows": [
+    {
+      "grade": "AAA",
+      "fred_bps": 42.0,
+      "damodaran_bps": 40,
+      "difference_bps": 2.0,
+      "ratio": 1.05
+    },
+    {
+      "grade": "AA",
+      "fred_bps": 61.0,
+      "damodaran_bps": 55,
+      "difference_bps": 6.0,
+      "ratio": 1.109
+    },
+    {
+      "grade": "A",
+      "fred_bps": 69.0,
+      "damodaran_bps": 78,
+      "difference_bps": -9.0,
+      "ratio": 0.885
+    },
+    {
+      "grade": "BBB",
+      "fred_bps": 100.0,
+      "damodaran_bps": 111,
+      "difference_bps": -11.0,
+      "ratio": 0.901
+    },
+    {
+      "grade": "BB",
+      "fred_bps": 163.0,
+      "damodaran_bps": 184,
+      "difference_bps": -21.0,
+      "ratio": 0.886
+    },
+    {
+      "grade": "B",
+      "fred_bps": 294.0,
+      "damodaran_bps": 321,
+      "difference_bps": -27.0,
+      "ratio": 0.916
+    },
+    {
+      "grade": "CCC",
+      "fred_bps": 1035.0,
+      "damodaran_bps": 885,
+      "difference_bps": 150.0,
+      "ratio": 1.169
+    }
+  ],
+  "fred_observation": "2026-08-20",
+  "damodaran_vintage": "January 2026",
+  "note": "Two unrelated sources. Damodaran's column is a periodic snapshot from traded bonds; FRED is a daily index. High-yield tails move fast, so CCC divergence is expected and is not evidence of an error."
+}

@@ -1,92 +1,267 @@
 {
-  "total_candidates": 8,
-  "resolved": 3,
-  "resolution_rate": 0.375,
+  "total_candidates": 346,
+  "resolved": 144,
+  "resolution_rate": 0.4161849710982659,
   "by_year": [
     {
-      "year": 2022,
-      "n": 4,
+      "year": 2010,
+      "n": 25,
       "resolved": 2,
+      "rate": 0.08
+    },
+    {
+      "year": 2011,
+      "n": 22,
+      "resolved": 1,
+      "rate": 0.045454545454545456
+    },
+    {
+      "year": 2012,
+      "n": 25,
+      "resolved": 3,
+      "rate": 0.12
+    },
+    {
+      "year": 2013,
+      "n": 22,
+      "resolved": 3,
+      "rate": 0.13636363636363635
+    },
+    {
+      "year": 2014,
+      "n": 24,
+      "resolved": 6,
+      "rate": 0.25
+    },
+    {
+      "year": 2015,
+      "n": 24,
+      "resolved": 10,
+      "rate": 0.4166666666666667
+    },
+    {
+      "year": 2016,
+      "n": 24,
+      "resolved": 10,
+      "rate": 0.4166666666666667
+    },
+    {
+      "year": 2017,
+      "n": 24,
+      "resolved": 14,
+      "rate": 0.5833333333333334
+    },
+    {
+      "year": 2018,
+      "n": 24,
+      "resolved": 12,
       "rate": 0.5
     },
     {
+      "year": 2019,
+      "n": 22,
+      "resolved": 16,
+      "rate": 0.7272727272727273
+    },
+    {
+      "year": 2020,
+      "n": 25,
+      "resolved": 12,
+      "rate": 0.48
+    },
+    {
+      "year": 2021,
+      "n": 18,
+      "resolved": 9,
+      "rate": 0.5
+    },
+    {
+      "year": 2022,
+      "n": 23,
+      "resolved": 15,
+      "rate": 0.6521739130434783
+    },
+    {
       "year": 2023,
-      "n": 4,
-      "resolved": 1,
-      "rate": 0.25
+      "n": 23,
+      "resolved": 17,
+      "rate": 0.7391304347826086
+    },
+    {
+      "year": 2024,
+      "n": 21,
+      "resolved": 14,
+      "rate": 0.6666666666666666
     }
   ],
   "by_era": [
     {
-      "label": "2022\u20132024",
-      "n": 8,
+      "label": "2006\u20132011",
+      "n": 47,
       "resolved": 3,
-      "rate": 0.375,
-      "via_xbrl": 3,
-      "via_text": 0
+      "rate": 0.06382978723404255,
+      "via_xbrl": 0,
+      "via_text": 3
+    },
+    {
+      "label": "2012\u20132018",
+      "n": 167,
+      "resolved": 58,
+      "rate": 0.3473053892215569,
+      "via_xbrl": 35,
+      "via_text": 23
+    },
+    {
+      "label": "2019\u20132021",
+      "n": 65,
+      "resolved": 37,
+      "rate": 0.5692307692307692,
+      "via_xbrl": 29,
+      "via_text": 8
+    },
+    {
+      "label": "2022\u20132024",
+      "n": 67,
+      "resolved": 46,
+      "rate": 0.6865671641791045,
+      "via_xbrl": 45,
+      "via_text": 1
     }
   ],
   "by_size": [
     {
       "label": "under $50M",
-      "n": 5,
-      "resolved": 1,
-      "rate": 0.2
+      "n": 132,
+      "resolved": 60,
+      "rate": 0.45454545454545453
     },
     {
       "label": "$50M\u2013200M",
-      "n": 1,
-      "resolved": 0,
-      "rate": 0.0
+      "n": 56,
+      "resolved": 34,
+      "rate": 0.6071428571428571
+    },
+    {
+      "label": "$200M\u20131B",
+      "n": 44,
+      "resolved": 27,
+      "rate": 0.6136363636363636
     },
     {
       "label": "over $1B",
-      "n": 1,
-      "resolved": 1,
-      "rate": 1.0
+      "n": 21,
+      "resolved": 11,
+      "rate": 0.5238095238095238
     },
     {
       "label": "none reported",
-      "n": 1,
-      "resolved": 1,
-      "rate": 1.0
+      "n": 93,
+      "resolved": 12,
+      "rate": 0.12903225806451613
     }
   ],
   "by_sector": [
     {
       "sector": "Manufacturing",
+      "n": 105,
+      "resolved": 59,
+      "rate": 0.5619047619047619
+    },
+    {
+      "sector": "Wholesale Trade",
+      "n": 9,
+      "resolved": 5,
+      "rate": 0.5555555555555556
+    },
+    {
+      "sector": "Transport & Utilities",
+      "n": 29,
+      "resolved": 13,
+      "rate": 0.4482758620689655
+    },
+    {
+      "sector": "Retail Trade",
+      "n": 31,
+      "resolved": 12,
+      "rate": 0.3870967741935484
+    },
+    {
+      "sector": "Services",
+      "n": 53,
+      "resolved": 20,
+      "rate": 0.37735849056603776
+    },
+    {
+      "sector": "Agriculture, Forestry, Fishing",
       "n": 3,
       "resolved": 1,
       "rate": 0.3333333333333333
+    },
+    {
+      "sector": "Mining",
+      "n": 73,
+      "resolved": 22,
+      "rate": 0.3013698630136986
+    },
+    {
+      "sector": "Finance, Insurance, Real Estate",
+      "n": 41,
+      "resolved": 11,
+      "rate": 0.2682926829268293
     }
   ],
   "reason_codes": [
     {
-      "code": "SYMBOL_NOT_LISTED",
-      "n": 4,
-      "share": 0.5,
-      "family": "data_unavailability"
-    },
-    {
       "code": "RESOLVED_XBRL",
-      "n": 3,
-      "share": 0.375,
+      "n": 109,
+      "share": 0.315028901734104,
       "family": "resolved"
     },
     {
+      "code": "NO_COMMON_EQUITY",
+      "n": 59,
+      "share": 0.17052023121387283,
+      "family": "model_inapplicability"
+    },
+    {
+      "code": "LISTING_EXCLUDES_EVENT",
+      "n": 51,
+      "share": 0.14739884393063585,
+      "family": "data_unavailability"
+    },
+    {
+      "code": "SYMBOL_NOT_LISTED",
+      "n": 47,
+      "share": 0.13583815028901733,
+      "family": "data_unavailability"
+    },
+    {
+      "code": "RESOLVED_FILING_TEXT",
+      "n": 35,
+      "share": 0.10115606936416185,
+      "family": "resolved"
+    },
+    {
+      "code": "NO_TRADING_SYMBOL_TAG",
+      "n": 24,
+      "share": 0.06936416184971098,
+      "family": "data_unavailability"
+    },
+    {
       "code": "AMBIGUOUS_OVERLAPPING",
-      "n": 1,
-      "share": 0.125,
+      "n": 21,
+      "share": 0.06069364161849711,
       "family": "data_unavailability"
     }
   ],
   "exclusion_families": {
-    "data_unavailability": 5,
-    "resolved": 3
+    "resolved": 144,
+    "data_unavailability": 143,
+    "model_inapplicability": 59
   },
-  "chapter_22_count": 0,
+  "chapter_22_count": 29,
   "window": {
-    "sampled_from": 2022,
-    "sampled_to": 2023
+    "sampled_from": 2010,
+    "sampled_to": 2024
   }
 }

@@ -188,16 +188,123 @@ class TestCohortMapping:
 
 
 class TestProvenance:
-    def test_source_is_recorded(self):
-        assert sr.SOURCE["publisher"]
-        assert sr.SOURCE["url"]
+    """
+    Both tables were checked row by row against the published source on
+    2026-08-22 and matched exactly. What remains is the VINTAGE problem, which
+    verification cannot fix and which the site must therefore state.
+    """
 
-    def test_thresholds_are_marked_pending_verification(self):
+    # Transcribed from ratings.html and smallrating.htm.
+    SOURCE_LARGE = [
+        (8.50, "AAA"), (6.50, "AA"), (5.50, "A+"), (4.25, "A"), (3.00, "A-"),
+        (2.50, "BBB"), (2.25, "BB+"), (2.00, "BB"), (1.75, "B+"), (1.50, "B"),
+        (1.25, "B-"), (0.80, "CCC"), (0.65, "CC"), (0.20, "C"),
+    ]
+    SOURCE_SMALL = [
+        (12.50, "AAA"), (9.50, "AA"), (7.50, "A+"), (6.00, "A"), (4.50, "A-"),
+        (4.00, "BBB"), (3.50, "BB+"), (3.00, "BB"), (2.50, "B+"), (2.00, "B"),
+        (1.50, "B-"), (1.25, "CCC"), (0.80, "CC"), (0.50, "C"),
+    ]
+
+    def test_large_table_matches_source_exactly(self):
+        assert sr._LARGE_CAP == self.SOURCE_LARGE
+
+    def test_small_table_matches_source_exactly(self):
+        assert sr._SMALL_CAP == self.SOURCE_SMALL
+
+    def test_source_is_recorded_with_urls(self):
+        assert sr.SOURCE["large_url"].startswith("https://")
+        assert sr.SOURCE["small_url"].startswith("https://")
+
+    def test_both_tables_record_a_verification_date(self):
+        assert "2026-08-22" in sr.SOURCE["large_verified"]
+        assert "2026-08-22" in sr.SOURCE["small_verified"]
+
+    def test_the_nine_year_vintage_gap_is_recorded(self):
         """
-        Transcribed from a published table from memory. Until re-checked against
-        the current file, that must be visible rather than implied.
+        The large table is January 2026 and the small one January 2017. A
+        classifier switching between them rates firms against thresholds
+        calibrated nine years apart, on a size cutoff rather than a date. That
+        cannot be verified away and must stay visible.
         """
-        assert "PENDING" in sr.SOURCE["verified_against"]
+        assert sr.SOURCE["large_vintage"] == "January 2026"
+        assert sr.SOURCE["small_vintage"] == "January 2017"
+        assert "NINE YEARS" in sr.SOURCE["small_verified"]
+
+    def test_financial_table_is_recorded_as_deliberately_unused(self):
+        assert "NOT used" in sr.SOURCE["financial_table"]
+
+    def test_damodaran_spreads_are_not_used_as_a_spread_source(self):
+        """
+        Retained only to corroborate FRED's unit conversion. If the module ever
+        starts serving them as benchmark levels, the 2017 small-cap column would
+        leak into a 2026 comparison.
+        """
+        source = inspect.getsource(sr.shadow_rating)
+        assert "DAMODARAN_SPREAD_BPS" not in source
+
+    def test_spread_corroboration_covers_the_scale(self):
+        for rating in sr.RATING_SCALE:
+            assert rating in sr.DAMODARAN_SPREAD_BPS_JAN2026
+
+
+class TestSizeBandSensitivity:
+    """
+    The band is worth 1-3 notches from identical fundamentals, so the threshold
+    choice has to be testable rather than asserted.
+    """
+
+    NEAR = dict(ebit=500.0, interest_expense=100.0,
+                total_assets=sr.LARGE_CAP_ASSET_THRESHOLD * 1.05)
+
+    def test_band_can_be_forced_for_sensitivity(self):
+        large = shadow_rating(**self.NEAR, force_band="large")
+        small = shadow_rating(**self.NEAR, force_band="small")
+        assert large.size_band == "large"
+        assert small.size_band == "small"
+
+    def test_forcing_changes_the_rating_at_the_same_coverage(self):
+        large = shadow_rating(**self.NEAR, force_band="large")
+        small = shadow_rating(**self.NEAR, force_band="small")
+        assert large.rating != small.rating
+
+    def test_forced_results_are_marked(self):
+        """A forced band must never be mistakable for a natural one."""
+        forced = shadow_rating(**self.NEAR, force_band="small")
+        assert forced.band_forced
+        assert any("FORCED" in n for n in forced.notes)
+
+    def test_unforced_results_are_not_marked(self):
+        assert not shadow_rating(**BASE).band_forced
+
+    def test_firms_near_the_boundary_are_flagged(self):
+        got = shadow_rating(**self.NEAR)
+        assert got.near_size_boundary
+        assert any("boundary" in n for n in got.notes)
+
+    def test_firms_far_from_the_boundary_are_not_flagged(self):
+        got = shadow_rating(ebit=500.0, interest_expense=100.0,
+                            total_assets=sr.LARGE_CAP_ASSET_THRESHOLD * 10)
+        assert not got.near_size_boundary
+
+    def test_band_gap_is_between_one_and_three_notches(self):
+        """
+        Measured across the plausible coverage range. Documents the magnitude so
+        a future table update that widened it would fail here.
+        """
+        gaps = []
+        for coverage in [1.0, 2.0, 3.0, 4.0, 5.0, 7.0, 10.0]:
+            large = sr._base_from_coverage(coverage, True)
+            small = sr._base_from_coverage(coverage, False)
+            gaps.append(sr.RATING_SCALE.index(small) - sr.RATING_SCALE.index(large))
+        assert min(gaps) >= 1, "the small table should never rate better"
+        assert max(gaps) <= 3, f"band gap widened beyond 3 notches: {gaps}"
+
+    def test_boundary_diagnostics_are_recorded(self):
+        d = sr.BAND_DIAGNOSTICS
+        assert 0 < d["share_large_at_threshold"] < 1
+        assert 0 < d["share_within_30pct_of_boundary"] < 1
+        assert d["universe_n"] > 1000
 
 
 def RATING_INDEX(rating: str) -> int:

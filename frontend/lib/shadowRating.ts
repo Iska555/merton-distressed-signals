@@ -39,21 +39,37 @@ export interface RatingResult {
   cohortIndex: string
   usable: boolean
   note: string
+  nearBoundary: boolean
+  bandForced: boolean
+  naturalBand: 'large' | 'small'
 }
 
-export function shadowRating(f: Fundamentals, tables: RatingTables): RatingResult {
+export function shadowRating(
+  f: Fundamentals,
+  tables: RatingTables,
+  forceBand?: 'large' | 'small' | null,
+): RatingResult {
   const blank: RatingResult = {
     rating: '', baseRating: '', sizeBand: 'small', coverage: NaN,
     notch: 0, notchReason: '', cohortIndex: '', usable: false, note: '',
+    nearBoundary: false, bandForced: false, naturalBand: 'small',
   }
 
   if (!f.totalAssets || f.totalAssets <= 0) {
     return { ...blank, note: 'total assets missing' }
   }
 
-  const large = f.totalAssets >= tables.large_cap_asset_threshold
+  const natural = f.totalAssets >= tables.large_cap_asset_threshold
+  const large = forceBand ? forceBand === 'large' : natural
   const sizeBand: 'large' | 'small' = large ? 'large' : 'small'
   const table = large ? tables.large_cap : tables.small_cap
+
+  // Firms near the cutoff have a rating that is partly an artefact of where the
+  // boundary was drawn, so the page can say so rather than presenting it flat.
+  const distance =
+    Math.abs(f.totalAssets - tables.large_cap_asset_threshold) /
+    tables.large_cap_asset_threshold
+  const nearBoundary = distance <= 0.3
 
   let note = ''
   let coverage: number
@@ -106,5 +122,8 @@ export function shadowRating(f: Fundamentals, tables: RatingTables): RatingResul
     cohortIndex: tables.cohort_index[rating] ?? 'BBB',
     usable: true,
     note,
+    nearBoundary,
+    bandForced: Boolean(forceBand),
+    naturalBand: natural ? 'large' : 'small',
   }
 }

@@ -61,20 +61,35 @@ export default function MispricingClient({
     [s, D, rPct, T],
   )
 
-  const rating = useMemo(() => {
-    if (!tables) return null
-    return shadowRating(
-      {
-        ebit: ebit * 1e6,
-        interestExpense: interest * 1e6,
-        totalAssets: assets * 1e6,
-        totalDebt: debt * 1e6,
-        ebitda: ebitda * 1e6,
-        revenue: revenue * 1e6,
-      },
-      tables,
-    )
-  }, [tables, ebit, interest, assets, debt, ebitda, revenue])
+  const [forceBand, setForceBand] = useState<'large' | 'small' | null>(null)
+
+  const fundamentals = useMemo(
+    () => ({
+      ebit: ebit * 1e6,
+      interestExpense: interest * 1e6,
+      totalAssets: assets * 1e6,
+      totalDebt: debt * 1e6,
+      ebitda: ebitda * 1e6,
+      revenue: revenue * 1e6,
+    }),
+    [ebit, interest, assets, debt, ebitda, revenue],
+  )
+
+  const rating = useMemo(
+    () => (tables ? shadowRating(fundamentals, tables, forceBand) : null),
+    [tables, fundamentals, forceBand],
+  )
+
+  // The counterfactual band, so the page can show what the threshold is worth
+  // rather than asserting that it matters.
+  const flipped = useMemo(() => {
+    if (!tables || !rating?.usable) return null
+    const other = rating.sizeBand === 'large' ? 'small' : 'large'
+    return shadowRating(fundamentals, tables, other)
+  }, [tables, fundamentals, rating])
+
+  const flippedCohortBps =
+    flipped && spreads ? spreads.cohorts[flipped.cohortIndex]?.oas_bps ?? null : null
 
   const cohortBps =
     rating && spreads ? spreads.cohorts[rating.cohortIndex]?.oas_bps ?? null : null
@@ -203,6 +218,72 @@ export default function MispricingClient({
           </p>
         )}
 
+        {rating?.usable && flipped?.usable && (
+          <div className="callout callout-neutral">
+            <p className="eyebrow">Size-band sensitivity</p>
+            <p>
+              This firm falls in the <strong>{rating.naturalBand}</strong> band on
+              total assets. Rated against the other table it would be{' '}
+              <strong>{flipped.rating}</strong> rather than{' '}
+              <strong>{rating.rating}</strong>
+              {flippedCohortBps !== null && cohortBps !== null && (
+                <>
+                  , moving the benchmark from{' '}
+                  <span className="mono tnum">{cohortBps.toFixed(0)}</span> to{' '}
+                  <span className="mono tnum">{flippedCohortBps.toFixed(0)}</span> bps
+                  and the divergence by{' '}
+                  <span className="mono tnum">
+                    {Math.abs(Math.round(cohortBps - flippedCohortBps)).toLocaleString()}
+                  </span>{' '}
+                  bps
+                </>
+              )}
+              . Identical fundamentals; only the table changes.
+            </p>
+            {rating.nearBoundary && (
+              <p>
+                <strong>This firm sits within 30% of the size boundary.</strong> Its
+                rating is partly an artefact of where the cutoff was drawn. About{' '}
+                <strong>8.5%</strong> of the filer universe falls in that zone.
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+              {(['natural', 'large', 'small'] as const).map((mode) => {
+                const active =
+                  mode === 'natural' ? forceBand === null : forceBand === mode
+                return (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setForceBand(mode === 'natural' ? null : mode)}
+                    style={{
+                      font: 'inherit',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      padding: '5px 11px',
+                      borderRadius: 999,
+                      cursor: 'pointer',
+                      border: `1px solid ${active ? 'var(--accent)' : 'var(--rule-sw)'}`,
+                      background: active ? 'var(--accent)' : 'transparent',
+                      color: active ? 'var(--ground)' : 'var(--muted)',
+                    }}
+                  >
+                    {mode === 'natural' ? 'As classified' : `Force ${mode}`}
+                  </button>
+                )
+              })}
+            </div>
+            {rating.bandForced && (
+              <p style={{ color: 'var(--risk)', fontSize: 13 }}>
+                Band is forced. Figures above are a sensitivity, not this
+                firm&rsquo;s classification.
+              </p>
+            )}
+          </div>
+        )}
+
         <p className="source-line">
           {spreads
             ? `Cohort spreads: ${spreads.source}, observation ${spreads.latest_observation}, retrieved ${spreads.retrieved_utc.slice(0, 10)}. Series IDs on /data.`
@@ -243,6 +324,35 @@ export default function MispricingClient({
             <strong>The shadow rating is not an agency rating.</strong> It is
             coverage-driven. A real rating incorporates analyst judgement, management
             access and private information a coverage ratio cannot see.
+          </p>
+          <p>
+            <strong>The two rating tables are nine years apart.</strong> The
+            large-firm table is a January 2026 analysis; the small-firm table is
+            January 2017. A firm crossing the size boundary is therefore rated against
+            thresholds calibrated nearly a decade apart, and the switch is triggered by
+            size rather than by date. Both were checked row by row against the
+            published source and match exactly — but verification cannot fix a vintage
+            gap, only disclose it.
+          </p>
+          <p>
+            <strong>Why the size band uses assets rather than market cap.</strong> The
+            published boundary is $5bn of market capitalisation. Market cap is a price,
+            and the equity-implied spread on the other side of this comparison is built
+            from that same price — so a market-cap band would move both sides together.
+            In a distress event equity collapses, the implied spread widens, the firm
+            drops a size band, and the benchmark widens too, damping the divergence
+            exactly when it should be opening. The bias runs toward{' '}
+            <strong>false negatives</strong>, the worst direction for a screen. Total
+            assets is price-independent and avoids that coupling.
+          </p>
+          <p>
+            <strong>The substitution is not an equivalence.</strong> $5bn of assets is
+            not $5bn of market cap, and the two cannot be reconciled without market caps
+            for the whole universe — which the price-API symbol quota forbids. The level
+            is a judgement: it sits near the 75th percentile of non-financial filers
+            with at least $50M of assets, so it separates roughly the top quartile. The
+            matching numeral is a coincidence. The sensitivity control above is the real
+            defence, because it lets the choice be measured rather than argued.
           </p>
         </div>
       </section>

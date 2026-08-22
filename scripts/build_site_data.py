@@ -345,6 +345,47 @@ def main() -> int:
         print(f"  cohort_spreads.json <- {len(spreads['cohorts'])} cohorts, "
               f"latest observation {spreads['latest_observation']}")
 
+        # Independent corroboration of the unit conversion. Damodaran's spread
+        # column is built from traded bonds and is unrelated to FRED. Agreement
+        # across investment grade is evidence there is no factor-of-100 error
+        # hiding in the percent-to-basis-point step.
+        rows = []
+        for grade in ("AAA", "AA", "A", "BBB", "BB", "B", "CCC"):
+            fred = spreads["cohorts"].get(grade, {}).get("oas_bps")
+            dam = sr.DAMODARAN_SPREAD_BPS_JAN2026.get(grade)
+            if fred is None or dam is None:
+                continue
+            rows.append({
+                "grade": grade,
+                "fred_bps": fred,
+                "damodaran_bps": dam,
+                "difference_bps": round(fred - dam, 1),
+                "ratio": round(fred / dam, 3) if dam else None,
+            })
+        (OUT / "spread_corroboration.json").write_text(
+            json.dumps(_clean({
+                "rows": rows,
+                "fred_observation": spreads["latest_observation"],
+                "damodaran_vintage": sr.SOURCE["large_vintage"],
+                "note": (
+                    "Two unrelated sources. Damodaran's column is a periodic "
+                    "snapshot from traded bonds; FRED is a daily index. "
+                    "High-yield tails move fast, so CCC divergence is expected "
+                    "and is not evidence of an error."
+                ),
+            }), indent=2) + "\n",
+            encoding="utf-8",
+        )
+        manifest["files"]["spread_corroboration.json"] = {
+            "source": "FRED ICE BofA OAS vs Damodaran synthetic-rating spreads",
+            "rows_in": len(rows),
+            "description": (
+                "Validation check on the percent-to-basis-point conversion, "
+                "against an independent source."
+            ),
+        }
+        print(f"  spread_corroboration.json <- {len(rows)} grades compared")
+
     (OUT / "MANIFEST.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
     )
