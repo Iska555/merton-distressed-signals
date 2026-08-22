@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import Link from 'next/link'
 import MispricingClient from './MispricingClient'
+import SectionMark from '@/components/SectionMark'
 import type { RatingTables } from '@/lib/shadowRating'
 
 function readJson<T>(name: string): T | null {
@@ -23,7 +24,10 @@ export default function MispricingPage() {
   return (
     <div className="wrap">
       <header className="masthead">
-        <p className="eyebrow">Mispricing · the divergence screen</p>
+        <div className="section-eyebrow">
+          <SectionMark name="mispricing" />
+          <p className="eyebrow">Mispricing · the divergence screen</p>
+        </div>
         <h1>
           Where equity and credit disagree, and which way.
         </h1>

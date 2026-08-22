@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import LineChart from '@/components/LineChart'
+import SectionMark from '@/components/SectionMark'
 import { callVal, f2, fM, metrics, solve, spreadAtLev } from '@/lib/merton'
 
 const S1 = 'var(--series-1)'
@@ -102,7 +103,10 @@ export default function ModelPage() {
   return (
     <div className="wrap">
       <header className="masthead">
-        <p className="eyebrow">The model · Merton (1974)</p>
+        <div className="section-eyebrow">
+          <SectionMark name="model" />
+          <p className="eyebrow">The model · Merton (1974)</p>
+        </div>
         <h1>Equity is a call option on the firm&rsquo;s assets.</h1>
         <p className="lede">
           Everything below follows from that one idea. Shareholders own the upside

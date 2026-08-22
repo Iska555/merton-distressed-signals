@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import FigureBars from '@/components/FigureBars'
 import PayoffDiagram from '@/components/PayoffDiagram'
+import SectionMark from '@/components/SectionMark'
 import { getManifest, getMeasurement, pct } from '@/lib/siteData'
 
 export default function Home() {
@@ -13,7 +15,29 @@ export default function Home() {
   return (
     <>
       {/* 1. Asymmetric hero */}
-      <header className="hero">
+      <header className="hero home-hero">
+        <picture className="hero-art hero-art-light">
+          <source srcSet="/figures/hero-paths-light.png" type="image/png" />
+          <Image
+            src="/figures/hero-paths-light.png"
+            width={2000}
+            height={680}
+            alt=""
+            unoptimized
+            priority
+          />
+        </picture>
+        <picture className="hero-art hero-art-dark">
+          <source srcSet="/figures/hero-paths-dark.png" type="image/png" />
+          <Image
+            src="/figures/hero-paths-dark.png"
+            width={2000}
+            height={680}
+            alt=""
+            unoptimized
+            priority
+          />
+        </picture>
         <div className="wrap">
           <div className="hero-grid">
             <div className="hero-copy">
@@ -36,6 +60,10 @@ export default function Home() {
             </div>
           </div>
           <div className="hero-rule" />
+          <p className="hero-params mono">
+            Hero simulation: sigma 34%, mu 5%, horizon 3 years, barrier 56,
+            seed 1974.
+          </p>
         </div>
       </header>
 
@@ -155,6 +183,25 @@ export default function Home() {
               <span className="mono">python -m scripts.audit_resolution</span>.
             </p>
           )}
+
+          <figure className="sample-field-figure">
+            <Image
+              src="/figures/sample-field.svg"
+              width={742}
+              height={252}
+              alt="Every bankruptcy candidate grouped by filing year and resolution outcome"
+              unoptimized
+            />
+            <figcaption className="figcap">
+              <span className="fignum">Figure 2</span>
+              <span className="figtitle">
+                Every bankruptcy candidate, by filing year and outcome
+              </span>
+              <span className="figsrc">
+                {`n = ${m?.total_candidates ?? 346} candidates from SEC 8-K Item 1.03 filings. One square per filing; texture separates model inapplicability from data unavailability.`}
+              </span>
+            </figcaption>
+          </figure>
         </div>
       </section>
 
@@ -222,7 +269,7 @@ export default function Home() {
             <figure>
               <PayoffDiagram />
               <figcaption className="figcap">
-                <span className="fignum">Figure 2</span>
+                <span className="fignum">Figure 3</span>
                 <span className="figtitle">Payoff at maturity against asset value</span>
                 <span className="figsrc">
                   Schematic. D is the face value of debt at the horizon. Drawn
@@ -243,6 +290,7 @@ export default function Home() {
           </div>
           <div className="cards">
             <Link className="card" href="/model">
+              <SectionMark name="model" />
               <h3>The model</h3>
               <p>
                 Merton solved live in the browser. Move leverage and volatility,
@@ -251,6 +299,7 @@ export default function Home() {
               <span className="go">Open the solver</span>
             </Link>
             <Link className="card" href="/mispricing">
+              <SectionMark name="mispricing" />
               <h3>Mispricing</h3>
               <p>
                 Where equity-implied risk and the credit cohort disagree, with
@@ -259,6 +308,7 @@ export default function Home() {
               <span className="go">See the divergence</span>
             </Link>
             <Link className="card" href="/measurement">
+              <SectionMark name="measurement" />
               <h3>Measurement</h3>
               <p>
                 The resolution audit in full. Era, sector and size conditioned on
@@ -267,6 +317,7 @@ export default function Home() {
               <span className="go">Read the audit</span>
             </Link>
             <Link className="card pending" href="/evidence">
+              <SectionMark name="evidence" />
               <h3>Evidence</h3>
               <p>
                 Distance to default in event time, defaulters against matched
@@ -275,6 +326,7 @@ export default function Home() {
               <span className="go">In progress</span>
             </Link>
             <Link className="card" href="/discrimination">
+              <SectionMark name="discrimination" />
               <h3>Discrimination</h3>
               <p>
                 What separation costs. Threshold slider, confusion matrix, and
@@ -283,6 +335,7 @@ export default function Home() {
               <span className="go">Base rate exhibit live</span>
             </Link>
             <Link className="card" href="/data">
+              <SectionMark name="data" />
               <h3>Data</h3>
               <p>
                 Sources, exclusions split by cause, spec amendments, and every

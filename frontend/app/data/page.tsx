@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import Link from 'next/link'
+import SectionMark from '@/components/SectionMark'
 import { getManifest, getMeasurement, pct } from '@/lib/siteData'
 
 interface Corroboration {
@@ -37,7 +38,10 @@ export default function DataPage() {
   return (
     <div className="wrap">
       <header className="masthead">
-        <p className="eyebrow">Data</p>
+        <div className="section-eyebrow">
+          <SectionMark name="data" />
+          <p className="eyebrow">Data</p>
+        </div>
         <h1>Every number here traces to a file you can open.</h1>
         <p className="lede">
           Every figure on this site traces to a file listed here or to a computation

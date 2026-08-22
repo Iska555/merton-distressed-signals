@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import SectionMark from '@/components/SectionMark'
 
 interface IllustrativeCase {
   name: string
@@ -62,7 +63,10 @@ export default function CaseStudies() {
   return (
     <div className="wrap">
       <header className="masthead">
-        <p className="eyebrow">Case studies</p>
+        <div className="section-eyebrow">
+          <SectionMark name="cases" />
+          <p className="eyebrow">Case studies</p>
+        </div>
         <h1>The most instructive firms are the ones that cannot be computed.</h1>
         <p className="lede">
           Computed case studies require the matched sample. Until it lands, the only

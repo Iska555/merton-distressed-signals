@@ -1,11 +1,15 @@
 import Link from 'next/link'
 import BaseRateExplorer from './BaseRateExplorer'
+import SectionMark from '@/components/SectionMark'
 
 export default function DiscriminationPage() {
   return (
     <div className="wrap">
       <header className="masthead">
-        <p className="eyebrow">Discrimination · the cost of acting</p>
+        <div className="section-eyebrow">
+          <SectionMark name="discrimination" />
+          <p className="eyebrow">Discrimination · the cost of acting</p>
+        </div>
         <h1>A good AUC can still be useless in production.</h1>
         <p className="lede">
           Anyone can show distance to default falls before a bankruptcy. The question

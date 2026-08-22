@@ -1,10 +1,14 @@
 import Link from 'next/link'
+import SectionMark from '@/components/SectionMark'
 
 export default function EvidencePage() {
   return (
     <div className="wrap">
       <header className="masthead">
-        <p className="eyebrow">Evidence · event study</p>
+        <div className="section-eyebrow">
+          <SectionMark name="evidence" />
+          <p className="eyebrow">Evidence · event study</p>
+        </div>
         <h1>The exhibit this study exists to produce does not exist yet.</h1>
         <p className="lede">
           The headline exhibit: median distance to default and its interquartile band

@@ -38,6 +38,14 @@ export const metadata: Metadata = {
     'Most corporate bankruptcies cannot be studied. Whether a failed company ' +
     'leaves a usable record depends on when it failed, and the reason is ' +
     'regulatory rather than economic.',
+  manifest: '/manifest.webmanifest',
+  icons: {
+    icon: [
+      { url: '/brand/icon.svg', type: 'image/svg+xml' },
+      { url: '/brand/favicon-32.png', type: 'image/png', sizes: '32x32' },
+    ],
+    apple: [{ url: '/brand/apple-touch-icon.png', sizes: '180x180' }],
+  },
 }
 
 export default function RootLayout({

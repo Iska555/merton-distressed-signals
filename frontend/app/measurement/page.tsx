@@ -1,7 +1,8 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import ConditionalTable from '@/components/ConditionalTable'
-import FigureBars from '@/components/FigureBars'
 import Heatmap from '@/components/Heatmap'
+import SectionMark from '@/components/SectionMark'
 import { getManifest, getMeasurement, pct } from '@/lib/siteData'
 
 export default function MeasurementPage() {
@@ -12,7 +13,10 @@ export default function MeasurementPage() {
     return (
       <div className="wrap">
         <header className="masthead">
-          <p className="kicker">Measurement</p>
+          <div className="section-eyebrow">
+            <SectionMark name="measurement" />
+            <p className="kicker">Measurement</p>
+          </div>
           <h1>Not yet computed.</h1>
           <p className="lead">
             The audit output is absent from{' '}
@@ -36,7 +40,10 @@ export default function MeasurementPage() {
         <div className="wrap">
           <div className="hero-grid">
             <div className="hero-copy">
-              <p className="kicker">Measurement</p>
+              <div className="section-eyebrow">
+                <SectionMark name="measurement" />
+                <p className="kicker">Measurement</p>
+              </div>
               <h1>Which bankruptcies survive into a dataset is decided by the calendar.</h1>
               <p className="lead">
                 Of {m.total_candidates} filings sampled from{' '}
@@ -138,17 +145,25 @@ export default function MeasurementPage() {
             </p>
           </div>
 
-          <FigureBars
-            number="Figure 1"
-            title="Share of bankruptcy filings resolvable to a traded symbol, by era"
-            source={`n = ${m.total_candidates} candidates from SEC 8-K Item 1.03 filings, resolved against XBRL company facts and Item 5 prose.`}
-            bars={m.by_era.map((e, i) => ({
-              label: e.label,
-              pct: e.rate * 100,
-              value: `${(e.rate * 100).toFixed(1)}%`,
-              highlight: i === m.by_era.length - 1,
-            }))}
-          />
+          <figure className="sample-field-figure">
+            <Image
+              src="/figures/sample-field.svg"
+              width={742}
+              height={252}
+              alt="Every bankruptcy candidate grouped by filing year and resolution outcome"
+              unoptimized
+              priority
+            />
+            <figcaption className="figcap">
+              <span className="fignum">Figure 1</span>
+              <span className="figtitle">
+                Every bankruptcy candidate, by filing year and outcome
+              </span>
+              <span className="figsrc">
+                {`n = ${m.total_candidates} candidates from SEC 8-K Item 1.03 filings, resolved against XBRL company facts and Item 5 prose. One square represents one filing.`}
+              </span>
+            </figcaption>
+          </figure>
 
           <div className="callout">
             <p className="eyebrow">Why this bounds the claim</p>
