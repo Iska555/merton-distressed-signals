@@ -135,26 +135,76 @@ class TestOverlapFlagging:
 
 
 class TestCommonEquityGate:
-    def test_registrant_without_common_stock_is_excluded_early(self, monkeypatch):
-        monkeypatch.setattr(identity, "has_common_equity", lambda cik: False)
+    """
+    The gate must distinguish "has no common equity" from "has no XBRL". They
+    look identical to a naive check and land in OPPOSITE exclusion families:
+    the first is a scope definition, the second a data limitation.
+
+    Getting this wrong put 72% of 2010-11 candidates in NO_COMMON_EQUITY,
+    including Corus Bankshares and AMCORE Financial -- both banks with ordinary
+    common stock and simply no XBRL. Re-adjudication changed 48 of 59 rows.
+    """
+
+    def _profile(self, monkeypatch):
         monkeypatch.setattr(identity.edgar, "company_profile",
                             lambda cik: {"name": "SOME LP", "tickers": []})
+
+    def test_absent_common_equity_is_excluded_early(self, monkeypatch):
+        self._profile(monkeypatch)
+        monkeypatch.setattr(identity, "common_equity_status", lambda cik: "absent")
 
         def _boom(*args, **kwargs):
             raise AssertionError("resolution attempted on a non-Merton object")
 
         monkeypatch.setattr(identity, "ticker_from_filings", _boom)
         got = identity.resolve("0000000001", event_date="2018-01-01")
-        assert got.ticker is None
         assert got.reason_code == ReasonCode.NO_COMMON_EQUITY
         assert identity.exclusion_family(got.reason_code) == "model_inapplicability"
 
-    def test_gate_can_be_disabled(self, monkeypatch):
-        monkeypatch.setattr(identity, "has_common_equity", lambda cik: False)
-        monkeypatch.setattr(identity.edgar, "company_profile",
-                            lambda cik: {"name": "SOME LP", "tickers": []})
+    def test_no_xbrl_falls_through_to_normal_resolution(self, monkeypatch):
+        """
+        THE REGRESSION. A pre-XBRL filer must be recorded as missing data, not
+        mislabelled a non-Merton object.
+        """
+        self._profile(monkeypatch)
+        monkeypatch.setattr(identity, "common_equity_status", lambda cik: "no_xbrl")
         monkeypatch.setattr(identity, "ticker_from_filings",
                             lambda cik, near_date=None, **kw: ([], 0))
+        monkeypatch.setattr(identity, "ticker_from_filing_text",
+                            lambda cik, near_date=None, **kw: [])
+        got = identity.resolve("0000000001", event_date="2010-01-01")
+        assert got.reason_code != ReasonCode.NO_COMMON_EQUITY
+        assert identity.exclusion_family(got.reason_code) == "data_unavailability"
+
+    def test_present_common_equity_proceeds(self, monkeypatch):
+        self._profile(monkeypatch)
+        monkeypatch.setattr(identity, "common_equity_status", lambda cik: "present")
+        monkeypatch.setattr(identity, "ticker_from_filings",
+                            lambda cik, near_date=None, **kw: ([], 3))
+        monkeypatch.setattr(identity, "ticker_from_filing_text",
+                            lambda cik, near_date=None, **kw: [])
+        got = identity.resolve("0000000001", event_date="2018-01-01")
+        assert got.reason_code != ReasonCode.NO_COMMON_EQUITY
+
+    def test_gate_can_be_disabled(self, monkeypatch):
+        self._profile(monkeypatch)
+        monkeypatch.setattr(identity, "common_equity_status", lambda cik: "absent")
+        monkeypatch.setattr(identity, "ticker_from_filings",
+                            lambda cik, near_date=None, **kw: ([], 0))
+        monkeypatch.setattr(identity, "ticker_from_filing_text",
+                            lambda cik, near_date=None, **kw: [])
         got = identity.resolve("0000000001", event_date="2018-01-01",
                                require_common_equity=False)
         assert got.reason_code != ReasonCode.NO_COMMON_EQUITY
+
+    def test_status_returns_no_xbrl_when_nothing_is_tagged(self, monkeypatch):
+        monkeypatch.setattr(identity, "has_common_equity", lambda cik: False)
+        monkeypatch.setattr(identity.edgar, "_cached_json",
+                            lambda url, path: {"units": {}})
+        assert identity.common_equity_status("0000000001") == "no_xbrl"
+
+    def test_status_returns_absent_when_other_xbrl_exists(self, monkeypatch):
+        monkeypatch.setattr(identity, "has_common_equity", lambda cik: False)
+        monkeypatch.setattr(identity.edgar, "_cached_json",
+                            lambda url, path: {"units": {"USD": [{"val": 1}]}})
+        assert identity.common_equity_status("0000000001") == "absent"

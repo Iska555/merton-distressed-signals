@@ -81,9 +81,16 @@ symbol on the page**. Cover-page extraction — the obvious fallback for older
 filings — is not unreliable before 2019; the datum does not exist. What survives
 is Item 5 prose: *"traded on the New York Stock Exchange under the symbol EK."*
 
-Resolution rate rises steeply across the window, and also varies by size and
-sector. The cohort skews large, late and less financial than the population of
-defaults it is drawn from. Full cross-tabs on `/measurement`.
+Resolution rises steeply and monotonically across the window — **12.8%** in
+2010–11 to **68.7%** in 2022–24, on 346 sampled filings. It also varies by
+sector: financials resolve at 26.8% against 56.2% for manufacturing, so the
+cohort under-samples exactly the sector where Merton is least applicable.
+
+It does **not** vary with size in the way an earlier draft of this README
+claimed. That figure was measured on 190 candidates and did not survive at 346;
+the corrected bands show no monotone trend. What remains is a filer-type effect:
+registrants reporting no public float at all — shells, trusts and partnerships —
+resolve at 18.3%. Full cross-tabs, with cell counts, on `/measurement`.
 
 ### 2. Two data traps that would have poisoned the study silently
 

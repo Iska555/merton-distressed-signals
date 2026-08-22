@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-08-22T15:20:13+00:00",
-  "git_commit": "8b45536",
+  "generated_utc": "2026-08-22T15:23:51+00:00",
+  "git_commit": "d2fa54a",
   "files": {
     "measurement.json": {
       "source": "data/processed/resolution_audit.csv",
@@ -22,7 +22,7 @@
       "source": "FRED ICE BofA option-adjusted spread indices",
       "rows_in": 7,
       "description": "Latest OAS per rating cohort. Index averages across many unrelated issuers, NOT any single firm's bond.",
-      "retrieved": "2026-08-22T15:20:17+00:00"
+      "retrieved": "2026-08-22T15:23:54+00:00"
     },
     "spread_corroboration.json": {
       "source": "FRED ICE BofA OAS vs Damodaran synthetic-rating spreads",

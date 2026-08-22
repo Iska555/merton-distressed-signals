@@ -145,15 +145,31 @@ embarrassment.
 
 ## D5 — Known exclusion biases, published either way
 
-From `docs/RESOLUTION_AUDIT.md`, all reaching visible UI:
+> **Corrected 2026-08-22 at N = 346.** The size claim below was measured at
+> N = 190 and did not survive the larger sample. It is corrected rather than
+> quietly dropped, because the original figure reached the README and the site.
 
-- **Size.** Public float ≥ $200M resolves at 79%; < $200M at 51%; none reported
-  at 9%. The cohort skews large.
-- **Sector.** Financials resolve at 29.7% and retail at 20%, against 60% for
-  transport and utilities. The cohort under-samples exactly the sector where
-  Merton is least applicable — which flatters the headline result and weakens
-  the sector panel. Both directions stated.
-- **Era.** See D3.
+From `docs/RESOLUTION_AUDIT.md` (N = 346), all reaching visible UI:
+
+- **Era. The strongest and only monotone gradient.** 12.8% (2010–11), 19.7%
+  (2012–14), 47.9% (2015–18), 56.9% (2019–21), 68.7% (2022–24). See D3.
+
+- **Size — the earlier claim was small-sample noise.** At N = 190 this was
+  reported as "float ≥ $200M resolves at 79%, < $200M at 51%". At N = 346 the
+  bands are **45.5% (under $50M), 60.7% ($50–200M), 58.5% (≥ $200M)** — no
+  monotone trend, and the ordering is not even the one previously claimed.
+  What survives is the gap for firms reporting **no public float at all**
+  (18.3%), which is a filer-type effect — shells, trusts and partnerships —
+  not a size effect. **The cohort does not measurably skew large.**
+
+- **Sector.** Financials resolve at 26.8% and mining at 30.1%, against 56.2%
+  for manufacturing. The cohort under-samples exactly the sector where Merton
+  is least applicable — which flatters the headline result and weakens the
+  sector panel. Both directions stated.
+
+The lesson is recorded because it will recur: a gradient measured on ~10
+observations per cell is not a finding. Cross-tabs are only published with
+their cell counts beside them.
 
 ---
 

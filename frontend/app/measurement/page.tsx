@@ -158,12 +158,25 @@ export default function MeasurementPage() {
       </section>
 
       <section className="section">
-        <h2>The size gradient</h2>
+        <h2>Size — no measurable gradient</h2>
         <p className="prose">
-          Resolution is strongly related to firm size. Registrants reporting no
-          public float — shells, liquidating trusts and partnerships — almost never
-          resolve, and are excluded on modelling grounds in any case.
+          Among firms reporting a public float there is <strong>no monotone
+          trend</strong>. The only real gap is for registrants reporting no float
+          at all — shells, liquidating trusts and partnerships — which is a
+          filer-type effect rather than a size one, and those are excluded on
+          modelling grounds regardless.
         </p>
+        <div className="callout callout-neutral">
+          <p className="eyebrow">Corrected</p>
+          <p>
+            An earlier run of this audit, on 190 candidates, reported that float
+            ≥ $200M resolved at 79% against 51% below, and concluded the cohort
+            skewed large. At 346 candidates that ordering does not hold and the
+            trend disappears. It was small-sample noise at roughly ten to twenty-five
+            observations per cell. Cross-tabs on this page are now published only
+            with their cell counts beside them.
+          </p>
+        </div>
         <div className="scroll-x">
           <table className="data">
             <thead>
