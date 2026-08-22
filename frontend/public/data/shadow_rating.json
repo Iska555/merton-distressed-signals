@@ -1,0 +1,159 @@
+{
+  "large_cap": [
+    [
+      8.5,
+      "AAA"
+    ],
+    [
+      6.5,
+      "AA"
+    ],
+    [
+      5.5,
+      "A+"
+    ],
+    [
+      4.25,
+      "A"
+    ],
+    [
+      3.0,
+      "A-"
+    ],
+    [
+      2.5,
+      "BBB"
+    ],
+    [
+      2.25,
+      "BB+"
+    ],
+    [
+      2.0,
+      "BB"
+    ],
+    [
+      1.75,
+      "B+"
+    ],
+    [
+      1.5,
+      "B"
+    ],
+    [
+      1.25,
+      "B-"
+    ],
+    [
+      0.8,
+      "CCC"
+    ],
+    [
+      0.65,
+      "CC"
+    ],
+    [
+      0.2,
+      "C"
+    ]
+  ],
+  "small_cap": [
+    [
+      12.5,
+      "AAA"
+    ],
+    [
+      9.5,
+      "AA"
+    ],
+    [
+      7.5,
+      "A+"
+    ],
+    [
+      6.0,
+      "A"
+    ],
+    [
+      4.5,
+      "A-"
+    ],
+    [
+      4.0,
+      "BBB"
+    ],
+    [
+      3.5,
+      "BB+"
+    ],
+    [
+      3.0,
+      "BB"
+    ],
+    [
+      2.5,
+      "B+"
+    ],
+    [
+      2.0,
+      "B"
+    ],
+    [
+      1.5,
+      "B-"
+    ],
+    [
+      1.25,
+      "CCC"
+    ],
+    [
+      0.8,
+      "CC"
+    ],
+    [
+      0.5,
+      "C"
+    ]
+  ],
+  "large_cap_asset_threshold": 5000000000,
+  "scale": [
+    "AAA",
+    "AA",
+    "A+",
+    "A",
+    "A-",
+    "BBB",
+    "BB+",
+    "BB",
+    "B+",
+    "B",
+    "B-",
+    "CCC",
+    "CC",
+    "C",
+    "D"
+  ],
+  "cohort_index": {
+    "AAA": "AAA",
+    "AA": "AA",
+    "A+": "A",
+    "A": "A",
+    "A-": "A",
+    "BBB": "BBB",
+    "BB+": "BB",
+    "BB": "BB",
+    "B+": "B",
+    "B": "B",
+    "B-": "B",
+    "CCC": "CCC",
+    "CC": "CCC",
+    "C": "CCC",
+    "D": "CCC"
+  },
+  "source": {
+    "table": "Damodaran synthetic rating, interest coverage to rating",
+    "publisher": "NYU Stern, Aswath Damodaran",
+    "url": "https://pages.stern.nyu.edu/~adamodar/",
+    "verified_against": "PENDING - re-check thresholds against the current published file before publication"
+  }
+}

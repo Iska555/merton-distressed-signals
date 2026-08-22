@@ -167,6 +167,90 @@ def build_measurement(audit: pd.DataFrame) -> dict:
     }
 
 
+FRED_SERIES = {
+    "AAA": "BAMLC0A1CAAA",
+    "AA": "BAMLC0A2CAA",
+    "A": "BAMLC0A3CA",
+    "BBB": "BAMLC0A4CBBB",
+    "BB": "BAMLH0A1HYBB",
+    "B": "BAMLH0A2HYB",
+    "CCC": "BAMLH0A3HYC",
+}
+
+
+def build_cohort_spreads() -> dict | None:
+    """
+    Latest ICE BofA option-adjusted spread per rating cohort, from FRED.
+
+    Fetched at BUILD time, not in the browser: the page must render with no
+    backend and no credential, and an API key must never reach a client. The
+    retrieval date is stamped into the payload and shown on the page, because a
+    spread without a date is not a fact about anything.
+
+    These are COHORT INDEX AVERAGES across hundreds of unrelated issuers, not
+    any single firm's bond. The page says so; the field name says so here too.
+    """
+    import os
+    import urllib.parse
+    import urllib.request
+    from datetime import date, timedelta
+
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv(ROOT / "backend" / ".env")
+    except Exception:  # noqa: BLE001
+        pass
+
+    key = os.getenv("FRED_API_KEY")
+    if not key:
+        print("  FRED_API_KEY not set; cohort spreads will be marked illustrative")
+        return None
+
+    start = (date.today() - timedelta(days=45)).isoformat()
+    cohorts, retrieved = {}, None
+    for label, series_id in FRED_SERIES.items():
+        query = urllib.parse.urlencode({
+            "series_id": series_id, "api_key": key, "file_type": "json",
+            "observation_start": start, "sort_order": "desc", "limit": 5,
+        })
+        try:
+            with urllib.request.urlopen(
+                f"https://api.stlouisfed.org/fred/series/observations?{query}",
+                timeout=30,
+            ) as response:
+                payload = json.loads(response.read().decode())
+            observations = [
+                o for o in payload.get("observations", [])
+                if o.get("value") not in (".", "", None)
+            ]
+            if not observations:
+                continue
+            latest = observations[0]
+            cohorts[label] = {
+                "series_id": series_id,
+                "oas_bps": round(float(latest["value"]) * 100, 1),
+                "observation_date": latest["date"],
+            }
+            retrieved = retrieved or latest["date"]
+        except Exception as exc:  # noqa: BLE001
+            print(f"  FRED {label} ({series_id}) failed: {type(exc).__name__}")
+
+    if not cohorts:
+        return None
+    return {
+        "cohorts": cohorts,
+        "retrieved_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "latest_observation": retrieved,
+        "source": "ICE BofA option-adjusted spread indices via FRED",
+        "caveat": (
+            "Cohort index averages across many unrelated issuers, not any single "
+            "firm's bond. Issuer-level pricing requires TRACE, which is not freely "
+            "available."
+        ),
+    }
+
+
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     manifest = {
@@ -216,6 +300,50 @@ def main() -> int:
             "description": "Hand-verification sample for symbol resolution accuracy.",
         }
         print(f"  verification.json <- {len(frame)} rows")
+
+    # Emit the rating tables rather than letting the browser keep its own copy.
+    # Two transcriptions of the same thresholds would drift, and the drift would
+    # be invisible: the page would quietly disagree with the study.
+    from src.models import shadow_rating as sr
+
+    (OUT / "shadow_rating.json").write_text(
+        json.dumps(_clean({
+            "large_cap": sr._LARGE_CAP,
+            "small_cap": sr._SMALL_CAP,
+            "large_cap_asset_threshold": sr.LARGE_CAP_ASSET_THRESHOLD,
+            "scale": sr.RATING_SCALE,
+            "cohort_index": sr.COHORT_INDEX,
+            "source": sr.SOURCE,
+        }), indent=2) + "\n",
+        encoding="utf-8",
+    )
+    manifest["files"]["shadow_rating.json"] = {
+        "source": "src/models/shadow_rating.py",
+        "rows_in": len(sr.RATING_SCALE),
+        "description": (
+            "Coverage-to-rating thresholds, emitted from the Python module so the "
+            "browser cannot hold a divergent copy. Accounting inputs only: no "
+            "Merton quantity enters the benchmark rating."
+        ),
+    }
+    print(f"  shadow_rating.json <- {len(sr.RATING_SCALE)} rating grades")
+
+    spreads = build_cohort_spreads()
+    if spreads:
+        (OUT / "cohort_spreads.json").write_text(
+            json.dumps(_clean(spreads), indent=2) + "\n", encoding="utf-8"
+        )
+        manifest["files"]["cohort_spreads.json"] = {
+            "source": "FRED ICE BofA option-adjusted spread indices",
+            "rows_in": len(spreads["cohorts"]),
+            "description": (
+                "Latest OAS per rating cohort. Index averages across many "
+                "unrelated issuers, NOT any single firm's bond."
+            ),
+            "retrieved": spreads["retrieved_utc"],
+        }
+        print(f"  cohort_spreads.json <- {len(spreads['cohorts'])} cohorts, "
+              f"latest observation {spreads['latest_observation']}")
 
     (OUT / "MANIFEST.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8"

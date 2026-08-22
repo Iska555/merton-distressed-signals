@@ -1,0 +1,251 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import { metrics, solve } from '@/lib/merton'
+import { shadowRating, type RatingTables } from '@/lib/shadowRating'
+
+interface Cohorts {
+  cohorts: Record<string, { series_id: string; oas_bps: number; observation_date: string }>
+  retrieved_utc: string
+  latest_observation: string
+  source: string
+  caveat: string
+}
+
+const S1 = 'var(--series-1)'
+const S2 = 'var(--series-2)'
+
+function Field({
+  id, label, value, min, max, step, display, onChange,
+}: {
+  id: string; label: string; value: number; min: number; max: number
+  step: number; display: string; onChange: (v: number) => void
+}) {
+  return (
+    <div className="field">
+      <div className="field-head">
+        <label htmlFor={id}>{label}</label>
+        <output htmlFor={id} className="tnum">{display}</output>
+      </div>
+      <input type="range" id={id} min={min} max={max} step={step} value={value}
+        onChange={(e) => onChange(+e.target.value)} />
+    </div>
+  )
+}
+
+export default function MispricingClient({
+  tables,
+  spreads,
+}: {
+  tables: RatingTables | null
+  spreads: Cohorts | null
+}) {
+  // Equity side
+  const [E, setE] = useState(1800)
+  const [sEpct, setSE] = useState(45)
+  const [D, setD] = useState(2200)
+  const [rPct, setR] = useState(4.3)
+  const [T, setT] = useState(3)
+
+  // Accounting side — the benchmark rating sees ONLY these.
+  const [ebit, setEbit] = useState(420)
+  const [interest, setInterest] = useState(140)
+  const [assets, setAssets] = useState(6200)
+  const [debt, setDebt] = useState(2200)
+  const [ebitda, setEbitda] = useState(680)
+  const [revenue, setRevenue] = useState(3400)
+
+  const s = useMemo(() => solve(E, sEpct / 100, D, rPct / 100, T), [E, sEpct, D, rPct, T])
+  const m = useMemo(
+    () => (s.ok ? metrics(s.V, s.sV, D, rPct / 100, rPct / 100, T) : null),
+    [s, D, rPct, T],
+  )
+
+  const rating = useMemo(() => {
+    if (!tables) return null
+    return shadowRating(
+      {
+        ebit: ebit * 1e6,
+        interestExpense: interest * 1e6,
+        totalAssets: assets * 1e6,
+        totalDebt: debt * 1e6,
+        ebitda: ebitda * 1e6,
+        revenue: revenue * 1e6,
+      },
+      tables,
+    )
+  }, [tables, ebit, interest, assets, debt, ebitda, revenue])
+
+  const cohortBps =
+    rating && spreads ? spreads.cohorts[rating.cohortIndex]?.oas_bps ?? null : null
+  const gap = m && cohortBps !== null && isFinite(m.spread) ? m.spread - cohortBps : null
+
+  let verdict = '', reading = '', colour = 'var(--ink)'
+  if (gap !== null) {
+    const mag = Math.abs(gap)
+    if (mag < 75) {
+      verdict = 'Within noise'
+      colour = 'var(--muted)'
+      reading =
+        'The equity market and the credit cohort broadly agree. Nothing here worth a second look.'
+    } else if (gap > 0) {
+      verdict = mag > 150 ? 'Equity implies materially more risk' : 'Equity implies more risk'
+      colour = S2
+      reading =
+        'The equity market is pricing more distress than the cohort benchmark charges. ' +
+        'Historically the direction that precedes trouble, and the direction worth ' +
+        'investigating. It is a reason to open the filings, not a trade.'
+    } else {
+      verdict = mag > 150 ? 'Credit implies materially more risk' : 'Credit implies more risk'
+      colour = S1
+      reading =
+        'The cohort benchmark is wider than the equity market implies. Often a cohort ' +
+        'effect rather than a firm one: the rating bucket is being repriced for reasons ' +
+        'that have nothing to do with this issuer.'
+    }
+  }
+
+  return (
+    <>
+      <section className="section">
+        <h2>The two sides, computed separately</h2>
+        <p className="prose">
+          The left panel drives the equity-implied spread through the Merton solve.
+          The right panel drives the benchmark rating through interest coverage and
+          scale. <strong>They share no input.</strong> That separation is the whole
+          point: the predecessor derived the rating from the model&rsquo;s own asset
+          value, so the gap it reported was partly the model arguing with itself.
+        </p>
+
+        <div className="gap-panel">
+          <div>
+            <p className="eyebrow">Equity side · drives implied spread</p>
+            <Field id="E" label="Market cap" min={100} max={8000} step={10} value={E}
+              display={`$${E.toLocaleString()}m`} onChange={setE} />
+            <Field id="sE" label="Equity volatility" min={10} max={150} step={1} value={sEpct}
+              display={`${sEpct}%`} onChange={setSE} />
+            <Field id="D" label="Debt face value" min={100} max={8000} step={10} value={D}
+              display={`$${D.toLocaleString()}m`} onChange={setD} />
+            <Field id="r" label="Risk-free rate" min={0} max={10} step={0.05} value={rPct}
+              display={`${rPct.toFixed(2)}%`} onChange={setR} />
+            <Field id="T" label="Horizon" min={0.5} max={8} step={0.25} value={T}
+              display={`${T.toFixed(2)} yr`} onChange={setT} />
+          </div>
+
+          <div>
+            <p className="eyebrow">Accounting side · drives benchmark rating</p>
+            <Field id="ebit" label="EBIT" min={-500} max={2000} step={10} value={ebit}
+              display={`$${ebit.toLocaleString()}m`} onChange={setEbit} />
+            <Field id="int" label="Interest expense" min={1} max={800} step={5} value={interest}
+              display={`$${interest.toLocaleString()}m`} onChange={setInterest} />
+            <Field id="ta" label="Total assets" min={200} max={40000} step={100} value={assets}
+              display={`$${assets.toLocaleString()}m`} onChange={setAssets} />
+            <Field id="td" label="Total debt" min={0} max={20000} step={50} value={debt}
+              display={`$${debt.toLocaleString()}m`} onChange={setDebt} />
+            <Field id="ebitda" label="EBITDA" min={1} max={4000} step={10} value={ebitda}
+              display={`$${ebitda.toLocaleString()}m`} onChange={setEbitda} />
+            <Field id="rev" label="Revenue" min={1} max={40000} step={100} value={revenue}
+              display={`$${revenue.toLocaleString()}m`} onChange={setRevenue} />
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <h2>Divergence</h2>
+
+        <div className="stat-row">
+          <div className="stat">
+            <div className="v tnum">
+              {m && isFinite(m.spread) ? Math.round(m.spread).toLocaleString() : '—'}
+            </div>
+            <div className="k">Equity-implied spread</div>
+            <div className="sub">bps · Merton solve</div>
+          </div>
+          <div className="stat">
+            <div className="v tnum">{rating?.usable ? rating.rating : '—'}</div>
+            <div className="k">Shadow rating</div>
+            <div className="sub">
+              {rating?.usable
+                ? `coverage ${isFinite(rating.coverage) ? rating.coverage.toFixed(2) + '×' : '∞'} · ${rating.sizeBand} cap`
+                : 'inputs incomplete'}
+            </div>
+          </div>
+          <div className="stat">
+            <div className="v tnum">{cohortBps !== null ? cohortBps.toFixed(0) : '—'}</div>
+            <div className="k">Cohort benchmark</div>
+            <div className="sub">
+              {rating?.usable ? `${rating.cohortIndex} index OAS` : '—'}
+            </div>
+          </div>
+          <div className="stat">
+            <div className="v tnum" style={{ color: colour }}>
+              {gap === null
+                ? '—'
+                : (gap >= 0 ? '+' : '−') + Math.abs(Math.round(gap)).toLocaleString()}
+            </div>
+            <div className="k">Divergence</div>
+            <div className="sub">bps · equity less cohort</div>
+          </div>
+        </div>
+
+        {gap !== null && (
+          <div className="gapline">
+            <div className="verdict" style={{ color: colour }}>{verdict}</div>
+            <p style={{ fontSize: 13.5, color: 'var(--muted)' }}>{reading}</p>
+          </div>
+        )}
+
+        {rating?.usable && rating.notch !== 0 && (
+          <p className="source-line">
+            Rating notched {rating.notch > 0 ? 'down' : 'up'} one grade from{' '}
+            {rating.baseRating}: {rating.notchReason}. At most one notch is ever
+            applied, and its reason is recorded so the assignment is auditable.
+          </p>
+        )}
+
+        <p className="source-line">
+          {spreads
+            ? `Cohort spreads: ${spreads.source}, observation ${spreads.latest_observation}, retrieved ${spreads.retrieved_utc.slice(0, 10)}. Series IDs on /data.`
+            : 'Cohort spreads unavailable — no FRED series retrieved at build time.'}
+        </p>
+      </section>
+
+      <section className="section">
+        <h2>What was broken, and what is still limited</h2>
+        <div className="callout">
+          <p className="eyebrow">Read this before using the number</p>
+          <p>
+            <strong>The circularity, now fixed.</strong> The old pipeline estimated a
+            credit rating from Merton asset leverage, then used that rating to look up
+            the benchmark spread. Both sides of the comparison descended from the same
+            model output. The benchmark rating is now assigned from accounting
+            fundamentals alone — interest coverage, scale, profitability, debt to
+            earnings — with no Merton quantity anywhere in it, and a test asserts that
+            the function cannot even accept one.
+          </p>
+          <p>
+            <strong>Levels are not comparable; directions are.</strong> Structural
+            models understate observed investment-grade spreads at short horizons,
+            because a real spread also pays for liquidity and tax. That is the
+            documented credit spread puzzle (Eom, Helwege and Huang 2004; Huang and
+            Huang 2012). Read the divergence as a screen for where equity and credit
+            disagree and in which direction, not as basis points anyone could capture.
+          </p>
+          <p>
+            <strong>The limitation that remains.</strong> A cohort index spread is the
+            average of many unrelated issuers, not this firm&rsquo;s bond. Issuer-level
+            pricing needs TRACE, which is not freely available. So this measures
+            divergence between an equity-implied estimate and a cohort benchmark. It is
+            a screening indicator that tells you where to look. Calling it an arbitrage
+            signal would be claiming more than the data can carry.
+          </p>
+          <p>
+            <strong>The shadow rating is not an agency rating.</strong> It is
+            coverage-driven. A real rating incorporates analyst judgement, management
+            access and private information a coverage ratio cannot see.
+          </p>
+        </div>
+      </section>
+    </>
+  )
+}
