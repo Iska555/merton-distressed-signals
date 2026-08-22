@@ -1,4 +1,4 @@
-# Resolution Audit — who gets into the treatment cohort, and who doesn't
+# Resolution Audit: who gets into the treatment cohort, and who doesn't
 
 **Run:** 2026-08-22 · **Sample:** 346 bankruptcy candidates, 25 per year, 2010–2024
 **Source:** 8-K Item 1.03 filings via EDGAR full-text search
@@ -10,7 +10,7 @@ published whichever way it comes out.
 
 > **Supersedes the 2026-08-20 run at N = 190.** Two findings changed materially
 > and are called out in §7, because both reached the README and the site before
-> being corrected — as did the first, wrong, correction of one of them.
+> being corrected, as did the first, wrong, correction of one of them.
 
 ---
 
@@ -25,7 +25,7 @@ published whichever way it comes out.
 
 ---
 
-## 2. The era gradient — the strongest and only monotone effect
+## 2. The era gradient, the strongest and only monotone effect
 
 | Era | N | Resolved |
 |---|---|---|
@@ -37,16 +37,16 @@ published whichever way it comes out.
 
 Two structural thresholds produce this:
 
-1. **~2011 — XBRL instance documents begin to exist.** Six pre-2010 bankruptcies
+1. **~2011, XBRL instance documents begin to exist.** Six pre-2010 bankruptcies
    (Lyondell, Nortel, Sharper Image, TOUSA, Buffets, Lehman) returned *zero*
    instance documents across all their filings.
 
-2. **2019–2021 — `dei:TradingSymbol` becomes tagged.** The SEC's FAST Act
+2. **2019–2021, `dei:TradingSymbol` becomes tagged.** The SEC's FAST Act
    Modernization rule introduced cover-page Inline XBRL.
 
 **Verified directly:** Kodak's 2011 10-K cover page carries only *"Title of each
 Class"* and *"Name of each exchange on which registered"*. There is **no trading
-symbol on the page at all** — that column was created by the 2019 rule.
+symbol on the page at all**. That column was created by the 2019 rule.
 Cover-page extraction is therefore not merely unreliable before 2019: the datum
 does not exist. Item 5 prose is the only surviving route, and it carries the
 `filing_text` tier.
@@ -70,7 +70,7 @@ Every cell below reads `resolved/candidates` with the rate beneath it. A rate is
 shown only when its 95% Wilson interval is 50 points wide or narrower; `±` means
 the counts are real but no rate can be read off them. Suppression is on interval
 width rather than a count threshold because an extreme rate is estimated
-precisely even at small n — 0 of 13 says something, 6 of 13 does not.
+precisely even at small n: 0 of 13 says something, 6 of 13 does not.
 
 Definitions live once, in `src/analysis/crosstabs.py`, shared by the audit
 script, the site build and this document.
@@ -86,8 +86,8 @@ script, the site build and this document.
 | Services | 2/12 · 17% | 1/7 · 14% | 6/11 · ± | 3/10 · 30% | 9/13 · 69% | 21/53 · 40% |
 | Finance, Insurance, Real Estate | 1/14 · 7% | 3/9 · ± | 3/5 · ± | 4/5 · ± | 3/8 · ± | 14/41 · 34% |
 | Retail Trade | 0/3 · ± | 1/7 · 14% | 1/5 · ± | 5/8 · ± | 5/8 · ± | 12/31 · 39% |
-| Transport & Utilities | 1/3 · ± | 3/9 · ± | 5/9 · ± | 4/8 · ± | — | 13/29 · 45% |
-| Wholesale Trade | — | 1/2 · ± | 3/4 · ± | 0/1 · ± | 1/2 · ± | 5/9 · ± |
+| Transport & Utilities | 1/3 · ± | 3/9 · ± | 5/9 · ± | 4/8 · ± | none | 13/29 · 45% |
+| Wholesale Trade | none | 1/2 · ± | 3/4 · ± | 0/1 · ± | 1/2 · ± | 5/9 · ± |
 | **all candidates** | 6/47 · 13% | 14/71 · 20% | 46/96 · 48% | 37/65 · 57% | 46/67 · 69% | 149/346 · 43% |
 
 **Survives conditioning.** Mining resolves below its own era in every era where
@@ -96,8 +96,8 @@ cell reportable, from 22% against 13% to 82% against 69%. Those are sector
 effects, not era in disguise.
 
 **Does not survive conditioning.** The claim that financials resolve worst rested
-on a single cell of fourteen firms in 2010–11 — where the era average is 13%
-anyway — and every later financials cell is too small to report. Sector
+on a single cell of fourteen firms in 2010–11, where the era average is 13%
+anyway, and every later financials cell is too small to report. Sector
 composition varies sharply across eras: financials are 29.8% of 2010–11
 candidates and 5.2% of 2015–18; mining is 35.4% of 2015–18 and 1.5% of 2022–24.
 The pooled financials figure is composition.
@@ -108,7 +108,7 @@ the cohort, it flatters the headline result, and it is stated for that reason.
 
 ---
 
-## 5. Size, within era — no gradient survives
+## 5. Size, within era: no gradient survives
 
 | Public float at last 10-K | 2010–11 | 2012–14 | 2015–18 | 2019–21 | 2022–24 | pooled |
 |---|---|---|---|---|---|---|
@@ -127,7 +127,7 @@ cohort does not measurably skew large.**
 
 Public float is read from `dei:EntityPublicFloat` through the `companyconcept`
 API. That is an XBRL tag, so a filer with no XBRL instance has no float **by
-construction** — not because it is small, but because it filed before 2011.
+construction**, not because it is small, but because it filed before 2011.
 
 | Filer has XBRL | N | Reports a public float | Share |
 |---|---|---|---|
@@ -138,7 +138,7 @@ The two agree on **86.7%** of 346 candidates. So the "none reported" band is
 substantially the pre-XBRL population wearing a different label, and its low
 pooled rate (18.3%) is mostly era: 37 of its 93 firms sit in 2010–11, where
 nothing resolves anyway. Within 2012–14 it resolves at 19% against an era average
-of 20% — no gap at all. Only in 2015–18 is there a real one (19% against 48%).
+of 20%, no gap at all. Only in 2015–18 is there a real one (19% against 48%).
 
 This is a finding about the public record, which is the study's actual subject,
 rather than a finding about firm size.
@@ -163,7 +163,7 @@ non-Merton objects** (a scope definition).
 changes across bankruptcy, such as Kodak's pre-bankruptcy **EK** against the
 post-emergence **KODK** listing that begins 2013-09-23.
 
-`AMBIGUOUS_OVERLAPPING` — the mutual-exclusivity guard — independently caught
+`AMBIGUOUS_OVERLAPPING`, the mutual-exclusivity guard, independently caught
 **American Airlines (CIK 0000004515)**, the AAL/AMR ticker splice found by hand
 in Phase 0. A registrant cannot trade under two symbols at once, so candidates
 whose windows overlap are flagged rather than auto-ranked. It is also the single
@@ -179,7 +179,7 @@ is the event (spec 1.2.2); subsequent dates are recorded.
 All reached the README and the site before being caught. Recorded rather than
 quietly overwritten.
 
-### 7.1 The size gradient — retracted, then the retraction corrected
+### 7.1 The size gradient: retracted, then the retraction corrected
 
 At N = 190 this was reported as *"float ≥ $200M resolves at 79%, < $200M at 51%"*
 and written up as "the cohort skews large". At N = 346 the top band is 58.5%, and
@@ -207,7 +207,7 @@ not later mistaken for protection it does not offer.
 
 The structural gate excluding registrants with no common shares outstanding ran
 *before* checking whether the filer had any XBRL at all. A pre-2011 filer with no
-XBRL looks identical to a partnership with no common equity — so 72% of 2010–11
+XBRL looks identical to a partnership with no common equity, so 72% of 2010–11
 candidates were labelled non-Merton objects, including **Corus Bankshares** and
 **AMCORE Financial**, both banks with ordinary common stock.
 
@@ -215,7 +215,7 @@ This corrupted precisely the distinction the two exclusion families exist to
 draw: *"the firm does not belong in the study"* versus *"the data does not
 exist"*.
 
-Fixed by making the check tri-state — `present` / `absent` / `no_xbrl` — and only
+Fixed by making the check tri-state (`present` / `absent` / `no_xbrl`) and only
 short-circuiting on `absent`. Re-adjudicating the 59 affected rows (provably
 equivalent to a full re-run, since the gate fired only on them) changed **48 of
 59**:

@@ -92,4 +92,4 @@ export const getMeasurement = () => readJson<Measurement>('measurement.json')
 export const getManifest = () => readJson<Manifest>('MANIFEST.json')
 
 export const pct = (x: number | null | undefined, dp = 1) =>
-  x === null || x === undefined || !isFinite(x) ? '—' : (x * 100).toFixed(dp) + '%'
+  x === null || x === undefined || !isFinite(x) ? 'n/a' : (x * 100).toFixed(dp) + '%'

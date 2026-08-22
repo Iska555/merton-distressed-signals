@@ -29,8 +29,8 @@ export default function DiscriminationPage() {
           </p>
           <p>
             The analysis is written and tested, including a{' '}
-            <strong>three-estimator horse race</strong> — KMV iterative solve,
-            simultaneous solve, and the Bharath–Shumway naive approximation — on
+            <strong>three-estimator horse race</strong>: KMV iterative solve,
+            simultaneous solve, and the Bharath and Shumway naive approximation, on
             identical samples with a paired bootstrap on the AUC differences.
             Bharath and Shumway (2008) found the naive approximation forecasts default
             about as well as the full solve. If that replicates here on 2012–2024 data,
@@ -45,7 +45,7 @@ export default function DiscriminationPage() {
         <ul className="spec-body" style={{ paddingLeft: 20 }}>
           <li>
             <strong>AUC, not accuracy.</strong> Accuracy on a sample selected for
-            defaulting is meaningless — a model flagging every firm on earth scores
+            defaulting is meaningless. A model flagging every firm on earth scores
             100%. The predecessor to this project hardcoded exactly that.
           </li>
           <li>

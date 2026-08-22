@@ -1,6 +1,6 @@
 """
 ==============================================================
-MERTON CREDIT SCANNER — SCHEDULER
+MERTON CREDIT SCANNER: SCHEDULER
 backend/scheduler.py
 
 Registered in main.py:
@@ -40,7 +40,7 @@ async def daily_market_close_scan():
         session = await run_daily_scan()
         update_cache(session)
         logger.info(
-            f"Daily scan stored: {session.session_id} — "
+            f"Daily scan stored: {session.session_id}, "
             f"{session.signals_fired} signals / {session.total_screened} screened"
         )
     except Exception as e:

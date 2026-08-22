@@ -1,18 +1,27 @@
 import './globals.css'
 import type { Metadata } from 'next'
-import { Source_Serif_4, Public_Sans, IBM_Plex_Mono } from 'next/font/google'
+import { Newsreader, Archivo, IBM_Plex_Mono } from 'next/font/google'
 import Nav from '@/components/Nav'
 import Footer from '@/components/Footer'
 
-const serif = Source_Serif_4({
-  subsets: ['latin'],
-  weight: ['400', '600'],
-  variable: '--font-serif',
-  display: 'swap',
-})
-const sans = Public_Sans({
+/**
+ * Newsreader for display, Archivo for body, IBM Plex Mono for figures.
+ *
+ * Source Serif 4 was the previous display face and it is a book face: it sets
+ * a page of text well and gives a headline no voice at all. Newsreader has the
+ * editorial contrast a masthead needs. Public Sans went with it because its
+ * neutrality read as provisional next to real numbers.
+ */
+const display = Newsreader({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
+  style: ['normal', 'italic'],
+  variable: '--font-display',
+  display: 'swap',
+})
+const sans = Archivo({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-sans',
   display: 'swap',
 })
@@ -26,8 +35,9 @@ const mono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: 'Distressed Credit Signals',
   description:
-    'Does equity-implied distance to default separate firms that subsequently ' +
-    'default from comparable firms that do not, and what does that cost in false positives?',
+    'Most corporate bankruptcies cannot be studied. Whether a failed company ' +
+    'leaves a usable record depends on when it failed, and the reason is ' +
+    'regulatory rather than economic.',
 }
 
 export default function RootLayout({
@@ -38,7 +48,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${serif.variable} ${sans.variable} ${mono.variable}`}
+      className={`${display.variable} ${sans.variable} ${mono.variable}`}
     >
       <body>
         <Nav />

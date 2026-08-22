@@ -82,13 +82,13 @@ export default function BaseRateExplorer() {
               className="v tnum"
               style={{ color: precision < 0.2 ? 'var(--risk)' : 'var(--ink)' }}
             >
-              {isFinite(precision) ? (precision * 100).toFixed(1) + '%' : '—'}
+              {isFinite(precision) ? (precision * 100).toFixed(1) + '%' : 'n/a'}
             </div>
             <div className="k eyebrow">Precision · flagged firms that do default</div>
           </div>
           <div className="gapline">
             <div className="v tnum" style={{ fontSize: 24 }}>
-              {isFinite(perTrue) ? perTrue.toFixed(1) : '—'}
+              {isFinite(perTrue) ? perTrue.toFixed(1) : 'n/a'}
             </div>
             <div className="k eyebrow">False alarms per real default</div>
           </div>
@@ -129,9 +129,9 @@ export default function BaseRateExplorer() {
       <div className="callout">
         <p className="eyebrow">Why this is the finding, not a caveat</p>
         <p>
-          At the default settings — catching <strong>80%</strong> of defaults while
+          At the default settings, catching <strong>80%</strong> of defaults while
           flagging <strong>20%</strong> of survivors, against a{' '}
-          <strong>1.5%</strong> base rate — precision is about{' '}
+          <strong>1.5%</strong> base rate, precision is about{' '}
           <strong>5.7%</strong>. Roughly <strong>sixteen false alarms for every
           real default</strong>. The discriminatory power is genuine; the production
           experience is still mostly noise.

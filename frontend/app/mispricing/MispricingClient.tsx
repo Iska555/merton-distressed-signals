@@ -47,7 +47,7 @@ export default function MispricingClient({
   const [rPct, setR] = useState(4.3)
   const [T, setT] = useState(3)
 
-  // Accounting side — the benchmark rating sees ONLY these.
+  // Accounting side. The benchmark rating sees ONLY these.
   const [ebit, setEbit] = useState(420)
   const [interest, setInterest] = useState(140)
   const [assets, setAssets] = useState(6200)
@@ -171,13 +171,13 @@ export default function MispricingClient({
         <div className="stat-row">
           <div className="stat">
             <div className="v tnum">
-              {m && isFinite(m.spread) ? Math.round(m.spread).toLocaleString() : '—'}
+              {m && isFinite(m.spread) ? Math.round(m.spread).toLocaleString() : 'n/a'}
             </div>
             <div className="k">Equity-implied spread</div>
             <div className="sub">bps · Merton solve</div>
           </div>
           <div className="stat">
-            <div className="v tnum">{rating?.usable ? rating.rating : '—'}</div>
+            <div className="v tnum">{rating?.usable ? rating.rating : 'n/a'}</div>
             <div className="k">Shadow rating</div>
             <div className="sub">
               {rating?.usable
@@ -186,16 +186,16 @@ export default function MispricingClient({
             </div>
           </div>
           <div className="stat">
-            <div className="v tnum">{cohortBps !== null ? cohortBps.toFixed(0) : '—'}</div>
+            <div className="v tnum">{cohortBps !== null ? cohortBps.toFixed(0) : 'n/a'}</div>
             <div className="k">Cohort benchmark</div>
             <div className="sub">
-              {rating?.usable ? `${rating.cohortIndex} index OAS` : '—'}
+              {rating?.usable ? `${rating.cohortIndex} index OAS` : 'n/a'}
             </div>
           </div>
           <div className="stat">
             <div className="v tnum" style={{ color: colour }}>
               {gap === null
-                ? '—'
+                ? 'n/a'
                 : (gap >= 0 ? '+' : '−') + Math.abs(Math.round(gap)).toLocaleString()}
             </div>
             <div className="k">Divergence</div>
@@ -287,7 +287,7 @@ export default function MispricingClient({
         <p className="source-line">
           {spreads
             ? `Cohort spreads: ${spreads.source}, observation ${spreads.latest_observation}, retrieved ${spreads.retrieved_utc.slice(0, 10)}. Series IDs on /data.`
-            : 'Cohort spreads unavailable — no FRED series retrieved at build time.'}
+            : 'Cohort spreads unavailable: no FRED series retrieved at build time.'}
         </p>
       </section>
 
@@ -300,8 +300,8 @@ export default function MispricingClient({
             credit rating from Merton asset leverage, then used that rating to look up
             the benchmark spread. Both sides of the comparison descended from the same
             model output. The benchmark rating is now assigned from accounting
-            fundamentals alone — interest coverage, scale, profitability, debt to
-            earnings — with no Merton quantity anywhere in it, and a test asserts that
+            fundamentals alone, meaning interest coverage, scale, profitability and
+            debt to earnings, with no Merton quantity anywhere in it. A test asserts that
             the function cannot even accept one.
           </p>
           <p>
@@ -331,14 +331,14 @@ export default function MispricingClient({
             January 2017. A firm crossing the size boundary is therefore rated against
             thresholds calibrated nearly a decade apart, and the switch is triggered by
             size rather than by date. Both were checked row by row against the
-            published source and match exactly — but verification cannot fix a vintage
+            published source and match exactly, but verification cannot fix a vintage
             gap, only disclose it.
           </p>
           <p>
             <strong>Why the size band uses assets rather than market cap.</strong> The
             published boundary is $5bn of market capitalisation. Market cap is a price,
             and the equity-implied spread on the other side of this comparison is built
-            from that same price — so a market-cap band would move both sides together.
+            from that same price, so a market-cap band would move both sides together.
             In a distress event equity collapses, the implied spread widens, the firm
             drops a size band, and the benchmark widens too, damping the divergence
             exactly when it should be opening. The bias runs toward{' '}
@@ -348,7 +348,7 @@ export default function MispricingClient({
           <p>
             <strong>The substitution is not an equivalence.</strong> $5bn of assets is
             not $5bn of market cap, and the two cannot be reconciled without market caps
-            for the whole universe — which the price-API symbol quota forbids. The level
+            for the whole universe, which the price-API symbol quota forbids. The level
             is a judgement: it sits near the 75th percentile of non-financial filers
             with at least $50M of assets, so it separates roughly the top quartile. The
             matching numeral is a coincidence. The sensitivity control above is the real

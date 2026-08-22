@@ -139,17 +139,17 @@ export default function ModelPage() {
           <div className="outputs">
             <div className="out-grid">
               <div className="out">
-                <div className="v tnum">{s.ok ? '$' + fM(s.V) : '—'}</div>
+                <div className="v tnum">{s.ok ? '$' + fM(s.V) : 'n/a'}</div>
                 <div className="k">Asset value</div>
                 <div className="sub">{s.ok ? `leverage D/V ${(D / s.V).toFixed(2)}` : ''}</div>
               </div>
               <div className="out">
-                <div className="v tnum">{s.ok ? (s.sV * 100).toFixed(1) + '%' : '—'}</div>
+                <div className="v tnum">{s.ok ? (s.sV * 100).toFixed(1) + '%' : 'n/a'}</div>
                 <div className="k">Asset volatility</div>
                 <div className="sub">deleveraged</div>
               </div>
               <div className="out">
-                <div className="v tnum">{m ? f2(m.dd) + 'σ' : '—'}</div>
+                <div className="v tnum">{m ? f2(m.dd) + 'σ' : 'n/a'}</div>
                 <div className="k">Distance to default</div>
                 <div className="sub">std devs to the barrier</div>
               </div>
@@ -159,20 +159,20 @@ export default function ModelPage() {
                 <div className="v tnum">
                   {m
                     ? (m.pd * 100 < 0.01 && m.pd > 0 ? '<0.01' : (m.pd * 100).toFixed(2)) + '%'
-                    : '—'}
+                    : 'n/a'}
                 </div>
                 <div className="k">Default probability</div>
                 <div className="sub">{m ? `over ${T.toFixed(2)} years` : ''}</div>
               </div>
               <div className="out">
                 <div className="v tnum">
-                  {m && isFinite(m.spread) ? Math.round(m.spread).toLocaleString('en-US') : '—'}
+                  {m && isFinite(m.spread) ? Math.round(m.spread).toLocaleString('en-US') : 'n/a'}
                 </div>
                 <div className="k">Implied credit spread</div>
                 <div className="sub">basis points over risk-free</div>
               </div>
               <div className="out">
-                <div className="v tnum">{m ? '$' + fM(m.B) : '—'}</div>
+                <div className="v tnum">{m ? '$' + fM(m.B) : 'n/a'}</div>
                 <div className="k">Debt value</div>
                 <div className="sub">present value of the claim</div>
               </div>
@@ -186,7 +186,7 @@ export default function ModelPage() {
               <span style={{ color: s.ok ? 'var(--muted)' : 'var(--risk)' }}>
                 {s.ok
                   ? `Converged. Asset volatility ${(s.sV * 100).toFixed(1)}% is the deleveraged equity volatility of ${sEpct.toFixed(0)}%.`
-                  : 'No solution in the search bracket. The equations are badly conditioned at these inputs — usually very low equity volatility with very high leverage.'}
+                  : 'No solution in the search bracket. The equations are badly conditioned at these inputs, usually very low equity volatility with very high leverage.'}
               </span>
             </div>
           </div>
@@ -248,7 +248,7 @@ export default function ModelPage() {
                 tip={(xv) => {
                   if (xv < chart2.lo || xv > chart2.hi) return ''
                   const sp = spreadAtLev(xv, s.sV, r, T)
-                  return `<b>leverage &nbsp;${xv.toFixed(2)}</b><br>spread &nbsp;${isFinite(sp) ? Math.round(sp).toLocaleString('en-US') : '—'} bps`
+                  return `<b>leverage &nbsp;${xv.toFixed(2)}</b><br>spread &nbsp;${isFinite(sp) ? Math.round(sp).toLocaleString('en-US') : 'n/a'} bps`
                 }}
               />
             )}

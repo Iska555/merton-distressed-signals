@@ -1,5 +1,5 @@
 """
-MERTON CREDIT SCANNER — EVENT SCANNER SERVICE
+MERTON CREDIT SCANNER: EVENT SCANNER SERVICE
 backend/signals/event_scanner.py
 
 Pure service layer. No FastAPI. No scheduler.
@@ -418,7 +418,7 @@ async def run_daily_scan(
                             key=lambda x: x.alpha_gap_bps, reverse=True)
     signals_fired = sum(1 for r in valid if r.signal in ("SHORT_CREDIT", "CRITICAL_SHORT"))
 
-    logger.info(f"Scan complete — {len(valid)} valid, {signals_fired} SHORT signals")
+    logger.info(f"Scan complete: {len(valid)} valid, {signals_fired} SHORT signals")
     return ScanSession(
         session_id=session_id,
         scan_date=date.today().isoformat(),

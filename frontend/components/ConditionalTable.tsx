@@ -3,21 +3,21 @@ import type { ConditionalTable as Table, Cell } from '@/lib/siteData'
 /**
  * A cross-tab reported within era as well as pooled.
  *
- * Era is the dominant axis of this sample — two SEC filing-rule changes drive
- * resolution from 13% to 69% across the window — so any other variable
+ * Era is the dominant axis of this sample. Two SEC filing-rule changes drive
+ * resolution from 13% to 69% across the window, so any other variable
  * correlated with era reproduces the era gradient under its own name. Showing
  * the pooled column beside the conditional cells is the point: a reader has to
  * be able to watch a pooled difference dissolve when era is held fixed.
  *
  * Every cell carries its count. A rate is printed only when its 95% Wilson
  * interval is narrow enough to separate one band from another; otherwise the
- * counts stand alone. That is a floor, not a safeguard — see /measurement.
+ * counts stand alone. That is a floor, not a safeguard. See /measurement.
  */
 function CellBox({ cell, pooled = false }: { cell: Cell; pooled?: boolean }) {
   if (cell.n === 0) {
     return (
       <td className="num" style={{ color: 'var(--faint)' }}>
-        —
+        n/a
       </td>
     )
   }
@@ -99,7 +99,7 @@ export default function ConditionalTable({
       <p className="source-line">
         Each cell is resolved/candidates above the rate.{' '}
         <span className="tnum">±</span> means the 95% Wilson interval is wider
-        than {(maxWidth * 100).toFixed(0)} points — the counts are real, the
+        than {(maxWidth * 100).toFixed(0)} points. The counts are real, the
         rate is not reportable. Suppression is on interval width rather than a
         count threshold because an extreme rate is estimated precisely at small
         n: 0 of 13 says something, 6 of 13 does not.

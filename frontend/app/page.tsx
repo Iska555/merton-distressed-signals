@@ -1,160 +1,358 @@
 import Link from 'next/link'
+import FigureBars from '@/components/FigureBars'
+import PayoffDiagram from '@/components/PayoffDiagram'
 import { getManifest, getMeasurement, pct } from '@/lib/siteData'
 
 export default function Home() {
   const m = getMeasurement()
   const manifest = getManifest()
 
-  const early = m?.by_era.find((e) => e.label.startsWith('2012'))
-  const late = m?.by_era.find((e) => e.label.startsWith('2022'))
+  const first = m?.by_era[0]
+  const last = m?.by_era[m.by_era.length - 1]
 
   return (
-    <div className="wrap">
-      <header className="masthead">
-        <p className="eyebrow">Abstract</p>
-        <h1>
-          Equity-implied credit risk, and what it costs to act on it.
-        </h1>
-        <p className="lede">
-          Does distance to default, computed from a structural model on equity
-          data alone, separate firms that subsequently default from comparable
-          firms that do not — and what false-positive rate does that separation
-          cost at realistic base rates?
-        </p>
+    <>
+      {/* 1. Asymmetric hero */}
+      <header className="hero">
+        <div className="wrap">
+          <div className="hero-grid">
+            <div className="hero-copy">
+              <p className="kicker">Working paper &middot; August 2026</p>
+              <h1>Most corporate bankruptcies cannot be studied.</h1>
+              <p className="lead">
+                Of {m?.total_candidates ?? 346} US bankruptcy filings sampled
+                from 2010 to 2024, the ticker a firm actually traded under can be
+                recovered for {m?.resolved ?? 149} of them. The rest are not
+                missing by choice. They are unreachable from free public data,
+                and the literature built on that data has never said so.
+              </p>
+            </div>
+            <div className="bignum">
+              <span className="n tnum">{m ? pct(m.resolution_rate) : '43.1%'}</span>
+              <span className="cap">
+                of sampled bankrupt US filers can be matched to the security they
+                traded as, using public sources alone.
+              </span>
+            </div>
+          </div>
+          <div className="hero-rule" />
+        </div>
       </header>
 
-      <section className="section">
-        <h2>The finding so far is about measurement</h2>
-        <p className="prose">
-          The study was designed to test discrimination. Building it surfaced a
-          prior problem that turns out to be the more useful result: constructing
-          a survivorship-free sample of defaulted US firms from free public data
-          is far harder than the literature admits, and the difficulty is
-          <em> structured</em> — it varies systematically by era, by firm size and
-          by sector, in ways that would bias any study that ignored them.
-        </p>
-
-        <div className="stat-row">
-          <div className="stat">
-            <div className="v tnum">{m ? pct(m.resolution_rate) : '—'}</div>
-            <div className="k">Candidates resolvable</div>
-            <div className="sub">
-              {m ? `${m.resolved} of ${m.total_candidates} bankruptcy filings` : 'not yet computed'}
+      {/* 2. Statistic strip */}
+      <section className="strip">
+        <div className="wrap">
+          <div className="strip-grid">
+            <div className="stat">
+              <span className="v tnum">
+                {m ? `${m.resolved} / ${m.total_candidates}` : '149 / 346'}
+              </span>
+              <span className="k">Candidates resolved</span>
+              <span className="d">bankruptcy filings, 2010 to 2024</span>
+            </div>
+            <div className="stat">
+              <span className="v tnum">
+                {first && last
+                  ? `${pct(first.rate, 1)} to ${pct(last.rate, 1)}`
+                  : '12.8% to 68.7%'}
+              </span>
+              <span className="k">Era gradient</span>
+              <span className="d">monotone, earliest to latest cohort</span>
+            </div>
+            <div className="stat">
+              <span className="v tnum">2</span>
+              <span className="k">Disclosure rules responsible</span>
+              <span className="d">XBRL 2011, cover page 2019</span>
+            </div>
+            <div className="stat">
+              <span className="v tnum">
+                {m ? pct(m.chapter_22_count / m.total_candidates, 1) : '8.4%'}
+              </span>
+              <span className="k">Filed twice</span>
+              <span className="d">same registrant, two bankruptcies</span>
             </div>
           </div>
-          <div className="stat">
-            <div className="v tnum">
-              {early && late ? `${pct(early.rate, 0)} → ${pct(late.rate, 0)}` : '—'}
+        </div>
+      </section>
+
+      {/* 3. Inverted deep band */}
+      <section className="band">
+        <div className="wrap">
+          <div className="band-grid">
+            <div className="stack">
+              <p className="kicker on-deep">The central finding</p>
+              <p className="pull">
+                Whether a failed company can be studied at all depends on when it
+                failed, and the reason is regulatory rather than economic.
+              </p>
+              <p>
+                A firm that went bankrupt in 2023 leaves a machine-readable
+                trading symbol in its own filings. A firm that went bankrupt in
+                2013 does not, because the tag did not exist yet. Nothing about
+                the two failures differs. Only the paperwork does.
+              </p>
+              <p>
+                This is not a limitations paragraph at the back of a paper. It is
+                the result.
+              </p>
             </div>
-            <div className="k">Era gradient</div>
-            <div className="sub">{early && late ? '2012–18 vs 2022–24' : 'not yet computed'}</div>
+            <div className="band-stats">
+              <div className="band-stat">
+                <span className="bn tnum">2011</span>
+                <span className="bl">
+                  XBRL instance documents begin appearing in filings
+                </span>
+              </div>
+              <div className="band-stat">
+                <span className="bn tnum">2019</span>
+                <span className="bl">
+                  FAST Act rule adds a trading symbol column to the cover page
+                </span>
+              </div>
+              <div className="band-stat">
+                <span className="bn tnum">2008</span>
+                <span className="bl">
+                  The largest default cluster in modern history, and out of reach
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="stat">
-            <div className="v tnum">2</div>
-            <div className="k">Structural thresholds</div>
-            <div className="sub">XBRL ~2011, cover page 2019</div>
+        </div>
+      </section>
+
+      {/* 4. Figure block */}
+      <section className="sec">
+        <div className="wrap stack-lg">
+          <div className="sec-head">
+            <p className="kicker">Measurement</p>
+            <h2>Identifiability more than quintupled, and no bankruptcy changed.</h2>
+            <p className="lead">
+              Resolution rate by filing era, holding method constant. The same
+              pipeline, run against the same kind of company, returns a different
+              answer depending only on the decade.
+            </p>
+          </div>
+
+          {m ? (
+            <FigureBars
+              number="Figure 1"
+              title="Share of bankruptcy filings resolvable to a traded symbol"
+              source={`n = ${m.total_candidates} candidates from SEC 8-K Item 1.03 filings. Every cell count is published on the measurement page. ${
+                manifest
+                  ? `Generated ${manifest.generated_utc.slice(0, 10)} at commit ${manifest.git_commit}.`
+                  : ''
+              }`}
+              bars={m.by_era.map((e, i) => ({
+                label: e.label.replace('-', ' to 20'),
+                pct: e.rate * 100,
+                value: `${(e.rate * 100).toFixed(1)}%`,
+                highlight: i === m.by_era.length - 1,
+              }))}
+            />
+          ) : (
+            <p className="prose">
+              Not yet computed. Run{' '}
+              <span className="mono">python -m scripts.audit_resolution</span>.
+            </p>
+          )}
+        </div>
+      </section>
+
+      {/* 5. Bordered two-up */}
+      <section className="sec tinted">
+        <div className="wrap stack-lg">
+          <div className="sec-head">
+            <p className="kicker">What decides it</p>
+            <h2>Two rules, eight years apart.</h2>
+          </div>
+          <div className="thresholds">
+            <div className="thr">
+              <span className="year tnum">2011</span>
+              <h3>Machine-readable filings arrive</h3>
+              <p className="what">
+                XBRL instance documents start appearing at scale. Before this
+                point a filing carries no structured data at all, so nothing in
+                it can be read by a pipeline without parsing prose.
+              </p>
+            </div>
+            <div className="thr">
+              <span className="year tnum">2019</span>
+              <h3>The symbol gets its own column</h3>
+              <p className="what">
+                The FAST Act Modernization rule adds a trading symbol field to
+                the 10-K cover page. Open a 2011 cover page and the column is
+                simply absent. The datum was never there to extract.
+              </p>
+            </div>
+          </div>
+          <p className="small narrow">
+            Between those dates the symbol exists only in running prose, in
+            sentences of the form <em>traded on the New York Stock Exchange
+            under the symbol EK</em>. Recovering it that way carries 40 of the{' '}
+            {m?.resolved ?? 149} resolutions, and it is why Kodak resolves to EK
+            rather than to the KODK it trades as today.
+          </p>
+        </div>
+      </section>
+
+      {/* 6. Figure block, second kind: the model as a graphic */}
+      <section className="sec">
+        <div className="wrap">
+          <div className="hero-grid" style={{ alignItems: 'center' }}>
+            <div className="stack">
+              <p className="kicker">The model</p>
+              <h2>Equity is a call option on the firm.</h2>
+              <p className="lead">
+                Merton&rsquo;s 1974 insight is the kink in this diagram.
+                Shareholders are paid nothing until the assets clear the debt,
+                then take everything above it. Lenders own the rest and their
+                upside is capped.
+              </p>
+              <p className="prose">
+                Everything downstream follows from that single shape. Distance to
+                default is how many standard deviations of asset value sit
+                between a firm and the barrier, and it is recoverable from the
+                equity market alone, which is why it can be computed for
+                companies whose bonds never trade.
+              </p>
+              <p>
+                <Link href="/model">Solve it in the browser</Link>
+              </p>
+            </div>
+            <figure>
+              <PayoffDiagram />
+              <figcaption className="figcap">
+                <span className="fignum">Figure 2</span>
+                <span className="figtitle">Payoff at maturity against asset value</span>
+                <span className="figsrc">
+                  Schematic. D is the face value of debt at the horizon. Drawn
+                  from the model, not from data.
+                </span>
+              </figcaption>
+            </figure>
           </div>
         </div>
-
-        <p className="source-line">
-          Source: SEC EDGAR full-text search on 8-K Item 1.03, resolved against
-          XBRL company facts.{' '}
-          {manifest
-            ? `Generated ${manifest.generated_utc.slice(0, 10)} at commit ${manifest.git_commit}.`
-            : 'Manifest not found.'}{' '}
-          Full method and exclusion rules on <Link href="/measurement">Measurement</Link>.
-        </p>
       </section>
 
-      <section className="section">
-        <h2>Modules</h2>
-        <div className="modules">
-          <Link href="/model" className="module">
-            <h3>The model</h3>
-            <p>
-              Merton (1974) from first principles, with an interactive solver that
-              recovers asset value and asset volatility in your browser.
-            </p>
-            <span className="status">Live · no data needed</span>
-          </Link>
-
-          <Link href="/mispricing" className="module">
-            <h3>Mispricing</h3>
-            <p>
-              Where equity-implied credit risk disagrees with what credit
-              investors charge, on a benchmark rating assigned from accounting
-              fundamentals alone.
-            </p>
-            <span className="status">Live · direction, not level</span>
-          </Link>
-
-          <Link href="/measurement" className="module">
-            <h3>Measurement</h3>
-            <p>
-              Why the sample is hard to build: two XBRL thresholds, an era
-              gradient, a size gradient, a spliced vendor ticker and a missing
-              listing.
-            </p>
-            <span className="status">Computed</span>
-          </Link>
-
-          <Link href="/evidence" className="module">
-            <h3>Evidence</h3>
-            <p>
-              Event-time distance-to-default paths, defaulted firms against
-              matched surviving controls.
-            </p>
-            <span className="status">Awaiting sample</span>
-          </Link>
-
-          <Link href="/discrimination" className="module">
-            <h3>Discrimination</h3>
-            <p>
-              ROC and AUC by horizon, an interactive threshold slider, and the
-              base-rate-adjusted precision that follows from it.
-            </p>
-            <span className="status">Awaiting sample</span>
-          </Link>
-
-          <Link href="/data" className="module">
-            <h3>Data</h3>
-            <p>
-              Sources with retrieval dates, sample construction, exclusions split
-              by cause, downloads and limitations.
-            </p>
-            <span className="status">Computed</span>
-          </Link>
+      {/* 7. Card grid */}
+      <section className="sec tinted">
+        <div className="wrap stack-lg">
+          <div className="sec-head">
+            <p className="kicker">The study</p>
+            <h2>Six modules, built to be checked.</h2>
+          </div>
+          <div className="cards">
+            <Link className="card" href="/model">
+              <h3>The model</h3>
+              <p>
+                Merton solved live in the browser. Move leverage and volatility,
+                watch distance to default and the implied spread follow.
+              </p>
+              <span className="go">Open the solver</span>
+            </Link>
+            <Link className="card" href="/mispricing">
+              <h3>Mispricing</h3>
+              <p>
+                Where equity-implied risk and the credit cohort disagree, with
+                the circularity that broke the original version removed.
+              </p>
+              <span className="go">See the divergence</span>
+            </Link>
+            <Link className="card" href="/measurement">
+              <h3>Measurement</h3>
+              <p>
+                The resolution audit in full. Era, sector and size conditioned on
+                each other, with cell counts beside every rate.
+              </p>
+              <span className="go">Read the audit</span>
+            </Link>
+            <Link className="card pending" href="/evidence">
+              <h3>Evidence</h3>
+              <p>
+                Distance to default in event time, defaulters against matched
+                survivors. Awaiting the sample build.
+              </p>
+              <span className="go">In progress</span>
+            </Link>
+            <Link className="card" href="/discrimination">
+              <h3>Discrimination</h3>
+              <p>
+                What separation costs. Threshold slider, confusion matrix, and
+                precision once a realistic base rate is applied.
+              </p>
+              <span className="go">Base rate exhibit live</span>
+            </Link>
+            <Link className="card" href="/data">
+              <h3>Data</h3>
+              <p>
+                Sources, exclusions split by cause, spec amendments, and every
+                command needed to reproduce the figures.
+              </p>
+              <span className="go">Check the work</span>
+            </Link>
+          </div>
         </div>
       </section>
 
-      <section className="section">
-        <h2>What this is not</h2>
-        <div className="callout">
-          <p className="eyebrow">Scope</p>
-          <p>
-            <strong>It is not an arbitrage signal.</strong> Issuer-level bond
-            pricing requires TRACE, which is not freely available. The mispricing
-            module compares an equity-implied estimate against a{' '}
-            <em>rating-cohort index average</em>, not against this firm&rsquo;s
-            bond. That is a screen for disagreement and its direction, never a
-            number of basis points anyone could capture.
-          </p>
-          <p>
-            <strong>It does not cover the financial crisis.</strong> The usable
-            window is 2012–2024. Before roughly 2011 the filings carry no XBRL,
-            and before 2019 they carry no trading symbol on the cover page at all.
-            The 2008–09 default cluster is not merely absent; it is unreachable
-            with free data.
-          </p>
-          <p>
-            <strong>No accuracy claim is made from defaulted firms alone.</strong>{' '}
-            A sample selected on the outcome cannot measure accuracy — a model
-            that flags every firm on earth scores 100% on it. Discrimination is
-            reported as AUC against a matched control cohort, with the
-            false-positive rate stated.
-          </p>
+      {/* 8. Pull quote */}
+      <section className="sec warm">
+        <div className="wrap">
+          <div className="quote">
+            <span className="bar" />
+            <div>
+              <blockquote>
+                A sample selected on the outcome cannot measure accuracy. A model
+                that flags every firm on earth scores 100% on it.
+              </blockquote>
+              <cite>
+                Why the original version of this project claimed nothing worth
+                claiming
+              </cite>
+            </div>
+          </div>
         </div>
       </section>
-    </div>
+
+      {/* 9. Scope columns */}
+      <section className="sec">
+        <div className="wrap stack-lg">
+          <div className="sec-head">
+            <p className="kicker">Scope</p>
+            <h2>What this is not.</h2>
+          </div>
+          <div className="scope">
+            <div className="scopecol">
+              <h3>Not an arbitrage signal</h3>
+              <p>
+                Issuer-level bond pricing needs TRACE, which is not free. The
+                mispricing module compares an equity-implied estimate against a
+                rating-cohort index average, not against this firm&rsquo;s bond.
+                It screens for disagreement and its direction. It is not basis
+                points anyone could capture.
+              </p>
+            </div>
+            <div className="scopecol">
+              <h3>Not a crisis study</h3>
+              <p>
+                The usable window runs 2012 to 2024. Before 2011 the filings
+                carry no XBRL, before 2019 no cover-page symbol. The 2008 default
+                cluster is not merely absent from the sample. It is unreachable
+                with free data, and any result here describes a low-default era.
+              </p>
+            </div>
+            <div className="scopecol">
+              <h3>Not accurate, yet</h3>
+              <p>
+                No accuracy figure is quoted from defaulted firms alone.
+                Discrimination will be reported as AUC against a matched control
+                cohort, with the false-positive rate stated and precision
+                recomputed at a realistic base rate. Those numbers do not exist
+                until the sample lands.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   )
 }

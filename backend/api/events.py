@@ -1,6 +1,6 @@
 """
 ==============================================================
-MERTON CREDIT SCANNER — EVENTS ROUTER
+MERTON CREDIT SCANNER: EVENTS ROUTER
 backend/api/events.py
 
 Registered in main.py as:
@@ -129,7 +129,7 @@ async def trigger_manual_scan(
 @router.get("/scan/stream")
 async def stream_scan_results():
     """
-    SSE endpoint — pushes scan updates every 5 seconds when new sessions land.
+    SSE endpoint. Pushes scan updates every 5 seconds when new sessions land.
     Frontend connects via: new EventSource('/api/v1/events/scan/stream')
     """
     async def event_generator():

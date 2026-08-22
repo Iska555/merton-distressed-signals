@@ -158,6 +158,58 @@ def build_measurement(audit: pd.DataFrame) -> dict:
     }
 
 
+def build_verification(frame: pd.DataFrame) -> dict:
+    """
+    The symbol-resolution error rate, by stratum.
+
+    Two numbers per stratum, deliberately kept apart. The **flag** rate is a
+    name-similarity heuristic that sorts attention and decides nothing; many
+    correct tickers are not derivable from a company name, so it runs high and
+    means little. The **error** rate is hand-adjudicated against the sentence in
+    the filing, and is the published statistic. Reporting only the first would
+    overstate the error rate by a factor of several.
+
+    Strata are reported separately because the risk is concentrated: prose
+    extraction before the 2019 cover-page rule is the variable case, and a
+    pooled figure dominated by clean recent XBRL would understate it there.
+    """
+    verdicts = frame.get("human_verdict", pd.Series(dtype=str)).fillna("")
+    errors = verdicts.isin(["wrong_company", "wrong_era"])
+    adjudicated = verdicts.isin(
+        ["correct", "wrong_company", "wrong_era", "unverifiable"])
+
+    def block(chunk: pd.DataFrame, mask: pd.Series) -> dict:
+        done = chunk[mask.loc[chunk.index]]
+        n = len(done)
+        bad = int(errors.loc[done.index].sum()) if n else 0
+        lo, hi = X.wilson_interval(bad, n) if n else (None, None)
+        return {
+            "n_sampled": len(chunk),
+            "n_adjudicated": n,
+            "errors": bad,
+            "error_rate": (bad / n) if n else None,
+            "ci_low": lo, "ci_high": hi,
+            "unverifiable": int(
+                (verdicts.loc[done.index] == "unverifiable").sum()) if n else 0,
+            "flagged": int((chunk.get("heuristic") == "CHECK").sum()),
+        }
+
+    strata = []
+    if "stratum" in frame.columns:
+        for name, chunk in frame.groupby("stratum"):
+            strata.append({"stratum": str(name), **block(chunk, adjudicated)})
+    return {
+        "n": len(frame),
+        "strata": strata,
+        "pooled": block(frame, adjudicated),
+        "verdict_counts": {str(k): int(v)
+                           for k, v in verdicts[adjudicated].value_counts().items()},
+        "note": ("Flag rate is a name-similarity heuristic and decides nothing. "
+                 "The error rate is hand-adjudicated against the sentence in the "
+                 "filing and is published whatever it says."),
+    }
+
+
 FRED_SERIES = {
     "AAA": "BAMLC0A1CAAA",
     "AA": "BAMLC0A2CAA",
@@ -276,13 +328,7 @@ def main() -> int:
     if verification.exists():
         frame = pd.read_csv(verification, dtype=str)
         (OUT / "verification.json").write_text(
-            json.dumps(_clean({
-                "n": len(frame),
-                "strata": [
-                    {"stratum": str(k), "n": int(len(v))}
-                    for k, v in frame.groupby("stratum")
-                ] if "stratum" in frame.columns else [],
-            }), indent=2) + "\n",
+            json.dumps(_clean(build_verification(frame)), indent=2) + "\n",
             encoding="utf-8",
         )
         manifest["files"]["verification.json"] = {

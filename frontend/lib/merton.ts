@@ -145,13 +145,13 @@ export function spreadAtLev(lev: number, sV: number, r: number, T: number): numb
 // ---------------------------------------------------------------- formatting
 
 export function fM(x: number): string {
-  if (!isFinite(x)) return '—'
+  if (!isFinite(x)) return 'n/a'
   if (Math.abs(x) >= 10000) return (x / 1000).toFixed(1) + 'bn'
   return Math.round(x).toLocaleString('en-US') + 'm'
 }
 
 export function f2(x: number): string {
-  return isFinite(x) ? x.toFixed(2) : '—'
+  return isFinite(x) ? x.toFixed(2) : 'n/a'
 }
 
 export function niceTicks(lo: number, hi: number, n: number): number[] {

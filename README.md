@@ -8,7 +8,7 @@
 
 > Does distance to default, computed from the Merton (1974) structural model on
 > equity data alone, separate firms that subsequently default from comparable
-> firms that do not — and what false-positive rate does that separation cost at
+> firms that do not, and what false-positive rate does that separation cost at
 > realistic base rates?
 
 The second clause is the contribution. Anyone can show distance to default falls
@@ -37,13 +37,13 @@ showing a placeholder.
 
 **Not an arbitrage signal.** Issuer-level bond pricing requires TRACE, which is
 not freely available. The mispricing module compares an equity-implied spread
-against a *rating-cohort index average* — hundreds of unrelated issuers, not this
+against a *rating-cohort index average* of hundreds of unrelated issuers, not this
 firm's bond. It reports direction and disagreement, never basis points anyone
 could capture.
 
 **Not a study of the financial crisis.** The usable window is 2012–2024. Before
 roughly 2011 filings carry no XBRL; before 2019 they carry no trading symbol on
-the cover page at all. The 2008–09 default cluster is not merely absent — it is
+the cover page at all. The 2008–09 default cluster is not merely absent. It is
 unreachable with free data.
 
 **Not an accuracy claim.** A sample selected on the outcome cannot measure
@@ -77,18 +77,18 @@ all:
 
 Verified directly: Kodak's 2011 10-K cover page carries only *"Title of each
 Class"* and *"Name of each exchange on which registered"*. There is **no trading
-symbol on the page**. Cover-page extraction — the obvious fallback for older
-filings — is not unreliable before 2019; the datum does not exist. What survives
+symbol on the page**. Cover-page extraction, the obvious fallback for older
+filings, is not unreliable before 2019: the datum does not exist. What survives
 is Item 5 prose: *"traded on the New York Stock Exchange under the symbol EK."*
 
-Resolution rises steeply and monotonically across the window — **12.8%** in
+Resolution rises steeply and monotonically across the window, from **12.8%** in
 2010–11 to **68.7%** in 2022–24, on 346 sampled filings.
 
 Era is so dominant that it contaminates everything measured beside it, so every
 cross-tab is reported *within* era strata with cell counts, and a rate is
 withheld where the interval is too wide to read. Conditioned that way, a sector
-effect survives — mining resolves below its own era in every era where the cell
-can be read, manufacturing above — and two earlier claims do not:
+effect survives, since mining resolves below its own era in every era where the
+cell can be read and manufacturing above, and two earlier claims do not:
 
 - **Size.** An earlier draft reported float ≥ $200M resolving at 79% against 51%
   below. It does not replicate, and of the four eras in which all three bands can
@@ -109,7 +109,7 @@ presence agree on 86.7% of candidates. Full cross-tabs on `/measurement`.
 
 **The spliced ticker.** Bed Bath & Beyond traded near **$0.07** before its April
 2023 filing. A major free price source returns a continuous "BBBY" series showing
-**$19–36 and rising** straight through the bankruptcy — Overstock/Beyond Inc.
+**$19–36 and rising** straight through the bankruptcy. Those are Overstock/Beyond Inc.
 prices retro-mapped onto the recycled ticker. A pipeline trusting it would compute
 a healthy firm through a bankruptcy and record it as a model failure.
 
@@ -122,7 +122,7 @@ begins 2018-02-06. Overlapping candidates are flagged and never auto-ranked.
 
 A model with respectable discriminatory power can still be near-useless as a
 standalone alarm. Catching 80% of defaults while flagging 20% of survivors, against
-a 1.5% annual default rate, yields **precision of about 5.7%** — roughly sixteen
+a 1.5% annual default rate, yields **precision of about 5.7%**, roughly sixteen
 false alarms per real default.
 
 That is not an argument that structural models are worthless. It is an argument
@@ -134,12 +134,12 @@ that they rank rather than alarm. Live exhibit on `/discrimination`.
 
 The predecessor generated its signal as `theoretical_spread − market_spread`, where
 the market spread came from `get_spread_by_rating(rating)` and the rating came from
-`_estimate_rating_from_merton_leverage(V, D)` — a function of the model's own solved
+`_estimate_rating_from_merton_leverage(V, D)`, a function of the model's own solved
 asset value. Both sides descended from the same output, so the gap was partly the
 model arguing with itself.
 
-Worse, for any firm classified as a bank or "shadow bank" — a set that included
-Boeing — *both* sides were hardcoded: debt as `max(E * 9.0, 1.0)` and the benchmark
+Worse, for any firm classified as a bank or "shadow bank", a set that included
+Boeing, *both* sides were hardcoded: debt as `max(E * 9.0, 1.0)` and the benchmark
 as 80/120/200 bps by market-cap bucket.
 
 **The fix.** `src/models/shadow_rating.py` assigns the benchmark rating from filing
@@ -152,7 +152,7 @@ return by convention drift.
 
 **What remains limited.** A cohort index is not an issuer's bond, and structural
 models understate observed investment-grade spreads at short horizons because a real
-spread also pays for liquidity and tax — the documented credit spread puzzle (Eom,
+spread also pays for liquidity and tax. This is the documented credit spread puzzle (Eom,
 Helwege and Huang 2004; Huang and Huang 2012). The divergence is therefore read as
 direction, not level, and the page says so.
 
@@ -171,7 +171,7 @@ direction, not level, and the page says so.
 Controls are drawn from a **point-in-time** filer universe rather than from firms
 listed today. Sampling current filers would have required a 2013 control to survive
 thirteen years, making the control group systematically healthier than the
-population and biasing the false-positive rate low — the mirror image of the
+population and biasing the false-positive rate low. That is the mirror image of the
 treatment-side bias, and invisible in the output.
 
 ---
@@ -187,7 +187,7 @@ the primary analysis.
 Five amendments have been made since, each in its own commit with a stated reason
 and disclosed on `/data`. The consequential one reversed control eligibility so that
 firms defaulting *after* a treatment firm's event are retained and censored rather
-than excluded — excluding them uses future information to make a present selection.
+than excluded. Excluding them uses future information to make a present selection.
 The most recent (§8.3) extends era-conditional reporting from headline metrics to
 every descriptive cross-tab, after a published finding turned out to be the era
 gradient measured a second time under another name.
@@ -223,7 +223,7 @@ Tests verify the code does what the code intends; they do not verify the numbers
 `scripts/check_published_figures.py` closes the other half of that gap. It states
 each claim the way it appears in visible UI, next to the computation that has to
 reproduce it, and names the file the sentence lives in when one stops being true.
-It exists because stale figures have twice survived a re-run here — once in a
+It exists because stale figures have twice survived a re-run here: once in a
 sector table that was hand-edited for one section and not another, once in two
 within-era orderings written from a glance at a console rather than computed.
 
@@ -238,11 +238,11 @@ cp .env.example backend/.env   # then fill in
 | `FRED_API_KEY` | For cohort spreads | Read at build time only; never reaches a browser |
 | `TIINGO_API_KEY` | For delisted prices | Metered: 500 unique symbols per calendar month |
 
-> **Security note — resolved 2026-08-23.** A FRED API key was committed to this
+> **Security note, resolved 2026-08-23.** A FRED API key was committed to this
 > repository's history in commit `6ca8476`. Untracking the file in `f778738`
 > did not remediate it: `git show 6ca8476:backend/.env` still returns the value,
 > and anyone who clones the repository has it. **The key has now been revoked
-> and reissued** — the exposed value returns HTTP 400 from the FRED API, so the
+> and reissued**. The exposed value returns HTTP 400 from the FRED API, so the
 > string still in history is inert. The lesson stands: removing a secret from
 > the working tree is not revocation, and only revocation ends the exposure.
 
@@ -257,7 +257,7 @@ src/
 scripts/      audit, verification, smell test, site data build
 data/
   raw/        cached API pulls (gitignored)
-  processed/  committed CSV outputs — the site's data source
+  processed/  committed CSV outputs, the site's data source
 frontend/     Next.js; research pages read committed JSON at build time
 backend/      FastAPI, now optional
 ```

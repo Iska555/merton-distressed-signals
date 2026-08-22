@@ -13,7 +13,7 @@ Control matching is the easiest place in this project to cheat without noticing.
 Once treatment distance-to-default paths are visible, every judgement about who
 counts as a comparable firm gets pulled, unconsciously, toward the set that makes
 the separation look cleaner. Widening a caliper, dropping an "obviously
-unsuitable" control, switching the size variable — each is individually
+unsuitable" control, switching the size variable. Each is individually
 defensible and collectively fatal.
 
 The defence is a specification with an earlier commit timestamp than the data it
@@ -47,8 +47,8 @@ A firm enters the eligible control pool if all hold:
 
 | # | Criterion |
 |---|---|
-| C1 | Files 10-K/10-Q with the SEC (US domestic filer). **20-F and 40-F filers are excluded** — they report under the IFRS taxonomy and expose none of the us-gaap concepts the pipeline reads (verified: Credit Suisse has zero usable debt concepts). |
-| C2 | Has **no** Item 1.03 event on or before the matched treatment firm's `t = 0`. A firm that defaults **later** is retained — see §1.3. |
+| C1 | Files 10-K/10-Q with the SEC (US domestic filer). **20-F and 40-F filers are excluded**, because they report under the IFRS taxonomy and expose none of the us-gaap concepts the pipeline reads (verified: Credit Suisse has zero usable debt concepts). |
+| C2 | Has **no** Item 1.03 event on or before the matched treatment firm's `t = 0`. A firm that defaults **later** is retained: see §1.3. |
 | C3 | SEC XBRL company facts exist covering `t − 24m` of the treatment firm it is matched to. |
 | C4 | Total assets and total liabilities both resolvable at `t − 24m`. |
 | C5 | Total assets at `t − 24m` ≥ **$50M**. |
@@ -57,8 +57,8 @@ A firm enters the eligible control pool if all hold:
 ### 1.2.1 Registrants without common equity are out of scope
 
 > **Amendment, 2026-08-20.** Added after hand-verification found Rockies Region
-> 2007 LP resolving to PDCE — the ticker of PDC Energy, its managing general
-> partner — because the partnership's own filing discusses the GP's stock,
+> 2007 LP resolving to PDCE, the ticker of PDC Energy and its managing general
+> partner, because the partnership's own filing discusses the GP's stock,
 > that being the only stock in the document.
 
 A registrant with **no common shares outstanding** (`dei:EntityCommonStockSharesOutstanding`
@@ -80,8 +80,8 @@ unavailability (§8.1).
 > but did not say *which* event to keep. It must be pre-registered, because the
 > choice changes the panel.
 
-A firm filing Item 1.03 more than once is a **Chapter 22** — a second
-bankruptcy — not a duplicate row. Walter Investment (2017, 2018) re-emerged and
+A firm filing Item 1.03 more than once is a **Chapter 22**, a second
+bankruptcy, not a duplicate row. Walter Investment (2017, 2018) re-emerged and
 filed again as Ditech Holding (2019), all on CIK 0001040719. These are common
 enough in a 2012–2024 sample to matter.
 
@@ -97,7 +97,7 @@ Rejected alternatives, recorded so the choice is visible:
 
 | Option | Why not |
 |---|---|
-| Keep the last filing | Discards the original onset of distress — the event the model is being tested on |
+| Keep the last filing | Discards the original onset of distress, the event the model is being tested on |
 | Retain both as separate events | Defensible, but the second event's `t − 36m` window overlaps the first's post-event period, so the "pre-distress" baseline is already distressed |
 | Exclude Chapter 22 firms entirely | Discards genuine defaults and adds a further selection layer |
 
@@ -112,7 +112,7 @@ The **Chapter 22 rate is reported on `/data`** regardless.
 
 Excluding a control because it defaults *after* the treatment firm's event uses
 future information to make a present selection. The surviving control group
-would then consist of firms known ex post never to have failed — unusually
+would then consist of firms known ex post never to have failed, and so unusually
 durable ones. Their distance-to-default distributions would separate from the
 treatment cohort more cleanly than they should, and the **false-positive rate,
 the single number this whole rework exists to produce, would come out biased
@@ -127,7 +127,7 @@ The rule is therefore:
 - Every control's observation window is **censored at the treatment firm's
   `t = 0`** regardless of what happens afterwards.
 - Its later outcome is recorded in two fields, `control_defaulted_later` and
-  `control_event_date`, and reported — never used to filter.
+  `control_event_date`, and reported. It is never used to filter.
 
 ---
 
@@ -147,8 +147,8 @@ data already **filed and public** at that date is visible.
 ### 2.0 Calendar time is a hard matching variable
 
 > **Amendment, 2026-08-20.** Calendar time was absent from the original table.
-> The implementation already enforced it — controls are drawn from the filer
-> universe of the anchor quarter — so the code was stricter than the spec. This
+> The implementation already enforced it, since controls are drawn from the filer
+> universe of the anchor quarter, so the code was stricter than the spec. This
 > amendment pre-registers the behaviour rather than leaving it an
 > implementation accident. No matched set changes.
 
@@ -171,8 +171,8 @@ treatment firm's event date.
 
 ### 2.0.1 Era-stratified reporting is mandatory
 
-Every headline metric is reported **stratified by era cohort** — 2012–18,
-2019–21, 2022–24 — with N for each, in addition to any pooled figure.
+Every headline metric is reported **stratified by era cohort** (2012–18,
+2019–21, 2022–24) with N for each, in addition to any pooled figure.
 
 **If the strata disagree, that is the result.** "Distance to default
 discriminates well in a tightening cycle and poorly under ZIRP" is a more
@@ -185,7 +185,7 @@ sentence.
 This is a **quota-forced** decision and is disclosed as such on `/data`.
 
 Matching on market cap would require price data for the entire candidate control
-universe — thousands of symbols — before any match could be formed. The Tiingo
+universe, thousands of symbols, before any match could be formed. The Tiingo
 free tier permits **500 unique symbols per calendar month**. Fetching prices to
 decide who to fetch prices for is not affordable.
 
@@ -320,7 +320,7 @@ Tiers are not pooled to improve N.
 > **not implementable and has been replaced by `filing_text`.**
 >
 > Two independent reasons. Tiingo's public listing file carries only
-> `ticker, exchange, assetType, priceCurrency, startDate, endDate` — **no
+> `ticker, exchange, assetType, priceCurrency, startDate, endDate`. There is **no
 > company names at all**, so there is nothing to match a name against.
 > OpenFIGI, the obvious substitute, returns "No identifier found" for every
 > delisted bankruptcy symbol tested (HTZGQ, BBBYQ, SIVBQ, LEHMQ, WAMUQ, RADCQ,
@@ -335,7 +335,7 @@ Tiers are not pooled to improve N.
 > This is why the tier exists at all: the SEC's 2019 FAST Act Modernization
 > rule introduced both the cover-page "Trading Symbol(s)" column and its
 > Inline XBRL tag. Before 2019 the ticker appears **nowhere on the cover
-> page** — verified directly on Kodak's 2011 10-K — so the `xbrl` tier cannot
+> page**, verified directly on Kodak's 2011 10-K, so the `xbrl` tier cannot
 > reach 2011-2021 events at all, and Item 5 prose is the only remaining route.
 
 ## 7. Pre-registered primary analysis
@@ -418,7 +418,7 @@ era therefore reproduces the era gradient under its own name.
    6 of 13 does not.
 4. **Where a variable's availability is itself an artefact of the era
    transition, that is stated on the same page as the table.** The instance
-   here is public float, read from `dei:EntityPublicFloat` — an XBRL tag, so a
+   here is public float, read from `dei:EntityPublicFloat`, an XBRL tag, so a
    pre-2011 filer reports no float by construction.
 
 Rule 3 is a floor, not a safeguard, and is documented as one. The claim that

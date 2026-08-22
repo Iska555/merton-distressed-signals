@@ -5,7 +5,7 @@ export default function EvidencePage() {
     <div className="wrap">
       <header className="masthead">
         <p className="eyebrow">Evidence · event study</p>
-        <h1>Distance to default before failure, against matched survivors.</h1>
+        <h1>The exhibit this study exists to produce does not exist yet.</h1>
         <p className="lede">
           The headline exhibit: median distance to default and its interquartile band
           from t−36 to t=0, defaulted firms against controls matched on calendar
@@ -24,7 +24,7 @@ export default function EvidencePage() {
             its current state is reported on <Link href="/measurement">Measurement</Link>.
           </p>
           <p>
-            The analysis code is written and tested — event-time alignment, cohort
+            The analysis code is written and tested: event-time alignment, cohort
             bands with per-cell counts, a balanced-panel variant, and a
             composition table so a reader can tell a change in the firms from a change
             in <em>which</em> firms are present. What is missing is data, and inventing

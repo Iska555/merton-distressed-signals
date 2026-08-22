@@ -63,11 +63,11 @@ export default function CaseStudies() {
     <div className="wrap">
       <header className="masthead">
         <p className="eyebrow">Case studies</p>
-        <h1>Individual firms, and the ones the study cannot reach.</h1>
+        <h1>The most instructive firms are the ones that cannot be computed.</h1>
         <p className="lede">
           Computed case studies require the matched sample. Until it lands, the only
           honest thing on this page is the set of firms that cannot be computed at
-          all — which turns out to be more informative than it sounds, because the
+          all, which turns out to be more informative than it sounds, because the
           reasons differ and two of them are about the model rather than the data.
         </p>
       </header>
@@ -85,14 +85,14 @@ export default function CaseStudies() {
           <p>
             When they land, each will carry a computed series with a month scrubber,
             and the set will include <strong>at least one documented failure</strong>{' '}
-            — a firm the model flagged that survived, or one that died with no
+            a firm the model flagged that survived, or one that died with no
             warning. A study with no failures is advocacy rather than analysis.
           </p>
         </div>
       </section>
 
       <section className="section">
-        <span className="flag">Illustrative — not sourced</span>
+        <span className="flag">Illustrative, not sourced</span>
         <h2>Firms outside the study</h2>
         <p className="prose">
           Nothing in this section is computed from data. Each entry states why the
@@ -165,7 +165,7 @@ export default function CaseStudies() {
             retained in the sample but reported separately, never pooled into the
             headline. The pre-registered primary metric is computed on non-financials
             only. Because financials also resolve at a lower rate than other sectors,
-            the cohort under-samples them anyway — which flatters the headline result
+            the cohort under-samples them anyway, which flatters the headline result
             and weakens the sector panel. Both directions are stated on{' '}
             <Link href="/measurement">Measurement</Link>.
           </p>

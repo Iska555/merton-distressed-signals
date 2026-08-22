@@ -109,16 +109,48 @@ def stratified_sample(audit: pd.DataFrame, n: int, seed: int) -> pd.DataFrame:
     resolved["stratum"] = resolved["tier"] + " / " + resolved["era"]
 
     strata = sorted(resolved["stratum"].unique())
-    per = max(1, n // len(strata))
     rng = np.random.default_rng(seed)
 
-    picks = []
+    # Equal allocation, then redistribute the shortfall.
+    #
+    # A first run of this asked for 80 and returned 69 without saying so: one
+    # stratum, filing_text/post_2019, contains only 9 resolutions in the whole
+    # pool, and `min(per, len(rows))` silently absorbed the difference. A
+    # sample size that quietly becomes whatever the smallest stratum permits is
+    # the same failure as an unreported exclusion. The shortfall now moves to
+    # the strata that still have capacity, and the caller is told when even
+    # that cannot reach n.
+    #
+    # The top-up draws from rows NOT already picked, so enlarging n only adds
+    # firms. It never re-rolls a sample that has been looked at, which would be
+    # indistinguishable from redrawing until the number is agreeable.
+    per = max(1, n // len(strata))
+    picks: dict[str, pd.DataFrame] = {}
     for stratum in strata:
         rows = resolved[resolved["stratum"] == stratum]
         take = min(per, len(rows))
         idx = rng.choice(len(rows), size=take, replace=False)
-        picks.append(rows.iloc[sorted(idx)])
-    return pd.concat(picks, ignore_index=True)
+        picks[stratum] = rows.iloc[sorted(idx)]
+
+    shortfall = n - sum(len(p) for p in picks.values())
+    while shortfall > 0:
+        room = {s: resolved[resolved["stratum"] == s].drop(picks[s].index)
+                for s in strata}
+        room = {s: rows for s, rows in room.items() if len(rows)}
+        if not room:
+            print(f"  only {n - shortfall} resolutions exist to sample; "
+                  f"asked for {n}")
+            break
+        for stratum in sorted(room, key=lambda s: -len(room[s])):
+            if shortfall <= 0:
+                break
+            rows = room[stratum]
+            take = min(max(1, shortfall // len(room)), len(rows), shortfall)
+            idx = rng.choice(len(rows), size=take, replace=False)
+            picks[stratum] = pd.concat([picks[stratum], rows.iloc[sorted(idx)]])
+            shortfall -= take
+
+    return pd.concat([picks[s] for s in strata], ignore_index=True)
 
 
 def verify(sample: pd.DataFrame) -> pd.DataFrame:
@@ -209,6 +241,74 @@ def report(frame: pd.DataFrame) -> None:
     print(f"  {'POOLED':26s} n={len(frame):3d}  flagged={flagged:3d} "
           f"({flagged / len(frame):5.1%})  95% CI [{low:.1%}, {high:.1%}]")
     print("\n  Pooled figures describe no single stratum. Report strata.")
+    print("  A flag is a name-similarity mismatch and nothing more. Many correct")
+    print("  tickers are not derivable from the company name, so a high flag")
+    print("  rate is not a high error rate.")
+    report_verdicts(frame)
+
+
+VERDICTS = DATA_PROCESSED.parent / "verification_verdicts.csv"
+
+#: An adjudicated row is one of these. "unverifiable" is a verdict, not a
+#: missing value: it means the filings do not settle the question, which is a
+#: real outcome and is reported rather than dropped.
+VERDICT_VALUES = ("correct", "wrong_company", "wrong_era", "unverifiable")
+ERROR_VERDICTS = ("wrong_company", "wrong_era")
+
+
+def attach_verdicts(frame: pd.DataFrame) -> pd.DataFrame:
+    """
+    Join hand-adjudicated verdicts, if any have been recorded.
+
+    Kept in a separate committed file rather than in the generated CSV, because
+    re-running the extraction would otherwise wipe the adjudication -- and the
+    temptation would then be to re-adjudicate against a number already seen.
+    """
+    frame = frame.copy()
+    frame["human_verdict"] = ""
+    frame["verdict_note"] = ""
+    if not VERDICTS.exists():
+        return frame
+    verdicts = pd.read_csv(VERDICTS, dtype=str).set_index("cik")
+    unknown = set(verdicts["verdict"].dropna()) - set(VERDICT_VALUES)
+    if unknown:
+        raise SystemExit(f"Unknown verdict(s) in {VERDICTS.name}: {sorted(unknown)}")
+    frame["human_verdict"] = frame["cik"].map(verdicts["verdict"]).fillna("")
+    if "note" in verdicts.columns:
+        frame["verdict_note"] = frame["cik"].map(verdicts["note"]).fillna("")
+    return frame
+
+
+def report_verdicts(frame: pd.DataFrame) -> None:
+    """The published statistic. Strata first; the pooled line describes nobody."""
+    adjudicated = frame[frame["human_verdict"].isin(VERDICT_VALUES)]
+    if adjudicated.empty:
+        print("\n  No hand verdicts recorded. The flag rate above is NOT an error"
+              "\n  rate. Fill in data/verification_verdicts.csv and re-run.")
+        return
+
+    print("\n" + "=" * 78)
+    print("HAND-ADJUDICATED ERROR RATE -- this is the published statistic")
+    print("=" * 78)
+
+    def line(label: str, chunk: pd.DataFrame) -> None:
+        errors = int(chunk["human_verdict"].isin(ERROR_VERDICTS).sum())
+        unver = int((chunk["human_verdict"] == "unverifiable").sum())
+        low, high = wilson_interval(errors, len(chunk))
+        print(f"  {label:26s} n={len(chunk):3d}  errors={errors:3d} "
+              f"({errors / len(chunk):5.1%})  95% CI [{low:.1%}, {high:.1%}]"
+              f"   unverifiable={unver}")
+
+    for stratum, chunk in adjudicated.groupby("stratum"):
+        line(str(stratum), chunk)
+    line("POOLED", adjudicated)
+
+    missing = len(frame) - len(adjudicated)
+    if missing:
+        print(f"\n  {missing} of {len(frame)} rows not yet adjudicated.")
+    print(f"\n  Verdicts: {adjudicated['human_verdict'].value_counts().to_dict()}")
+    print("  A statistic, not a gate. Published whatever it says, and NOT")
+    print("  re-measured on these same firms after a fix.")
 
 
 def main() -> int:
@@ -227,6 +327,7 @@ def main() -> int:
           f"(seed {args.seed}); resolving...", flush=True)
 
     frame = verify(sample)
+    frame = attach_verdicts(frame)
     report(frame)
 
     DATA_PROCESSED.mkdir(parents=True, exist_ok=True)

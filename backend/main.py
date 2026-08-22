@@ -1,5 +1,5 @@
 """
-FastAPI application entry point — Merton Credit Scanner
+FastAPI application entry point for the Merton Credit Scanner
 """
 import logging
 import os
@@ -37,7 +37,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Existing analysis routes — untouched
+# Existing analysis routes, untouched
 app.include_router(router, prefix="/api/v1", tags=["analysis"])
 
 # Event scanner routes → /api/v1/events/scan/*

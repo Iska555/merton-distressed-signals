@@ -50,7 +50,7 @@ export default function MispricingPage() {
       {!spreads && tables && (
         <section className="section">
           <div className="callout">
-            <p className="eyebrow">Illustrative — not sourced</p>
+            <p className="eyebrow">Illustrative, not sourced</p>
             <p>
               No cohort spreads were retrieved at build time, so the benchmark side
               of the comparison is unavailable. The divergence figure is suppressed

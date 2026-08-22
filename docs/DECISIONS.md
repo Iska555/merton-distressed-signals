@@ -6,7 +6,7 @@ data was seen.
 
 ---
 
-## D1 — The "alpha gap" is demoted from a finding to an illustration
+## D1. The "alpha gap" is demoted from a finding to an illustration
 
 **Decided 2026-08-20. Irreversible without a paid data source.**
 
@@ -19,10 +19,10 @@ signal = theoretical_spread − market_spread
 ```
 
 where `market_spread` came from `get_spread_by_rating(rating)` and `rating` came
-from `_estimate_rating_from_merton_leverage(V, D)` — a function of the model's
+from `_estimate_rating_from_merton_leverage(V, D)`, a function of the model's
 own solved asset value. The model was being compared against a benchmark derived
 from its own output. Worse, for any firm classified as a bank or "shadow bank"
-(`{"F", "GM", "BA"}` — which includes Boeing, a published case study), *both*
+(`{"F", "GM", "BA"}`, which includes Boeing, a published case study), *both*
 sides were hardcoded: debt as `max(E * 9.0, 1.0)` and the benchmark as 80/120/200
 bps by market-cap bucket.
 
@@ -43,7 +43,7 @@ The research question drops the spread-comparison clause entirely and becomes a
 question purely about discrimination:
 
 > Does equity-implied distance to default separate firms that subsequently
-> default from comparable firms that do not — and what false-positive rate does
+> default from comparable firms that do not, and what false-positive rate does
 > that separation cost at realistic base rates?
 
 This **eliminates the circularity by construction** rather than disclosing it and
@@ -55,7 +55,7 @@ event time, because no honest one can be built.
 
 ---
 
-## D2 — Lehman, SVB and Credit Suisse sit outside the study
+## D2. Lehman, SVB and Credit Suisse sit outside the study
 
 **Decided 2026-08-20.**
 
@@ -72,7 +72,7 @@ Lehman additionally falls outside the study window entirely (§D3).
 ### Decision
 
 They are **retained**, but in a section that is visually distinct and explicitly
-outside the computed study, under a standing `ILLUSTRATIVE — not sourced`
+outside the computed study, under a standing `ILLUSTRATIVE, not sourced`
 label, with a stated reason per firm.
 
 They must not sit in `/case-studies` alongside computed firms with hand-authored
@@ -86,7 +86,7 @@ asset-value insolvencies in the Merton sense.
 
 ---
 
-## D3 — The study window is 2012–2024, and excludes the financial crisis
+## D3. The study window is 2012–2024, and excludes the financial crisis
 
 **Forced by data, 2026-08-20.**
 
@@ -102,7 +102,7 @@ Resolution rate by era (`docs/RESOLUTION_AUDIT.md`):
 Two structural thresholds cause this: XBRL instance documents begin ~2011, and
 `dei:TradingSymbol` becomes tagged only under the SEC's 2019 FAST Act
 Modernization rule. Kodak's 2011 10-K cover page carries **no trading symbol at
-all** — the column did not exist before that rule.
+all**. The column did not exist before that rule.
 
 ### Consequence, which must appear in visible UI
 
@@ -112,13 +112,13 @@ to a crisis, and the site must say so on the exhibit itself rather than in a
 footnote.
 
 **Period selection is therefore a named limitation on `/data`, alongside
-survivorship bias.** The 2008–09 default cluster — the richest concentration of
-corporate failure in modern history, and the one every reader will look for — is
+survivorship bias.** The 2008–09 default cluster, the richest concentration of
+corporate failure in modern history and the one every reader will look for, is
 not merely absent; it is unreachable with free data.
 
 ---
 
-## D4 — Two provenance tiers, never merged
+## D4. Two provenance tiers, never merged
 
 **Decided 2026-08-20. Amends `docs/matching-spec.md` §6.**
 
@@ -143,7 +143,7 @@ embarrassment.
 
 ---
 
-## D5 — Known exclusion biases, reported conditional on era
+## D5. Known exclusion biases, reported conditional on era
 
 > **Corrected twice.** The size claim below was first published at N = 190,
 > then retracted at N = 346 as "small-sample noise". The retraction reached the
@@ -159,8 +159,8 @@ embarrassment.
 finding until it has been reported within era strata, with cell counts beside
 every figure.**
 
-Two SEC filing-rule changes — XBRL instances from roughly 2011, the cover-page
-trading symbol from 2019 — drive resolution from 12.8% to 68.7% across the
+Two SEC filing-rule changes, XBRL instances from roughly 2011 and the cover-page
+trading symbol from 2019, drive resolution from 12.8% to 68.7% across the
 window. Any variable correlated with era will therefore reproduce the era
 gradient under its own name, and a pooled cross-tab may be reporting era a
 second time. Three cross-tabs were once published here as independent
@@ -224,13 +224,13 @@ several of the resolutions underneath it were correctly withdrawn.
 ### The limit of the fix
 
 Suppressing rates on wide intervals is a floor, not a safeguard. The retracted
-cell — 19 of 24 — has an interval only 31 points wide and would still be
+cell, 19 of 24, has an interval only 31 points wide and would still be
 reported under the current rule. `tests/test_crosstabs.py` asserts exactly that,
 so nobody later mistakes the rule for protection it does not give.
 
 ---
 
-## D6 — The project is a measurement-and-discrimination study, not a detector
+## D6. The project is a measurement-and-discrimination study, not a detector
 
 **Decided 2026-08-20, following from D1.**
 
@@ -238,7 +238,7 @@ Demoting the circularity (D1) removes the alpha gap entirely. There is no
 model-versus-market exhibit anywhere on the site, by that decision. So the
 project **no longer detects credit mispricing, and cannot, with free data.**
 
-What remains — "distance to default predicts default" — is legitimate and also
+What remains, "distance to default predicts default", is legitimate and also
 crowded. Bharath & Shumway (2008), Campbell, Hilscher & Szilagyi (2008), and
 Duffie, Saita & Wang (2007) all covered it. A site headlining that finding in
 2026 reads as a competent replication and nothing more.
@@ -269,7 +269,7 @@ Consequences:
 
 ---
 
-## D7 — Two-month run at 3:1, rather than cutting controls
+## D7. Two-month run at 3:1, rather than cutting controls
 
 **Decided 2026-08-20.**
 
@@ -279,7 +279,7 @@ across two calendar months.
 
 **Controls win the trade.** The marginal treatment firm beyond roughly 100 adds
 little: the event-time DD path is already tightly estimated there. The marginal
-control buys two things the study actually needs — precision on the
+control buys two things the study actually needs: precision on the
 false-positive rate, and **match quality**. At 1:1 the nearest available firm is
 taken whether or not it is a good match, because there is no alternative. Bad
 matches on sector, size and leverage contaminate every downstream comparison,
@@ -298,6 +298,6 @@ built against the treatment panel and clearly-labelled placeholder controls in
 the interval, so nothing is idle.
 
 **If treatment is ever capped, it is capped by random draw with a committed
-seed** — never by matchability, which would select for ordinary mid-cap
+seed**, never by matchability, which would select for ordinary mid-cap
 non-financials and add a fifth selection layer on top of the four already
 documented (era, size, sector, vendor coverage).

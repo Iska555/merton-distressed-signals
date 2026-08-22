@@ -38,7 +38,7 @@ export default function DataPage() {
     <div className="wrap">
       <header className="masthead">
         <p className="eyebrow">Data</p>
-        <h1>Sources, sample construction, and what the study cannot claim.</h1>
+        <h1>Every number here traces to a file you can open.</h1>
         <p className="lede">
           Every figure on this site traces to a file listed here or to a computation
           from inputs shown on screen. Where a number could not be sourced, the page
@@ -204,13 +204,13 @@ export default function DataPage() {
                 <td className="mono">data_unavailability</td>
                 <td>The firm belongs in the study; the sources cannot support it</td>
                 <td>A limitation, possibly a biased one</td>
-                <td className="num">{m?.exclusion_families['data_unavailability'] ?? '—'}</td>
+                <td className="num">{m?.exclusion_families['data_unavailability'] ?? 'n/a'}</td>
               </tr>
               <tr>
                 <td className="mono">model_inapplicability</td>
                 <td>The sources are fine; the firm is not a Merton object</td>
                 <td>A scope definition, and a correct exclusion</td>
-                <td className="num">{m?.exclusion_families['model_inapplicability'] ?? '—'}</td>
+                <td className="num">{m?.exclusion_families['model_inapplicability'] ?? 'n/a'}</td>
               </tr>
             </tbody>
           </table>
@@ -221,7 +221,7 @@ export default function DataPage() {
           on firm assets; a partnership interest is not that instrument, so such a
           registrant does not belong in the cohort even when its data is complete.
           Financial firms sit awkwardly across both and are handled by the sector
-          panel rather than a code — see <Link href="/case-studies">Case studies</Link>.
+          panel rather than a code. See <Link href="/case-studies">Case studies</Link>.
         </p>
       </section>
 
@@ -264,8 +264,8 @@ export default function DataPage() {
         </p>
         <p className="prose">
           The fourth changes matched sets: excluding later-defaulting controls would
-          have biased the false-positive rate — the single number this study exists
-          to produce — low. The fifth was forced by a published finding that turned
+          have biased the false-positive rate low, and that is the single number
+          this study exists to produce. The fifth was forced by a published finding that turned
           out to be the era gradient measured a second time under another name; the
           original rule covered headline metrics but not the audit&rsquo;s own
           cross-tabs, so it was extended rather than narrowed.
@@ -294,7 +294,7 @@ export default function DataPage() {
             overwhelmingly a matter of <em>when</em> a firm failed: resolution
             runs from 12.8% to 68.7% across the window, so the cohort is heavily
             late. Once era is held fixed, most other apparent gradients stop
-            being gradients — a size effect published earlier does not replicate
+            being gradients. A size effect published earlier does not replicate
             at all. A sector effect does survive: mining resolves below its own
             era throughout. The cohort also under-samples financials, which
             flatters the headline result. Every cross-tab on{' '}
