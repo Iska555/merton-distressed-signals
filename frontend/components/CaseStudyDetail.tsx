@@ -95,7 +95,7 @@ export default function CaseStudyDetail({ caseStudy, onBack }: Props) {
                   {caseStudy.title}
                 </h1>
                 <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-500">
-                  {caseStudy.subtitle} // {caseStudy.date}
+                  {caseStudy.subtitle} &middot; {caseStudy.date}
                 </p>
               </div>
             </div>

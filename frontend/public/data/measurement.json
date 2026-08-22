@@ -1,0 +1,92 @@
+{
+  "total_candidates": 8,
+  "resolved": 3,
+  "resolution_rate": 0.375,
+  "by_year": [
+    {
+      "year": 2022,
+      "n": 4,
+      "resolved": 2,
+      "rate": 0.5
+    },
+    {
+      "year": 2023,
+      "n": 4,
+      "resolved": 1,
+      "rate": 0.25
+    }
+  ],
+  "by_era": [
+    {
+      "label": "2022\u20132024",
+      "n": 8,
+      "resolved": 3,
+      "rate": 0.375,
+      "via_xbrl": 3,
+      "via_text": 0
+    }
+  ],
+  "by_size": [
+    {
+      "label": "under $50M",
+      "n": 5,
+      "resolved": 1,
+      "rate": 0.2
+    },
+    {
+      "label": "$50M\u2013200M",
+      "n": 1,
+      "resolved": 0,
+      "rate": 0.0
+    },
+    {
+      "label": "over $1B",
+      "n": 1,
+      "resolved": 1,
+      "rate": 1.0
+    },
+    {
+      "label": "none reported",
+      "n": 1,
+      "resolved": 1,
+      "rate": 1.0
+    }
+  ],
+  "by_sector": [
+    {
+      "sector": "Manufacturing",
+      "n": 3,
+      "resolved": 1,
+      "rate": 0.3333333333333333
+    }
+  ],
+  "reason_codes": [
+    {
+      "code": "SYMBOL_NOT_LISTED",
+      "n": 4,
+      "share": 0.5,
+      "family": "data_unavailability"
+    },
+    {
+      "code": "RESOLVED_XBRL",
+      "n": 3,
+      "share": 0.375,
+      "family": "resolved"
+    },
+    {
+      "code": "AMBIGUOUS_OVERLAPPING",
+      "n": 1,
+      "share": 0.125,
+      "family": "data_unavailability"
+    }
+  ],
+  "exclusion_families": {
+    "data_unavailability": 5,
+    "resolved": 3
+  },
+  "chapter_22_count": 0,
+  "window": {
+    "sampled_from": 2022,
+    "sampled_to": 2023
+  }
+}

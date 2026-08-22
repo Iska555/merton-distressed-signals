@@ -109,7 +109,7 @@ export default function SpreadChart({
                 fontSize: '11px',
                 fontFamily: 'monospace',
               }}
-              formatter={(value: any) => [`${Number(value).toFixed(0)} bps`, '']}
+              formatter={(value: number | string) => [`${Number(value).toFixed(0)} bps`, '']}
             />
             <ReferenceLine
               y={marketSpread}
