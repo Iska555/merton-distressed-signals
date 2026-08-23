@@ -1,0 +1,3 @@
+frontend/public/brand/*.svg text eol=lf
+frontend/public/marks/*.svg text eol=lf
+frontend/public/figures/*.svg text eol=lf

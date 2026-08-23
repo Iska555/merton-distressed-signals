@@ -13,17 +13,17 @@ import type { ConditionalTable } from '@/lib/siteData'
  * this page exists to document.
  */
 function shade(rate: number): string {
-  // Interpolate white to deep teal. Rate is already 0..1.
+  // Interpolate white to deep red. Rate is already 0..1.
   const t = Math.max(0, Math.min(1, rate))
   const from = [255, 255, 255]
-  const to = [13, 74, 71]
+  const to = [168, 28, 42]
   const mix = from.map((f, i) => Math.round(f + (to[i] - f) * t))
   return `rgb(${mix[0]}, ${mix[1]}, ${mix[2]})`
 }
 
 /** White type once the ground is dark enough to need it. */
 function ink(rate: number): string {
-  return rate > 0.45 ? '#FFFFFF' : '#1E3033'
+  return rate >= 0.75 ? '#FFFFFF' : 'var(--fig-ink)'
 }
 
 export default function Heatmap({
@@ -59,7 +59,7 @@ export default function Heatmap({
                     return (
                       <td key={i} className="empty">
                         <div className="cell">
-                          <span className="c" style={{ color: '#5F7176' }}>
+                          <span className="c" style={{ color: 'var(--muted)' }}>
                             none
                           </span>
                         </div>
@@ -70,10 +70,10 @@ export default function Heatmap({
                     return (
                       <td key={i} className="empty">
                         <div className="cell">
-                          <span className="r" style={{ color: '#5F7176' }}>
+                          <span className="r" style={{ color: 'var(--muted)' }}>
                             &plusmn;
                           </span>
-                          <span className="c" style={{ color: '#5F7176' }}>
+                          <span className="c" style={{ color: 'var(--muted)' }}>
                             {c.resolved}/{c.n}
                           </span>
                         </div>

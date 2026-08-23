@@ -16,7 +16,7 @@ export interface Bar {
   pct: number
   /** Printed at the right. Defaults to the percentage. */
   value?: string
-  /** Copper rather than green. Use for the row the section is about. */
+  /** Signal red rather than the structural fill. Use for the focal row. */
   highlight?: boolean
 }
 

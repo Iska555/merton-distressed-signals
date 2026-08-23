@@ -48,6 +48,7 @@ export default function PayoffDiagram({
         fill="none"
         stroke="var(--series-2)"
         strokeWidth={2}
+        strokeDasharray="7 4"
       />
 
       {/* equity payoff: flat at zero then 45 degrees */}

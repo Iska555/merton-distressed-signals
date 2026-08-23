@@ -34,9 +34,6 @@ jobs:
       - name: Check generated assets
         run: make assets-check
 
-      - name: Test asset contracts and punctuation
-        run: python -m pytest tests/test_assets.py tests/test_asset_drift.py tests/test_no_em_dash.py -q
-
       - name: Lint frontend
         working-directory: frontend
         run: npm run lint
@@ -44,3 +41,13 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         run: npm run build
+
+      - name: Test asset, palette, brand, and punctuation contracts
+        run: >-
+          python -m pytest
+          tests/test_assets.py
+          tests/test_asset_drift.py
+          tests/test_site_brand.py
+          tests/test_site_palette.py
+          tests/test_no_em_dash.py
+          -q
