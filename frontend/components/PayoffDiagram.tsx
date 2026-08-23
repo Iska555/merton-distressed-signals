@@ -27,6 +27,11 @@ export default function PayoffDiagram({
       role="img"
       aria-label="Equity payoff at maturity is zero until asset value reaches the debt face value, then rises one for one. Debt is the mirror image and is capped."
     >
+      <title>Equity and debt payoff at maturity</title>
+      <desc>
+        Equity is zero below the debt face value and rises one for one above it.
+        Debt rises with asset value until it reaches its cap.
+      </desc>
       {/* axes */}
       <line x1={x(0)} y1={y(0)} x2={x(100)} y2={y(0)} stroke="var(--rule-strong)" />
       <line x1={x(0)} y1={y(0)} x2={x(0)} y2={y(100)} stroke="var(--rule-strong)" />

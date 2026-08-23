@@ -42,12 +42,5 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-      - name: Test asset, palette, brand, and punctuation contracts
-        run: >-
-          python -m pytest
-          tests/test_assets.py
-          tests/test_asset_drift.py
-          tests/test_site_brand.py
-          tests/test_site_palette.py
-          tests/test_no_em_dash.py
-          -q
+      - name: Test root suite
+        run: python -m pytest tests -q

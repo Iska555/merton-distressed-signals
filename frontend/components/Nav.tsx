@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import ThemeToggle from '@/components/ThemeToggle'
 
 const LINKS = [
   { href: '/model', label: 'Model' },
@@ -52,6 +53,7 @@ export default function Nav() {
             </Link>
           ))}
         </div>
+        <ThemeToggle />
       </div>
     </nav>
   )

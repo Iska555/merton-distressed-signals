@@ -1,6 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Newsreader, Archivo, IBM_Plex_Mono } from 'next/font/google'
+import Script from 'next/script'
 import Nav from '@/components/Nav'
 import Footer from '@/components/Footer'
 
@@ -57,8 +58,12 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${display.variable} ${sans.variable} ${mono.variable}`}
+      suppressHydrationWarning
     >
       <body>
+        <Script id="restore-theme" strategy="beforeInteractive">
+          {`try{if(localStorage.getItem('dcs-theme')==='dark'){document.documentElement.dataset.theme='dark'}}catch{}`}
+        </Script>
         <Nav />
         <main>{children}</main>
         <Footer />

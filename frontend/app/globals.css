@@ -166,7 +166,10 @@ a { color: var(--signal); }
 .nav-lockup-dark { display: none; }
 :root[data-theme="dark"] .nav-lockup-light { display: none; }
 :root[data-theme="dark"] .nav-lockup-dark { display: block; }
-.nav-links { display: flex; gap: 26px; overflow-x: auto; scrollbar-width: none; }
+.nav-links {
+  display: flex; flex: 1; min-width: 0; gap: 26px;
+  overflow-x: auto; scrollbar-width: none;
+}
 .nav-links::-webkit-scrollbar { display: none; }
 .nav-links a {
   font-size: 11.5px; font-weight: 600; letter-spacing: 0.11em;
@@ -176,6 +179,15 @@ a { color: var(--signal); }
 }
 .nav-links a:hover { color: var(--signal); border-bottom-color: var(--signal); }
 .nav-links a[data-active="true"] { color: var(--signal); border-bottom-color: var(--signal); }
+.theme-toggle {
+  width: 32px; height: 32px; flex: 0 0 32px; display: grid; place-items: center;
+  border: 1px solid var(--rule-strong); border-radius: 50%;
+  background: var(--ground); color: var(--signal); cursor: pointer;
+  font: 600 17px/1 var(--sans); transition: border-color 160ms, color 160ms;
+}
+.theme-toggle:hover, .theme-toggle:focus-visible {
+  border-color: var(--signal); color: var(--signal);
+}
 
 /* ---------- 1. asymmetric hero ---------- */
 
@@ -225,7 +237,12 @@ a { color: var(--signal); }
 .masthead h1 { color: var(--deep); font-size: clamp(34px, 5vw, 54px); }
 :root[data-theme="dark"] .masthead h1 { color: var(--ink); }
 .section-eyebrow { display: flex; align-items: center; gap: 10px; }
-.section-mark { width: 28px; height: 28px; flex: 0 0 28px; }
+.section-mark {
+  display: inline-block; width: 28px; height: 28px; flex: 0 0 28px;
+  background: var(--signal); -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-size: contain; mask-size: contain;
+}
 
 /* ---------- 2. statistic strip ---------- */
 

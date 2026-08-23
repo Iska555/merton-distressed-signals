@@ -88,6 +88,11 @@ export default function LineChart({
         role="img"
         aria-label={ariaLabel}
       >
+        <title>{ariaLabel}</title>
+        <desc>
+          Interactive line chart. Axis labels, series labels, and exact values
+          are stated beside or below the figure.
+        </desc>
         {yTicks.map((t) => (
           <g key={`y${t}`}>
             <line

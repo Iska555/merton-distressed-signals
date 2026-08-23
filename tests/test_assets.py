@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import csv
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 from scripts import assets
 
 
 SVG_NS = {"svg": "http://www.w3.org/2000/svg"}
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _write_audit(path) -> None:
@@ -81,3 +83,10 @@ def test_every_svg_builder_emits_title_and_description():
         root = _root(svg)
         assert len(root.findall("svg:title", SVG_NS)) == 1
         assert len(root.findall("svg:desc", SVG_NS)) == 1
+
+
+def test_every_committed_public_svg_has_title_and_description():
+    for path in (ROOT / "frontend" / "public").rglob("*.svg"):
+        root = ET.parse(path).getroot()
+        assert len(root.findall("svg:title", SVG_NS)) == 1, path
+        assert len(root.findall("svg:desc", SVG_NS)) == 1, path

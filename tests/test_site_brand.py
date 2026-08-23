@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html as html_module
+import re
 from pathlib import Path
 
 import pytest
@@ -25,6 +26,8 @@ def test_root_metadata_and_navigation_use_generated_brand_assets():
     assert 'href="/brand/apple-touch-icon.png"' in page
     assert 'src="/brand/lockup.svg"' in page
     assert 'src="/brand/lockup-dark.svg"' in page
+    assert 'data-theme-toggle="true"' in page
+    assert 'aria-label="Toggle colour theme"' in page
 
 
 def test_homepage_uses_hero_paths_and_states_the_asserted_parameters():
@@ -48,21 +51,23 @@ def test_homepage_uses_hero_paths_and_states_the_asserted_parameters():
         ("/data", "data"),
     ],
 )
-def test_each_route_first_heading_has_a_hidden_section_mark(route: str, mark: str):
+def test_each_route_first_heading_has_a_theme_coloured_hidden_section_mark(
+    route: str, mark: str
+):
     page = _page(route)
 
-    assert f'src="/marks/{mark}.svg"' in page
-    image_start = page.index(f'src="/marks/{mark}.svg"')
-    image = page[page.rfind("<img", 0, image_start) : page.index(">", image_start) + 1]
-    assert 'aria-hidden="true"' in image
-    assert 'alt=""' in image
+    assert f'data-mark="{mark}"' in page
+    mark_start = page.index(f'data-mark="{mark}"')
+    element = page[page.rfind("<span", 0, mark_start) : page.index(">", mark_start) + 1]
+    assert 'aria-hidden="true"' in element
+    assert f'url(/marks/{mark}.svg)' in element
 
 
 def test_homepage_cards_have_all_six_module_marks():
     page = _page("/")
 
     for mark in ("model", "mispricing", "measurement", "evidence", "discrimination", "data"):
-        assert f'src="/marks/{mark}.svg"' in page
+        assert f"url(/marks/{mark}.svg)" in page
 
 
 def test_sample_field_is_the_requested_numbered_figure_on_both_pages():
@@ -75,3 +80,13 @@ def test_sample_field_is_the_requested_numbered_figure_on_both_pages():
     assert '<span class="fignum">Figure 1</span>' in measurement
     assert "n = 346 candidates" in home
     assert "n = 346 candidates" in measurement
+
+
+def test_every_inline_chart_svg_has_title_and_description():
+    for route in ("/", "/model"):
+        page = _page(route)
+        svgs = re.findall(r"<svg\b.*?</svg>", page, flags=re.DOTALL)
+        assert svgs
+        for svg in svgs:
+            assert "<title" in svg
+            assert "<desc" in svg

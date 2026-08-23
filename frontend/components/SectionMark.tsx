@@ -1,5 +1,3 @@
-import Image from 'next/image'
-
 export type SectionName =
   | 'model'
   | 'mispricing'
@@ -17,14 +15,14 @@ export default function SectionMark({
   className?: string
 }) {
   return (
-    <Image
+    <span
       className={`section-mark ${className}`.trim()}
-      src={`/marks/${name}.svg`}
-      width={28}
-      height={28}
-      alt=""
+      data-mark={name}
       aria-hidden="true"
-      unoptimized
+      style={{
+        WebkitMaskImage: `url(/marks/${name}.svg)`,
+        maskImage: `url(/marks/${name}.svg)`,
+      }}
     />
   )
 }
