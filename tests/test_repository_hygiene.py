@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 from pathlib import Path
+import tomllib
 
 import dotenv
 
@@ -103,3 +104,22 @@ def test_config_loads_credentials_from_root_env(monkeypatch):
     importlib.reload(config)
 
     assert calls == [config.ROOT / ".env"]
+
+
+def test_runtime_dependencies_include_the_parquet_engine():
+    metadata = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    dependencies = {
+        dependency.split("[", 1)[0].split("=", 1)[0].split("<", 1)[0].split(">", 1)[0]
+        for dependency in metadata["project"]["dependencies"]
+    }
+
+    assert "pyarrow" in dependencies
+
+
+def test_site_data_builder_documents_the_static_runtime_boundary():
+    docstring = (ROOT / "scripts" / "build_site_data.py").read_text(
+        encoding="utf-8"
+    ).split('"""', 2)[1]
+
+    assert "no backend is required" in docstring
+    assert "allowed to call a backend" not in docstring

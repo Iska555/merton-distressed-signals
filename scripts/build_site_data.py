@@ -1,10 +1,9 @@
 """
 Turn committed CSVs under data/processed/ into JSON the site reads at build time.
 
-The site must render with the FastAPI backend entirely stopped. Every research
-page therefore reads a static file produced here, never an API. The only thing
-allowed to call a backend is the live single-name screen, and it degrades to a
-stated unavailable state.
+All supported routes use committed static inputs or local client computation,
+so no backend is required. Every research page reads a static file produced
+here or computes from user-selected browser inputs.
 
 Writes a MANIFEST.json alongside, carrying the run date, the git commit the
 figures were produced at, row counts, and a provenance line per file. A number
@@ -270,6 +269,7 @@ def main() -> int:
             "scale": sr.RATING_SCALE,
             "cohort_index": sr.COHORT_INDEX,
             "source": sr.SOURCE,
+            "band_diagnostics": sr.BAND_DIAGNOSTICS,
             "benchmark_spread_bps": sr.DAMODARAN_SPREAD_BPS_JAN2026,
             "benchmark_source": sr.SOURCE,
         }), indent=2) + "\n",

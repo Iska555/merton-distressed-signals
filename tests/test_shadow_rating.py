@@ -305,6 +305,14 @@ class TestSizeBandSensitivity:
         assert 0 < d["share_within_30pct_of_boundary"] < 1
         assert d["universe_n"] > 1000
 
+    def test_boundary_count_and_rate_preserve_the_exact_population_cell(self):
+        d = sr.BAND_DIAGNOSTICS
+
+        assert d["universe_n"] == 3132
+        assert d["within_30pct_of_boundary_n"] == 265
+        assert isinstance(d["within_30pct_of_boundary_n"], int)
+        assert d["share_within_30pct_of_boundary"] == 265 / 3132
+
 
 def RATING_INDEX(rating: str) -> int:
     return sr.RATING_SCALE.index(rating) if rating in sr.RATING_SCALE else 99

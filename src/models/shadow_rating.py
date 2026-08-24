@@ -98,14 +98,19 @@ DAMODARAN_SPREAD_BPS_JAN2026 = {
 LARGE_CAP_ASSET_THRESHOLD = 5_000_000_000
 
 # Measured on the 2023Q1 point-in-time universe, non-financials, assets >= $50M.
+_BAND_UNIVERSE_N = 3132
+_WITHIN_30PCT_OF_BOUNDARY_N = 265
 BAND_DIAGNOSTICS = {
     "universe_quarter": "2023Q1",
-    "universe_n": 3132,
+    "universe_n": _BAND_UNIVERSE_N,
     "p50_assets_usd": 1_100_000_000,
     "p75_assets_usd": 4_730_000_000,
     "p85_assets_usd": 10_350_000_000,
     "share_large_at_threshold": 0.242,
-    "share_within_30pct_of_boundary": 0.085,
+    "within_30pct_of_boundary_n": _WITHIN_30PCT_OF_BOUNDARY_N,
+    "share_within_30pct_of_boundary": (
+        _WITHIN_30PCT_OF_BOUNDARY_N / _BAND_UNIVERSE_N
+    ),
 }
 
 # (minimum coverage, rating). Descending; first match wins.

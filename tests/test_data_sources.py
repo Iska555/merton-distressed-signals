@@ -75,3 +75,17 @@ def test_committed_benchmark_exactly_matches_python_source():
         shadow_rating.DAMODARAN_SPREAD_BPS_JAN2026
     )
     assert payload["benchmark_source"] == shadow_rating.SOURCE
+
+
+def test_committed_band_diagnostics_exactly_match_python_source():
+    payload = json.loads(
+        (ROOT / "frontend" / "public" / "data" / "shadow_rating.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    assert payload["band_diagnostics"] == shadow_rating.BAND_DIAGNOSTICS
+    assert payload["band_diagnostics"]["within_30pct_of_boundary_n"] == 265
+    assert payload["band_diagnostics"]["share_within_30pct_of_boundary"] == (
+        265 / 3132
+    )

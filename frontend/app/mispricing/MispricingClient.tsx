@@ -82,6 +82,11 @@ export default function MispricingClient({ tables }: { tables: RatingTables }) {
   const gap = m && benchmarkBps !== null && isFinite(m.spread)
     ? m.spread - benchmarkBps
     : null
+  const boundaryDiagnostic = tables.bandDiagnostics
+  const boundaryQuarter = boundaryDiagnostic.universeQuarter.replace(
+    /^(\d{4})Q([1-4])$/,
+    '$1 Q$2',
+  )
 
   let verdict = '', reading = '', colour = 'var(--ink)'
   if (gap !== null) {
@@ -235,9 +240,14 @@ export default function MispricingClient({ tables }: { tables: RatingTables }) {
             {rating.nearBoundary && (
               <p>
                 <strong>This firm sits within 30% of the size boundary.</strong> Its
-                rating is partly an artefact of where the cutoff was drawn. About{' '}
-                <strong>8.5%</strong> of the 3,132-filer 2023 Q1 universe falls in
-                that zone.
+                rating is partly an artefact of where the cutoff was drawn.{' '}
+                <strong>
+                  {boundaryDiagnostic.within30PctOfBoundaryN.toLocaleString()} of{' '}
+                  {boundaryDiagnostic.universeN.toLocaleString()} ({(
+                    boundaryDiagnostic.shareWithin30PctOfBoundary * 100
+                  ).toFixed(1)}%)
+                </strong>{' '}
+                of the {boundaryQuarter} universe falls in that zone.
               </p>
             )}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>

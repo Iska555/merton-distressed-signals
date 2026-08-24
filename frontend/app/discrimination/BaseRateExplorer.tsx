@@ -70,9 +70,9 @@ export default function BaseRateExplorer() {
               onChange={(e) => setBaseRate(+e.target.value)} />
           </div>
           <p style={{ fontSize: 12.5, color: 'var(--muted)' }}>
-            US corporate default rates have run roughly 1–2% a year outside crises,
-            and into double digits for speculative-grade issuers in a downturn. The
-            slider spans both.
+            The slider values are illustrative user-selected assumptions, not
+            historical estimates or fitted study values. They span low-base-rate
+            through severe-stress scenarios so you can inspect the arithmetic.
           </p>
         </div>
 

@@ -11,6 +11,17 @@
  * the circularity is back and the comparison stops meaning anything.
  */
 
+export interface BandDiagnostics {
+  universeQuarter: string
+  universeN: number
+  p50AssetsUsd: number
+  p75AssetsUsd: number
+  p85AssetsUsd: number
+  shareLargeAtThreshold: number
+  within30PctOfBoundaryN: number
+  shareWithin30PctOfBoundary: number
+}
+
 export interface RatingTables {
   large_cap: [number, string][]
   small_cap: [number, string][]
@@ -18,6 +29,7 @@ export interface RatingTables {
   scale: string[]
   cohort_index: Record<string, string>
   source: Record<string, string>
+  bandDiagnostics: BandDiagnostics
   benchmarkSpreadBps: Record<string, number>
   benchmarkSource: Record<string, string>
 }

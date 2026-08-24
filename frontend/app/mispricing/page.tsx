@@ -7,8 +7,18 @@ import type { RatingTables } from '@/lib/shadowRating'
 
 type RatingTablesPayload = Omit<
   RatingTables,
-  'benchmarkSpreadBps' | 'benchmarkSource'
+  'bandDiagnostics' | 'benchmarkSpreadBps' | 'benchmarkSource'
 > & {
+  band_diagnostics: {
+    universe_quarter: string
+    universe_n: number
+    p50_assets_usd: number
+    p75_assets_usd: number
+    p85_assets_usd: number
+    share_large_at_threshold: number
+    within_30pct_of_boundary_n: number
+    share_within_30pct_of_boundary: number
+  }
   benchmark_spread_bps: Record<string, number>
   benchmark_source: Record<string, string>
 }
@@ -28,6 +38,18 @@ export default function MispricingPage() {
   const tables: RatingTables | null = payload
     ? {
         ...payload,
+        bandDiagnostics: {
+          universeQuarter: payload.band_diagnostics.universe_quarter,
+          universeN: payload.band_diagnostics.universe_n,
+          p50AssetsUsd: payload.band_diagnostics.p50_assets_usd,
+          p75AssetsUsd: payload.band_diagnostics.p75_assets_usd,
+          p85AssetsUsd: payload.band_diagnostics.p85_assets_usd,
+          shareLargeAtThreshold: payload.band_diagnostics.share_large_at_threshold,
+          within30PctOfBoundaryN:
+            payload.band_diagnostics.within_30pct_of_boundary_n,
+          shareWithin30PctOfBoundary:
+            payload.band_diagnostics.share_within_30pct_of_boundary,
+        },
         benchmarkSpreadBps: payload.benchmark_spread_bps,
         benchmarkSource: payload.benchmark_source,
       }
@@ -88,11 +110,16 @@ export default function MispricingPage() {
             </p>
             <p>
               {tables?.source
-                ? `Table: ${tables.source.table}, ${tables.source.publisher}.`
-                : ''}{' '}
-              Threshold values are transcribed and carry a pending-verification flag
-              until re-checked against the current published file; that flag is
-              asserted by a test rather than left to memory.
+                ? (
+                    <>
+                      Table: {tables.source.table}, {tables.source.publisher}.{' '}
+                      <strong>Large-firm verification:</strong>{' '}
+                      {tables.source.large_verified}.{' '}
+                      <strong>Small-firm verification:</strong>{' '}
+                      {tables.source.small_verified}.
+                    </>
+                  )
+                : ''}
             </p>
             <p>
               The benchmark is the January 2026 Damodaran synthetic-rating default

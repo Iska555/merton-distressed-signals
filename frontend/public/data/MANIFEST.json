@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-08-22T17:45:07+00:00",
-  "git_commit": "17101e0",
+  "generated_utc": "2026-08-24T18:05:27+00:00",
+  "git_commit": "592dc81",
   "files": {
     "measurement.json": {
       "source": "data/processed/resolution_audit.csv",

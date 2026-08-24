@@ -161,6 +161,16 @@
     "small_verified": "2026-08-22, all 14 threshold rows checked against source, zero mismatches, but the table itself is a January 2017 analysis and is NINE YEARS older than the large-firm table",
     "financial_table": "A separate table for financial service firms exists (January 2026, AAA above coverage 3.0, BBB at 0.9-1.2, D at or below 0.05). It is deliberately NOT used: financials are excluded from the pre-registered primary metric on Merton-inapplicability grounds."
   },
+  "band_diagnostics": {
+    "universe_quarter": "2023Q1",
+    "universe_n": 3132,
+    "p50_assets_usd": 1100000000,
+    "p75_assets_usd": 4730000000,
+    "p85_assets_usd": 10350000000,
+    "share_large_at_threshold": 0.242,
+    "within_30pct_of_boundary_n": 265,
+    "share_within_30pct_of_boundary": 0.08461047254150703
+  },
   "benchmark_spread_bps": {
     "AAA": 40,
     "AA": 55,
