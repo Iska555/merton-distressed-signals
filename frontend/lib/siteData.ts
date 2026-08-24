@@ -6,9 +6,8 @@
  * under data/processed/ and carry a MANIFEST recording the git commit and
  * provenance of every figure.
  *
- * When a file is absent the page renders a stated "not yet computed" panel
- * rather than a placeholder number. A missing result is a fact about the study,
- * not something to fill in.
+ * When a required file is absent, the page renders a clear build/data error
+ * rather than a placeholder number. Published routes require committed output.
  */
 import fs from 'node:fs'
 import path from 'node:path'

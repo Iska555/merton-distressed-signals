@@ -28,7 +28,7 @@ sensitivity analysis rather than in a comment:
                 driving any result.
 
 Nothing here applies sector overrides, floors, or hardcoded substitutions. The
-predecessor (backend/signals/generator.py) replaced bank debt with `E * 9.0`
+predecessor signal generator replaced bank debt with `E * 9.0`
 and bank benchmark spreads with constants; those are fabrications and are gone.
 """
 from __future__ import annotations

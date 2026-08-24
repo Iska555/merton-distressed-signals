@@ -11,6 +11,15 @@ export default function Home() {
 
   const first = m?.by_era[0]
   const last = m?.by_era[m.by_era.length - 1]
+  const headline = m
+    ? `${m.resolved} of ${m.total_candidates} (${pct(m.resolution_rate)})`
+    : '149 of 346 (43.1%)'
+  const eraGradient = first && last
+    ? `${first.resolved} of ${first.n} (${pct(first.rate, 1)}) to ${last.resolved} of ${last.n} (${pct(last.rate, 1)})`
+    : '6 of 47 (12.8%) to 46 of 67 (68.7%)'
+  const chapter22 = m
+    ? `${m.chapter_22_count} of ${m.total_candidates} (${pct(m.chapter_22_count / m.total_candidates, 1)})`
+    : '29 of 346 (8.4%)'
 
   return (
     <>
@@ -49,9 +58,9 @@ export default function Home() {
                 missing by choice. They are unreachable from free public data,
                 and the literature built on that data has never said so.
               </p>
-            </div>
-            <div className="bignum">
-              <span className="n tnum">{m ? pct(m.resolution_rate) : '43.1%'}</span>
+          </div>
+          <div className="bignum">
+              <span className="n tnum">{headline}</span>
               <span className="cap">
                 of sampled bankrupt US filers can be matched to the security they
                 traded as, using public sources alone.
@@ -79,9 +88,7 @@ export default function Home() {
             </div>
             <div className="stat">
               <span className="v tnum">
-                {first && last
-                  ? `${pct(first.rate, 1)} to ${pct(last.rate, 1)}`
-                  : '12.8% to 68.7%'}
+                {eraGradient}
               </span>
               <span className="k">Era gradient</span>
               <span className="d">monotone, earliest to latest cohort</span>
@@ -92,9 +99,7 @@ export default function Home() {
               <span className="d">XBRL 2011, cover page 2019</span>
             </div>
             <div className="stat">
-              <span className="v tnum">
-                {m ? pct(m.chapter_22_count / m.total_candidates, 1) : '8.4%'}
-              </span>
+              <span className="v tnum">{chapter22}</span>
               <span className="k">Filed twice</span>
               <span className="d">same registrant, two bankruptcies</span>
             </div>

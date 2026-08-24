@@ -309,8 +309,8 @@ _DURATION_OK: set[str] = set()  # balance-sheet concepts only, for now
 
 # Debt concepts.
 #
-# The bug this replaces: backend/data/equity_fetcher.py summed "Total Debt" AND
-# its own components, overstating Ford's debt by 2.67x ($435.67B vs $163.30B).
+# The predecessor debt fetcher summed "Total Debt" AND its own components,
+# overstating Ford's debt by 2.67x ($435.67B vs $163.30B).
 # Here, components that overlap are never added: a total is used if tagged, and
 # only otherwise is it built from disjoint parts.
 #
@@ -500,8 +500,8 @@ def shares_history(cik: str, facts: dict | None = None) -> pd.DataFrame:
     is dated at the filing itself and so is the most timely), then falls back
     through us-gaap balance-sheet concepts.
 
-    This replaces backend/backtesting/historical_data.py, which applied the
-    CURRENT share count to every historical date -- catastrophic for a firm
+    This replaces a predecessor historical-data implementation that applied the
+    CURRENT share count to every historical date. That is catastrophic for a firm
     that reorganised, since post-emergence share counts get multiplied by
     pre-bankruptcy prices.
     """

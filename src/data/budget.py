@@ -169,7 +169,7 @@ class SymbolBudget:
                     f"{'Hard cap' if allow_reserve else 'Soft cap (reserve held back)'} "
                     f"of {ceiling} reached for {self.provider} in {status.month}. "
                     "The unique-symbol cap does not reset until the 1st of next month. "
-                    "Use the on-disk cache, narrow the sample, or wait."
+                    "Narrow the sample or wait for the monthly reset."
                 )
 
             node["symbols"].append(symbol)

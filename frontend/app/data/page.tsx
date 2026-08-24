@@ -229,12 +229,13 @@ export default function DataPage() {
           <p>
             <strong>Selection into the cohort is not random.</strong> It is
             overwhelmingly a matter of <em>when</em> a firm failed: resolution
-            runs from 12.8% to 68.7% across the window, so the cohort is heavily
-            late. Once era is held fixed, most other apparent gradients stop
-            being gradients. A size effect published earlier does not replicate
-            at all. A sector effect does survive: mining resolves below its own
-            era throughout. The cohort also under-samples financials, which
-            flatters the headline result. Every cross-tab on{' '}
+            runs from 6 of 47 (12.8%) to 46 of 67 (68.7%) across the window, so
+            the cohort is heavily late. Once era is held fixed, most other
+            apparent gradients stop being gradients. A size effect published
+            earlier does not replicate at all. A sector effect does survive:
+            mining resolves below its own era throughout. The cohort also
+            under-samples financials, which flatters the headline result. Every
+            cross-tab on{' '}
             <Link href="/measurement">Measurement</Link> is reported within era
             strata with its cell counts, for this reason.
           </p>

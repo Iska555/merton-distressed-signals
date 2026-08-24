@@ -17,7 +17,7 @@ export default function MeasurementPage() {
             <SectionMark name="measurement" />
             <p className="kicker">Measurement</p>
           </div>
-          <h1>Not yet computed.</h1>
+          <h1>Measurement data unavailable.</h1>
           <p className="lead">
             The audit output is absent from{' '}
             <span className="mono">data/processed/</span>. Run{' '}
@@ -56,8 +56,8 @@ export default function MeasurementPage() {
             <div className="bignum">
               <span className="n tnum">{pct(m.resolution_rate)}</span>
               <span className="cap">
-                resolved overall, against 12.8% in the earliest cohort and 68.7%
-                in the latest.
+                resolved overall. The earliest and latest cohorts are 6 of 47
+                (12.8%) and 46 of 67 (68.7%).
               </span>
             </div>
           </div>
@@ -191,9 +191,10 @@ export default function MeasurementPage() {
             <p className="kicker">Sector against era</p>
             <h2>One sector effect survives conditioning. One does not.</h2>
             <p className="lead">
-              Sector composition varies sharply across eras: financials are 30%
-              of 2010 to 2011 candidates and 5% of 2015 to 2018. A pooled sector
-              rate is therefore partly a statement about when each sector failed.
+              Sector composition varies sharply across eras: financials are 14 of
+              47 (30%) and 5 of 96 (5%) of candidates in 2010 to 2011 and 2015
+              to 2018, respectively. A pooled sector rate is therefore partly a
+              statement about when each sector failed.
             </p>
           </div>
 
@@ -218,9 +219,10 @@ export default function MeasurementPage() {
               <span className="year tnum">Holds</span>
               <h3>Mining resolves below its own era, everywhere</h3>
               <p className="what">
-                0 of 13, then 38% against an era average of 48%, then 47% against
-                57%. Manufacturing sits above its era in all five, every cell
-                reportable, from 22% against 13% up to 82% against 69%. These are
+                0 of 13; 13 of 34 (38%) against 46 of 96 (48%); 9 of 19 (47%)
+                against 37 of 65 (57%). Manufacturing sits above its era in all
+                five, every cell reportable, from 2 of 9 (22%) against 6 of 47
+                (13%) through 27 of 33 (82%) against 46 of 67 (69%). These are
                 sector effects, not era in disguise.
               </p>
             </div>
@@ -228,12 +230,12 @@ export default function MeasurementPage() {
               <span className="year tnum">Fails</span>
               <h3>Financials resolving worst was one small cell</h3>
               <p className="what">
-                The claim rested on fourteen firms in 2010 to 2011, where the era
-                average is 13% anyway, and every later financials cell is too
+                The claim rested on 1 of 14 (7%) against the 6 of 47 (13%) era in
+                financials in 2010 to 2011. Every later financials cell is too
                 small to report. The pooled gap is composition. What remains true
-                is a fact about the cohort rather than a rate: financials are
-                11.8% of candidates and 9.4% of the resolved set, so the study
-                under-samples the sector where Merton is least applicable.
+                is a fact about the cohort rather than a rate: financials are 41
+                of 346 (11.8%) candidates and 14 of 149 (9.4%) resolved, so the
+                study under-samples the sector where Merton is least applicable.
               </p>
             </div>
           </div>
@@ -312,9 +314,9 @@ export default function MeasurementPage() {
             <span className="bar" />
             <div>
               <blockquote>
-                A point estimate was published without its interval, from a cell
-                whose 95% bounds ran from 61% to 93%. The finding did not
-                collapse. It was never that precise.
+                A point estimate from 19 of 24 (79%) firms was published without
+                its interval, whose 95% bounds ran from 61% to 93%. The finding
+                did not collapse. It was never that precise.
               </blockquote>
               <cite>
                 On the size gradient, retracted at N = 346 and then the
@@ -336,9 +338,9 @@ export default function MeasurementPage() {
           <div className="callout callout-neutral">
             <p className="eyebrow">What actually changed</p>
             <p>
-              An earlier run on 190 candidates reported float above $200M
-              resolving at 79% against 51% below, and concluded the cohort skewed
-              large. That was retracted here as small-sample noise.{' '}
+              An earlier run on 190 candidates reported 19 of 24 (79%) top-band
+              firms resolved and concluded the cohort skewed large. That was
+              retracted here as small-sample noise.{' '}
               <strong>
                 The retraction was right about the conclusion and wrong about the
                 reason

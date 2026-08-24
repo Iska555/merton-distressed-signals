@@ -236,7 +236,8 @@ export default function MispricingClient({ tables }: { tables: RatingTables }) {
               <p>
                 <strong>This firm sits within 30% of the size boundary.</strong> Its
                 rating is partly an artefact of where the cutoff was drawn. About{' '}
-                <strong>8.5%</strong> of the filer universe falls in that zone.
+                <strong>8.5%</strong> of the 3,132-filer 2023 Q1 universe falls in
+                that zone.
               </p>
             )}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>

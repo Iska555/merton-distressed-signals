@@ -63,7 +63,11 @@ class TestSpending:
             ledger.spend(f"S{i}")
         with pytest.raises(BudgetExhausted) as exc:
             ledger.spend("NEXT")
-        assert "does not reset until" in str(exc.value)
+        message = str(exc.value).lower()
+        assert "does not reset until" in message
+        assert "on-disk cache" not in message
+        assert "narrow the sample" in message
+        assert "wait for the monthly reset" in message
 
 
 class TestPreflight:

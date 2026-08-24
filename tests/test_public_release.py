@@ -2,12 +2,16 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PUBLIC_SOURCE = [
-    ROOT / "frontend" / "app" / "page.tsx",
-    ROOT / "frontend" / "app" / "discrimination" / "page.tsx",
-    ROOT / "frontend" / "app" / "case-studies" / "page.tsx",
-    ROOT / "frontend" / "components" / "Nav.tsx",
-]
+PUBLIC_SOURCE = sorted(
+    path
+    for directory in (
+        ROOT / "frontend" / "app",
+        ROOT / "frontend" / "components",
+        ROOT / "frontend" / "lib",
+    )
+    for path in directory.rglob("*")
+    if path.suffix in {".ts", ".tsx"}
+)
 BENCHMARK_COPY = [
     ROOT / "frontend" / "app" / "page.tsx",
     ROOT / "frontend" / "app" / "mispricing" / "page.tsx",
@@ -16,9 +20,20 @@ BENCHMARK_COPY = [
 ]
 
 
+def source_text(path: Path) -> str:
+    return " ".join(path.read_text(encoding="utf-8").split())
+
+
 def test_public_release_contains_no_unfinished_module_copy():
-    text = "\n".join(path.read_text(encoding="utf-8") for path in PUBLIC_SOURCE)
-    for phrase in ("Awaiting sample", "In progress", "Not yet computed", "does not exist yet"):
+    text = "\n".join(
+        source_text(path) for path in PUBLIC_SOURCE
+    ).lower()
+    for phrase in (
+        "awaiting sample",
+        "in progress",
+        "not yet computed",
+        "does not exist yet",
+    ):
         assert phrase not in text
 
 
@@ -30,7 +45,7 @@ def test_evidence_route_is_not_published_before_results_exist():
 
 def test_public_copy_frames_the_benchmark_as_periodic_not_live_credit():
     text = "\n".join(
-        path.read_text(encoding="utf-8") for path in BENCHMARK_COPY
+        source_text(path) for path in BENCHMARK_COPY
     ).lower()
     for stale in (
         "credit investors are charging",
@@ -42,3 +57,34 @@ def test_public_copy_frames_the_benchmark_as_periodic_not_live_credit():
     ):
         assert stale not in text
     assert "january 2026 periodic synthetic-rating default-spread benchmark" in text
+
+
+def test_public_empirical_copy_includes_the_specified_cell_counts():
+    homepage = source_text(ROOT / "frontend" / "app" / "page.tsx")
+    data_page = source_text(ROOT / "frontend" / "app" / "data" / "page.tsx")
+    measurement = source_text(ROOT / "frontend" / "app" / "measurement" / "page.tsx")
+    mispricing = source_text(
+        ROOT / "frontend" / "app" / "mispricing" / "MispricingClient.tsx"
+    )
+
+    for phrase in (
+        "149 of 346 (43.1%)",
+        "6 of 47 (12.8%) to 46 of 67 (68.7%)",
+        "29 of 346 (8.4%)",
+    ):
+        assert phrase in homepage
+    assert "6 of 47 (12.8%) to 46 of 67 (68.7%)" in data_page
+    for phrase in (
+        "Measurement data unavailable.",
+        "6 of 47 (12.8%) and 46 of 67 (68.7%)",
+        "14 of 47 (30%) and 5 of 96 (5%)",
+        "0 of 13; 13 of 34 (38%) against 46 of 96 (48%); 9 of 19 (47%) against 37 of 65 (57%)",
+        "2 of 9 (22%) against 6 of 47 (13%) through 27 of 33 (82%) against 46 of 67 (69%)",
+        "1 of 14 (7%) against the 6 of 47 (13%) era",
+        "41 of 346 (11.8%) candidates and 14 of 149 (9.4%) resolved",
+        "19 of 24 (79%)",
+        "61% to 93%",
+    ):
+        assert phrase in measurement
+    assert "51%" not in measurement
+    assert "3,132-filer 2023 Q1 universe" in mispricing
