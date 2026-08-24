@@ -241,7 +241,7 @@ def build_cohort_spreads() -> dict | None:
     try:
         from dotenv import load_dotenv
 
-        load_dotenv(ROOT / "backend" / ".env")
+        load_dotenv(ROOT / ".env")
     except Exception:  # noqa: BLE001
         pass
 

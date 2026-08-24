@@ -20,7 +20,7 @@ FRONTEND_DATA = ROOT / "frontend" / "public" / "data"
 for _d in (DATA_RAW, DATA_PROCESSED):
     _d.mkdir(parents=True, exist_ok=True)
 
-load_dotenv(ROOT / "backend" / ".env")
+load_dotenv(ROOT / ".env")
 
 # ---------------------------------------------------------------- credentials
 FRED_API_KEY = os.getenv("FRED_API_KEY")
