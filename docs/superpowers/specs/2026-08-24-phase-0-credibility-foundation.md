@@ -60,10 +60,17 @@ official URL, access method, terms or licensing URL, redistribution boundary,
 point-in-time limitation and known failure mode. The Data page exposes the registry
 as a downloadable artifact. The README links to the human-readable source policy.
 
+Official terms are enforced, not merely linked. Exact ICE BofA OAS observations are
+removed from committed public JSON because the series notes restrict publication of
+top-level index values. The Mispricing module uses the already verified January 2026
+Damodaran synthetic-rating spreads and labels them as a periodic analytical benchmark,
+not a live market index. Tiingo raw observations are never committed; only derived
+outputs that cannot reconstruct the underlying feed may be retained or published.
+
 ## Global constraints
 
 - Preserve the chocolate, burgundy and red visual system already committed.
-- Do not change any published research number in Phase 0.
+- Do not change any published bankruptcy-study number in Phase 0.
 - Do not add predictive performance results before the matched sample exists.
 - Do not use em dashes in source or rendered copy.
 - Keep generated brand and figure assets byte-identical.
@@ -81,6 +88,8 @@ as a downloadable artifact. The README links to the human-readable source policy
   boilerplate.
 - `python -m scripts.verify` is the canonical local and CI verification entry point.
 - The data-source registry validates and is downloadable from the site.
+- No public artifact redistributes exact third-party values contrary to the linked
+  source terms.
 - Asset drift, published-figure checks, frontend lint, frontend build and root tests
   pass from a clean supported environment.
 - Deployment remains a separate explicit action because it pushes external state.

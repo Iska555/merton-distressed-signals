@@ -13,7 +13,7 @@
 ## Global Constraints
 
 - Preserve the chocolate, burgundy and red visual system already committed.
-- Do not change any published research number in Phase 0.
+- Do not change any published bankruptcy-study number in Phase 0.
 - Do not add predictive performance results before the matched sample exists.
 - Do not use em dashes in source or rendered copy.
 - Keep generated brand and figure assets byte-identical.
@@ -197,19 +197,30 @@ git add frontend tests/test_public_release.py tests/test_site_brand.py
 git commit -m "content: publish only completed research modules"
 ```
 
-### Task 3: Add a data-source and licensing registry
+### Task 3: Enforce source licensing and add a data-source registry
 
 **Files:**
 - Create: `frontend/public/data/SOURCES.json`
 - Create: `docs/DATA_SOURCES.md`
 - Create: `tests/test_data_sources.py`
+- Modify: `.env.example`
+- Modify: `src/config.py`
+- Modify: `src/models/shadow_rating.py`
+- Modify: `scripts/build_site_data.py`
 - Modify: `frontend/app/data/page.tsx`
+- Modify: `frontend/app/mispricing/page.tsx`
+- Modify: `frontend/app/mispricing/MispricingClient.tsx`
+- Modify: `frontend/lib/shadowRating.ts`
+- Modify: `frontend/public/data/shadow_rating.json`
+- Modify: `frontend/public/data/MANIFEST.json`
+- Delete: `frontend/public/data/cohort_spreads.json`
+- Delete: `frontend/public/data/spread_corroboration.json`
 
 **Interfaces:**
-- Consumes: official SEC, FRED and Tiingo source identities already disclosed on the Data page
-- Produces: a downloadable JSON array whose records contain `id`, `publisher`, `official_url`, `used_for`, `access`, `terms_url`, `redistribution`, `point_in_time_limit` and `known_failure_mode`
+- Consumes: official SEC, FRED, ICE, Tiingo and Damodaran source terms; the verified `DAMODARAN_SPREAD_BPS_JAN2026` mapping
+- Produces: a downloadable JSON array whose records contain `id`, `publisher`, `official_url`, `used_for`, `access`, `terms_url`, `redistribution`, `point_in_time_limit` and `known_failure_mode`; `shadow_rating.json.benchmark_spread_bps`; a Mispricing module that consumes only redistributable benchmark data
 
-- [ ] **Step 1: Write a failing registry-schema test**
+- [ ] **Step 1: Write failing registry and redistribution tests**
 
 ```python
 import json
@@ -235,33 +246,76 @@ def test_source_registry_is_complete_and_uses_official_links():
         assert row["official_url"].startswith("https://")
         assert row["terms_url"].startswith("https://")
         assert all(str(row[field]).strip() for field in REQUIRED)
+
+
+def test_restricted_top_level_market_data_is_not_publicly_committed():
+    public = ROOT / "frontend" / "public" / "data"
+    assert not (public / "cohort_spreads.json").exists()
+    assert not (public / "spread_corroboration.json").exists()
+    builder = (ROOT / "scripts" / "build_site_data.py").read_text(encoding="utf-8")
+    assert "BAMLC0A" not in builder
+    assert "BAMLH0A" not in builder
+
+
+def test_shadow_rating_payload_carries_the_permitted_periodic_benchmark():
+    payload = json.loads(
+        (ROOT / "frontend" / "public" / "data" / "shadow_rating.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert payload["benchmark_spread_bps"]["BBB"] == 111
+    assert payload["benchmark_source"]["publisher"] == "NYU Stern, Aswath Damodaran"
 ```
 
-- [ ] **Step 2: Run the focused test and confirm the missing-file failure**
+- [ ] **Step 2: Run the focused test and confirm the expected failures**
 
 Run: `python -m pytest tests/test_data_sources.py -q`
 
-Expected: failure because `SOURCES.json` does not exist.
+Expected: failures because `SOURCES.json` and the benchmark payload fields do not
+exist, while restricted public spread files and FRED series retrieval still exist.
 
-- [ ] **Step 3: Create the source registry**
+- [ ] **Step 3: Remove restricted exact observations from public outputs**
+
+Delete the two public spread JSON files and their MANIFEST entries. Remove the FRED
+series IDs, API retrieval and corroboration writer from `scripts/build_site_data.py`.
+Remove `FRED_API_KEY` from `.env.example` and `src/config.py`; retain the public-domain
+risk-free identifier only if another supported module consumes it.
+
+- [ ] **Step 4: Emit the permitted periodic benchmark from one source of truth**
+
+Export `DAMODARAN_SPREAD_BPS_JAN2026` from `src.models.shadow_rating`. Add it to
+`shadow_rating.json` as `benchmark_spread_bps` with `benchmark_source` copied from the
+existing verified source metadata. Update `RatingTables` to expose those fields.
+
+- [ ] **Step 5: Reframe the Mispricing module around the periodic benchmark**
+
+Remove the separate `spreads` prop and `cohort_spreads.json` reader. Compute the
+benchmark from `tables.benchmarkSpreadBps[rating.rating]`. Describe it as the January
+2026 Damodaran synthetic-rating default spread, not an ICE index, live credit price or
+issuer bond. Preserve the independent equity and accounting input paths, the size-band
+sensitivity and the warning that the divergence is a screening direction rather than
+tradable basis points.
+
+- [ ] **Step 6: Create the source registry**
 
 Add one record for each required source. State that committed outputs are derived
-research artifacts rather than redistributed raw feeds. Record the rolling-history
-limit for FRED OAS, ticker-reuse and delisted-history risks for the price source, and
-historical disclosure limits for SEC sources.
+research artifacts rather than redistributed raw feeds. The FRED row records ICE OAS
+as reviewed but excluded from public output because its series notes restrict
+publication. The Tiingo row states that starter and trial plans prohibit persistent
+raw storage and that only non-reconstructable derived products may be retained or
+distributed under its terms. Record ticker-reuse and delisted-history risks for the
+price source and historical disclosure limits for SEC sources.
 
-- [ ] **Step 4: Document provenance policy**
+- [ ] **Step 7: Document provenance policy and update the Data page**
 
 Create `docs/DATA_SOURCES.md` explaining source selection, credentials, raw-data
 retention, committed-output policy, point-in-time rules and the difference between
-public access and unrestricted redistribution. Link to `SOURCES.json`.
+public access and unrestricted redistribution. Link to `SOURCES.json`. Remove the
+FRED-versus-Damodaran exact-value table and FRED credential statement from the Data
+page. Add a source-line link labelled `Download the source and licensing registry`.
+Preserve every bankruptcy-study number.
 
-- [ ] **Step 5: Expose the registry on the Data page**
-
-Add a source-line link to `/data/SOURCES.json` labelled `Download the source and
-licensing registry`. Preserve the existing source table and all published numbers.
-
-- [ ] **Step 6: Run registry tests and frontend lint**
+- [ ] **Step 8: Run focused tests, frontend lint and production build**
 
 Run: `python -m pytest tests/test_data_sources.py -q`
 
@@ -271,11 +325,15 @@ Run: `npm run lint` from `frontend/`.
 
 Expected: exit 0.
 
-- [ ] **Step 7: Commit Task 3**
+Run: `npm run build` from `frontend/`.
+
+Expected: a static `/mispricing` and `/data` route with no restricted JSON request.
+
+- [ ] **Step 9: Commit Task 3**
 
 ```text
-git add frontend/public/data/SOURCES.json docs/DATA_SOURCES.md tests/test_data_sources.py frontend/app/data/page.tsx
-git commit -m "docs: publish data source registry"
+git add .env.example src scripts frontend docs/DATA_SOURCES.md tests/test_data_sources.py
+git commit -m "fix: enforce public data licensing boundaries"
 ```
 
 ### Task 4: Add one cross-platform verification entry point and professional documentation
