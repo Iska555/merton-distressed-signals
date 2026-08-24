@@ -9,7 +9,6 @@ const LINKS = [
   { href: '/model', label: 'Model' },
   { href: '/mispricing', label: 'Mispricing' },
   { href: '/measurement', label: 'Measurement' },
-  { href: '/evidence', label: 'Evidence' },
   { href: '/discrimination', label: 'Discrimination' },
   { href: '/case-studies', label: 'Cases' },
   { href: '/data', label: 'Data' },

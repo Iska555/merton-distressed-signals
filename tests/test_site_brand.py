@@ -45,7 +45,6 @@ def test_homepage_uses_hero_paths_and_states_the_asserted_parameters():
         ("/model", "model"),
         ("/mispricing", "mispricing"),
         ("/measurement", "measurement"),
-        ("/evidence", "evidence"),
         ("/discrimination", "discrimination"),
         ("/case-studies", "cases"),
         ("/data", "data"),
@@ -66,7 +65,7 @@ def test_each_route_first_heading_has_a_theme_coloured_hidden_section_mark(
 def test_homepage_cards_have_all_six_module_marks():
     page = _page("/")
 
-    for mark in ("model", "mispricing", "measurement", "evidence", "discrimination", "data"):
+    for mark in ("model", "mispricing", "measurement", "discrimination", "cases", "data"):
         assert f"url(/marks/{mark}.svg)" in page
 
 

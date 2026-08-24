@@ -178,8 +178,8 @@ export default function Home() {
             />
           ) : (
             <p className="prose">
-              Not yet computed. Run{' '}
-              <span className="mono">python -m scripts.audit_resolution</span>.
+              Figure data are unavailable. See the Data module for the published
+              inputs and reproduction steps.
             </p>
           )}
 
@@ -285,7 +285,7 @@ export default function Home() {
         <div className="wrap stack-lg">
           <div className="sec-head">
             <p className="kicker">The study</p>
-            <h2>Six modules, built to be checked.</h2>
+            <h2>Six completed modules, built to be checked.</h2>
           </div>
           <div className="cards">
             <Link className="card" href="/model">
@@ -315,14 +315,14 @@ export default function Home() {
               </p>
               <span className="go">Read the audit</span>
             </Link>
-            <Link className="card pending" href="/evidence">
-              <SectionMark name="evidence" />
-              <h3>Evidence</h3>
+            <Link className="card" href="/case-studies">
+              <SectionMark name="cases" />
+              <h3>Cases</h3>
               <p>
-                Distance to default in event time, defaulters against matched
-                survivors. Awaiting the sample build.
+                Three completed boundary cases show where public data reach ends
+                and where the model does not apply cleanly.
               </p>
-              <span className="go">In progress</span>
+              <span className="go">Read the cases</span>
             </Link>
             <Link className="card" href="/discrimination">
               <SectionMark name="discrimination" />
@@ -393,13 +393,11 @@ export default function Home() {
               </p>
             </div>
             <div className="scopecol">
-              <h3>Not accurate, yet</h3>
+              <h3>Not an accuracy claim</h3>
               <p>
-                No accuracy figure is quoted from defaulted firms alone.
-                Discrimination will be reported as AUC against a matched control
-                cohort, with the false-positive rate stated and precision
-                recomputed at a realistic base rate. Those numbers do not exist
-                until the sample lands.
+                This release makes no empirical discrimination claim. Any future
+                AUC, false-positive rate and base-rate precision must be measured
+                against a matched control cohort.
               </p>
             </div>
           </div>

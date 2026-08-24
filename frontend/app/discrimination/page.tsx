@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import BaseRateExplorer from './BaseRateExplorer'
 import SectionMark from '@/components/SectionMark'
 
@@ -20,29 +19,6 @@ export default function DiscriminationPage() {
       </header>
 
       <BaseRateExplorer />
-
-      <section className="section">
-        <h2>Measured discrimination</h2>
-        <div className="callout callout-neutral">
-          <p className="eyebrow">Awaiting sample</p>
-          <p>
-            ROC curves and AUC by horizon, bootstrapped confidence intervals, the
-            calibration plot and the lead-time distribution all require the matched
-            cohort. Sample construction is in progress; see{' '}
-            <Link href="/measurement">Measurement</Link>.
-          </p>
-          <p>
-            The analysis is written and tested, including a{' '}
-            <strong>three-estimator horse race</strong>: KMV iterative solve,
-            simultaneous solve, and the Bharath and Shumway naive approximation, on
-            identical samples with a paired bootstrap on the AUC differences.
-            Bharath and Shumway (2008) found the naive approximation forecasts default
-            about as well as the full solve. If that replicates here on 2012–2024 data,
-            the honest headline is that the sophisticated machinery buys little, and it
-            will be reported that way.
-          </p>
-        </div>
-      </section>
 
       <section className="section">
         <h2>Rules fixed before the data</h2>
