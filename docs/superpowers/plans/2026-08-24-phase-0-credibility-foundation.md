@@ -239,7 +239,7 @@ def test_source_registry_is_complete_and_uses_official_links():
     rows = json.loads(REGISTRY.read_text(encoding="utf-8"))
     assert {row["id"] for row in rows} == {
         "sec-edgar-search", "sec-companyfacts", "sec-dera-fsds",
-        "fred-ice-bofa-oas", "tiingo-prices",
+        "fred-ice-bofa-oas", "tiingo-prices", "damodaran-synthetic-rating",
     }
     for row in rows:
         assert REQUIRED <= row.keys()
