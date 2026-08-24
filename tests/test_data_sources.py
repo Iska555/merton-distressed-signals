@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+from scripts import build_site_data
 from src.models import shadow_rating
 
 
@@ -32,6 +33,26 @@ def test_restricted_top_level_market_data_is_not_publicly_committed():
     builder = (ROOT / "scripts" / "build_site_data.py").read_text(encoding="utf-8")
     assert "BAMLC0A" not in builder
     assert "BAMLH0A" not in builder
+
+
+def test_generator_removes_stale_restricted_market_data(tmp_path, monkeypatch):
+    output = tmp_path / "public-data"
+    processed = tmp_path / "processed"
+    output.mkdir()
+    processed.mkdir()
+    restricted = [
+        output / "cohort_spreads.json",
+        output / "spread_corroboration.json",
+    ]
+    for path in restricted:
+        path.write_text('{"restricted": true}\n', encoding="utf-8")
+
+    monkeypatch.setattr(build_site_data, "OUT", output)
+    monkeypatch.setattr(build_site_data, "DATA_PROCESSED", processed)
+    monkeypatch.setattr(build_site_data, "git_commit", lambda: "test")
+
+    assert build_site_data.main() == 0
+    assert all(not path.exists() for path in restricted)
 
 
 def test_shadow_rating_payload_carries_the_permitted_periodic_benchmark():

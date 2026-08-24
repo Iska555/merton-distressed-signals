@@ -41,13 +41,12 @@ export default function MispricingPage() {
           <p className="eyebrow">Mispricing · the divergence screen</p>
         </div>
         <h1>
-          Where equity and credit disagree, and which way.
+          Where the equity-implied estimate and periodic benchmark disagree.
         </h1>
         <p className="lede">
-          If the equity market implies a wider spread than credit investors are
-          charging, one of the two is wrong. This is the part of the project with
-          practical interest and the part that needs the most care, because the
-          obvious way to build it does not work.
+          The January 2026 periodic synthetic-rating default-spread benchmark gives
+          the equity-implied estimate a fixed analytical reference. Their divergence
+          is a screening direction, not a live market basis or a trade.
         </p>
       </header>
 

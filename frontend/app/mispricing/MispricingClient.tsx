@@ -99,7 +99,8 @@ export default function MispricingClient({ tables }: { tables: RatingTables }) {
         'Historically the direction that precedes trouble, and the direction worth ' +
         'investigating. It is a reason to open the filings, not a trade.'
     } else {
-      verdict = mag > 150 ? 'Credit implies materially more risk' : 'Credit implies more risk'
+      verdict =
+        mag > 150 ? 'Periodic benchmark materially wider' : 'Periodic benchmark wider'
       colour = S1
       reading =
         'The periodic benchmark is wider than the equity market implies. This can be ' +
@@ -300,8 +301,9 @@ export default function MispricingClient({ tables }: { tables: RatingTables }) {
             models understate observed investment-grade spreads at short horizons,
             because a real spread also pays for liquidity and tax. That is the
             documented credit spread puzzle (Eom, Helwege and Huang 2004; Huang and
-            Huang 2012). Read the divergence as a screen for where equity and credit
-            disagree and in which direction, not as basis points anyone could capture.
+            Huang 2012). Read the divergence as a screen for where the equity-implied
+            estimate and periodic benchmark disagree and in which direction, not as
+            basis points anyone could capture.
           </p>
           <p>
             <strong>The limitation that remains.</strong> The January 2026 Damodaran

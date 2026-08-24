@@ -138,66 +138,52 @@ def fetch_tiingo(
     """
     Daily adjusted closes from Tiingo, which retains delisted tickers.
 
-    Metered: the free tier allows 500 unique symbols per calendar month. Two
-    protections apply, in this order:
-
-      1. On-disk cache, checked first and written before parsing. A rerun of
-         the pipeline consumes ZERO new unique symbols.
-      2. Symbol budget ledger, which records the spend before the request is
-         issued and raises BudgetExhausted rather than warning.
+    Metered: the free tier allows 500 unique symbols per calendar month. The
+    symbol budget ledger records the spend before each request and raises
+    BudgetExhausted rather than warning. Raw Tiingo responses are never read
+    from or written to persistent cache because Starter and Trial plans do not
+    permit persistent raw-data storage.
 
     Requires TIINGO_API_KEY. Without it this returns a not-configured result
     rather than raising, so the pipeline still runs on the control cohort.
     """
     global _TIINGO_LIMITER
 
-    path = _cache_path("tiingo", ticker, start, end)
-    payload: list | None = None
-    if path.exists() and not refresh:
-        try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
-        except Exception:  # noqa: BLE001
-            payload = None
-
-    if payload is None:
-        if not TIINGO_API_KEY:
-            return PriceSeries(
-                ticker, "tiingo", None, False, "TIINGO_API_KEY not configured"
-            )
-
-        # Spend the slot BEFORE the request. A failed request still consumed
-        # the provider's quota; assuming otherwise overruns the budget.
-        ledger = budget if budget is not None else budget_mod.SymbolBudget("tiingo")
-        try:
-            ledger.spend(ticker, allow_reserve=allow_reserve)
-        except budget_mod.BudgetExhausted as exc:
-            return PriceSeries(ticker, "tiingo", None, False, f"budget: {exc}")
-
-        if _TIINGO_LIMITER is None:
-            _TIINGO_LIMITER = budget_mod.tiingo_rate_limiter()
-        _TIINGO_LIMITER.acquire()
-
-        url = (
-            f"https://api.tiingo.com/tiingo/daily/{ticker.lower()}/prices"
-            f"?startDate={start}&endDate={end}&format=json&resampleFreq=daily"
+    if not TIINGO_API_KEY:
+        return PriceSeries(
+            ticker, "tiingo", None, False, "TIINGO_API_KEY not configured"
         )
-        req = urllib.request.Request(
-            url,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Token {TIINGO_API_KEY}",
-            },
-        )
-        try:
-            with urllib.request.urlopen(req, timeout=45) as resp:
-                payload = json.loads(resp.read().decode())
-        except urllib.error.HTTPError as exc:
-            return PriceSeries(ticker, "tiingo", None, False, f"http {exc.code}")
-        except Exception as exc:  # noqa: BLE001
-            return PriceSeries(ticker, "tiingo", None, False, f"{type(exc).__name__}")
-        # Written before parsing, so a schema surprise never costs the slot twice.
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(payload), encoding="utf-8")
+
+    # Spend the slot BEFORE the request. A failed request still consumed
+    # the provider's quota; assuming otherwise overruns the budget.
+    ledger = budget if budget is not None else budget_mod.SymbolBudget("tiingo")
+    try:
+        ledger.spend(ticker, allow_reserve=allow_reserve)
+    except budget_mod.BudgetExhausted as exc:
+        return PriceSeries(ticker, "tiingo", None, False, f"budget: {exc}")
+
+    if _TIINGO_LIMITER is None:
+        _TIINGO_LIMITER = budget_mod.tiingo_rate_limiter()
+    _TIINGO_LIMITER.acquire()
+
+    url = (
+        f"https://api.tiingo.com/tiingo/daily/{ticker.lower()}/prices"
+        f"?startDate={start}&endDate={end}&format=json&resampleFreq=daily"
+    )
+    req = urllib.request.Request(
+        url,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Token {TIINGO_API_KEY}",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=45) as resp:
+            payload = json.loads(resp.read().decode())
+    except urllib.error.HTTPError as exc:
+        return PriceSeries(ticker, "tiingo", None, False, f"http {exc.code}")
+    except Exception as exc:  # noqa: BLE001
+        return PriceSeries(ticker, "tiingo", None, False, f"{type(exc).__name__}")
 
     if not payload:
         return PriceSeries(ticker, "tiingo", None, False, "empty response")

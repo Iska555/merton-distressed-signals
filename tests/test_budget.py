@@ -144,30 +144,41 @@ class TestRateLimiter:
 
 
 class TestCacheIntegration:
-    """The guarantee: a cached symbol never spends a slot."""
+    """Tiingo Starter and Trial responses are never persisted as raw data."""
 
-    def test_cache_hit_does_not_spend(self, tmp_path, monkeypatch):
-        import json as _json
+    def test_default_fetch_does_not_persist_raw_response(self, tmp_path, monkeypatch):
+        import io
+
         from src.data import prices
 
         monkeypatch.setattr(prices, "_CACHE", tmp_path)
-        monkeypatch.setattr(prices, "TIINGO_API_KEY", "fake-key-must-not-be-used")
+        monkeypatch.setattr(prices, "TIINGO_API_KEY", "fake")
+        monkeypatch.setattr(
+            prices,
+            "_TIINGO_LIMITER",
+            type("Limiter", (), {"acquire": lambda self: None})(),
+        )
 
-        cached = [
+        response = [
             {"date": "2023-01-03T00:00:00.000Z", "adjClose": 10.0},
             {"date": "2023-01-04T00:00:00.000Z", "adjClose": 11.0},
         ]
-        path = prices._cache_path("tiingo", "TEST", "2023-01-01", "2023-12-31")
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(_json.dumps(cached), encoding="utf-8")
+        monkeypatch.setattr(
+            prices.urllib.request,
+            "urlopen",
+            lambda request, timeout: io.BytesIO(json.dumps(response).encode()),
+        )
 
+        path = prices._cache_path("tiingo", "TEST", "2023-01-01", "2023-12-31")
         ledger = SymbolBudget("tiingo", cap=10, reserve=2, path=tmp_path / "l.json")
         got = prices.fetch_tiingo(
             "TEST", "2023-01-01", "2023-12-31", budget=ledger
         )
+
         assert got.ok
         assert got.n == 2
-        assert ledger.status().used == 0      # nothing spent
+        assert ledger.status().used == 1
+        assert not path.exists()
 
     def test_missing_key_does_not_spend(self, tmp_path, monkeypatch):
         from src.data import prices

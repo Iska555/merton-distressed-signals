@@ -301,8 +301,9 @@ export default function Home() {
               <SectionMark name="mispricing" />
               <h3>Mispricing</h3>
               <p>
-                Where equity-implied risk and the credit cohort disagree, with
-                the circularity that broke the original version removed.
+                Where equity-implied risk and the January 2026 periodic
+                synthetic-rating default-spread benchmark disagree, with the
+                original circularity removed.
               </p>
               <span className="go">See the divergence</span>
             </Link>
@@ -377,10 +378,10 @@ export default function Home() {
               <h3>Not an arbitrage signal</h3>
               <p>
                 Issuer-level bond pricing needs TRACE, which is not free. The
-                mispricing module compares an equity-implied estimate against a
-                rating-cohort index average, not against this firm&rsquo;s bond.
-                It screens for disagreement and its direction. It is not basis
-                points anyone could capture.
+                mispricing module compares an equity-implied estimate against the
+                January 2026 periodic synthetic-rating default-spread benchmark,
+                not against this firm&rsquo;s bond. It screens for disagreement and
+                its direction. It is not basis points anyone could capture.
               </p>
             </div>
             <div className="scopecol">

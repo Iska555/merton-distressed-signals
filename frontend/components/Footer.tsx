@@ -13,7 +13,7 @@ export default function Footer() {
           been retracted and corrected in place, each recorded on{' '}
           <Link href="/data">Data</Link> with what was claimed and why it was
           wrong. Sources: SEC EDGAR filings and XBRL, SEC DERA Financial
-          Statement Data Sets, FRED ICE BofA option-adjusted spread indices.
+          Statement Data Sets, and NYU Stern Damodaran synthetic-rating data.
         </p>
       </div>
     </footer>

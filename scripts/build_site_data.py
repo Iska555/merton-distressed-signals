@@ -212,6 +212,9 @@ def build_verification(frame: pd.DataFrame) -> dict:
 
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
+    for restricted_name in ("cohort_spreads.json", "spread_corroboration.json"):
+        (OUT / restricted_name).unlink(missing_ok=True)
+
     manifest = {
         "generated_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "git_commit": git_commit(),
