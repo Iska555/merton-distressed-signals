@@ -23,7 +23,6 @@ for _d in (DATA_RAW, DATA_PROCESSED):
 load_dotenv(ROOT / ".env")
 
 # ---------------------------------------------------------------- credentials
-FRED_API_KEY = os.getenv("FRED_API_KEY")
 TIINGO_API_KEY = os.getenv("TIINGO_API_KEY")
 FMP_API_KEY = os.getenv("FMP_API_KEY")
 
@@ -85,22 +84,5 @@ LEVERAGE_DECILES = 10
 # all-rated corporate default rate. Range shown as a slider on the site.
 ANNUAL_DEFAULT_BASE_RATE = 0.015
 BASE_RATE_SLIDER_RANGE = (0.002, 0.05)
-
-# ---------------------------------------------------------------- FRED series
-# NOTE: ICE BofA OAS series are served on a ROLLING 3-YEAR WINDOW (verified
-# 2026-08-19: observation_start 2023-08-21). They CANNOT be used as a
-# contemporaneous benchmark in a historical event study. They appear only in
-# the present-day illustrative module on /screen.
-FRED_RISK_FREE = "DGS1"
-FRED_SPREAD_SERIES = {
-    "AAA": "BAMLC0A1CAAA",
-    "BBB": "BAMLC0A4CBBB",
-    "BB": "BAMLH0A1HYBB",
-    "B": "BAMLH0A2HYB",
-    "CCC": "BAMLH0A3HYC",
-    "IG_MASTER": "BAMLC0A0CM",
-    "HY_MASTER": "BAMLH0A0HYM2",
-}
-FRED_OAS_HISTORY_STARTS = "2023-08-21"  # empirical, re-verify on each rerun
 
 VERSION = "2.0.0-research"

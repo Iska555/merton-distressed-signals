@@ -4,14 +4,6 @@ import { useMemo, useState } from 'react'
 import { metrics, solve } from '@/lib/merton'
 import { shadowRating, type RatingTables } from '@/lib/shadowRating'
 
-interface Cohorts {
-  cohorts: Record<string, { series_id: string; oas_bps: number; observation_date: string }>
-  retrieved_utc: string
-  latest_observation: string
-  source: string
-  caveat: string
-}
-
 const S1 = 'var(--series-1)'
 const S2 = 'var(--series-2)'
 
@@ -33,13 +25,7 @@ function Field({
   )
 }
 
-export default function MispricingClient({
-  tables,
-  spreads,
-}: {
-  tables: RatingTables | null
-  spreads: Cohorts | null
-}) {
+export default function MispricingClient({ tables }: { tables: RatingTables }) {
   // Equity side
   const [E, setE] = useState(1800)
   const [sEpct, setSE] = useState(45)
@@ -88,12 +74,14 @@ export default function MispricingClient({
     return shadowRating(fundamentals, tables, other)
   }, [tables, fundamentals, rating])
 
-  const flippedCohortBps =
-    flipped && spreads ? spreads.cohorts[flipped.cohortIndex]?.oas_bps ?? null : null
+  const flippedBenchmarkBps =
+    flipped?.usable ? tables.benchmarkSpreadBps[flipped.rating] ?? null : null
 
-  const cohortBps =
-    rating && spreads ? spreads.cohorts[rating.cohortIndex]?.oas_bps ?? null : null
-  const gap = m && cohortBps !== null && isFinite(m.spread) ? m.spread - cohortBps : null
+  const benchmarkBps =
+    rating?.usable ? tables.benchmarkSpreadBps[rating.rating] ?? null : null
+  const gap = m && benchmarkBps !== null && isFinite(m.spread)
+    ? m.spread - benchmarkBps
+    : null
 
   let verdict = '', reading = '', colour = 'var(--ink)'
   if (gap !== null) {
@@ -102,21 +90,20 @@ export default function MispricingClient({
       verdict = 'Within noise'
       colour = 'var(--muted)'
       reading =
-        'The equity market and the credit cohort broadly agree. Nothing here worth a second look.'
+        'The equity-implied estimate and periodic benchmark broadly agree. Nothing here worth a second look.'
     } else if (gap > 0) {
       verdict = mag > 150 ? 'Equity implies materially more risk' : 'Equity implies more risk'
       colour = S2
       reading =
-        'The equity market is pricing more distress than the cohort benchmark charges. ' +
+        'The equity market is pricing more distress than the periodic benchmark. ' +
         'Historically the direction that precedes trouble, and the direction worth ' +
         'investigating. It is a reason to open the filings, not a trade.'
     } else {
       verdict = mag > 150 ? 'Credit implies materially more risk' : 'Credit implies more risk'
       colour = S1
       reading =
-        'The cohort benchmark is wider than the equity market implies. Often a cohort ' +
-        'effect rather than a firm one: the rating bucket is being repriced for reasons ' +
-        'that have nothing to do with this issuer.'
+        'The periodic benchmark is wider than the equity market implies. This can be ' +
+        'a classification or vintage effect rather than evidence about this issuer.'
     }
   }
 
@@ -186,10 +173,12 @@ export default function MispricingClient({
             </div>
           </div>
           <div className="stat">
-            <div className="v tnum">{cohortBps !== null ? cohortBps.toFixed(0) : 'n/a'}</div>
-            <div className="k">Cohort benchmark</div>
+            <div className="v tnum">
+              {benchmarkBps !== null ? benchmarkBps.toFixed(0) : 'n/a'}
+            </div>
+            <div className="k">Periodic benchmark</div>
             <div className="sub">
-              {rating?.usable ? `${rating.cohortIndex} index OAS` : 'n/a'}
+              {rating?.usable ? `${rating.rating} synthetic-rating default spread` : 'n/a'}
             </div>
           </div>
           <div className="stat">
@@ -199,7 +188,7 @@ export default function MispricingClient({
                 : (gap >= 0 ? '+' : '−') + Math.abs(Math.round(gap)).toLocaleString()}
             </div>
             <div className="k">Divergence</div>
-            <div className="sub">bps · equity less cohort</div>
+            <div className="sub">bps · equity less periodic benchmark</div>
           </div>
         </div>
 
@@ -226,14 +215,16 @@ export default function MispricingClient({
               total assets. Rated against the other table it would be{' '}
               <strong>{flipped.rating}</strong> rather than{' '}
               <strong>{rating.rating}</strong>
-              {flippedCohortBps !== null && cohortBps !== null && (
+              {flippedBenchmarkBps !== null && benchmarkBps !== null && (
                 <>
                   , moving the benchmark from{' '}
-                  <span className="mono tnum">{cohortBps.toFixed(0)}</span> to{' '}
-                  <span className="mono tnum">{flippedCohortBps.toFixed(0)}</span> bps
+                  <span className="mono tnum">{benchmarkBps.toFixed(0)}</span> to{' '}
+                  <span className="mono tnum">{flippedBenchmarkBps.toFixed(0)}</span> bps
                   and the divergence by{' '}
                   <span className="mono tnum">
-                    {Math.abs(Math.round(cohortBps - flippedCohortBps)).toLocaleString()}
+                    {Math.abs(
+                      Math.round(benchmarkBps - flippedBenchmarkBps),
+                    ).toLocaleString()}
                   </span>{' '}
                   bps
                 </>
@@ -285,9 +276,9 @@ export default function MispricingClient({
         )}
 
         <p className="source-line">
-          {spreads
-            ? `Cohort spreads: ${spreads.source}, observation ${spreads.latest_observation}, retrieved ${spreads.retrieved_utc.slice(0, 10)}. Series IDs on /data.`
-            : 'Cohort spreads unavailable: no FRED series retrieved at build time.'}
+          Benchmark: January 2026 Damodaran synthetic-rating default spread. This
+          periodic analytical input is not an ICE index, live credit price or issuer
+          bond quote.
         </p>
       </section>
 
@@ -313,12 +304,13 @@ export default function MispricingClient({
             disagree and in which direction, not as basis points anyone could capture.
           </p>
           <p>
-            <strong>The limitation that remains.</strong> A cohort index spread is the
-            average of many unrelated issuers, not this firm&rsquo;s bond. Issuer-level
-            pricing needs TRACE, which is not freely available. So this measures
-            divergence between an equity-implied estimate and a cohort benchmark. It is
-            a screening indicator that tells you where to look. Calling it an arbitrage
-            signal would be claiming more than the data can carry.
+            <strong>The limitation that remains.</strong> The January 2026 Damodaran
+            synthetic-rating default spread is a periodic analytical benchmark, not
+            this firm&rsquo;s bond, an ICE index or a live credit price. Issuer-level
+            pricing needs TRACE, which is not freely available. This divergence is a
+            screening direction that tells you where to look, not tradable basis
+            points. Calling it an arbitrage signal would claim more than the data can
+            carry.
           </p>
           <p>
             <strong>The shadow rating is not an agency rating.</strong> It is

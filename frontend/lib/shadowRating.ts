@@ -18,6 +18,8 @@ export interface RatingTables {
   scale: string[]
   cohort_index: Record<string, string>
   source: Record<string, string>
+  benchmarkSpreadBps: Record<string, number>
+  benchmarkSource: Record<string, string>
 }
 
 export interface Fundamentals {

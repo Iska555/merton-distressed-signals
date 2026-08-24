@@ -5,6 +5,14 @@ import MispricingClient from './MispricingClient'
 import SectionMark from '@/components/SectionMark'
 import type { RatingTables } from '@/lib/shadowRating'
 
+type RatingTablesPayload = Omit<
+  RatingTables,
+  'benchmarkSpreadBps' | 'benchmarkSource'
+> & {
+  benchmark_spread_bps: Record<string, number>
+  benchmark_source: Record<string, string>
+}
+
 function readJson<T>(name: string): T | null {
   try {
     return JSON.parse(
@@ -16,10 +24,14 @@ function readJson<T>(name: string): T | null {
 }
 
 export default function MispricingPage() {
-  const tables = readJson<RatingTables>('shadow_rating.json')
-  const spreads = readJson<Parameters<typeof MispricingClient>[0]['spreads']>(
-    'cohort_spreads.json',
-  )
+  const payload = readJson<RatingTablesPayload>('shadow_rating.json')
+  const tables: RatingTables | null = payload
+    ? {
+        ...payload,
+        benchmarkSpreadBps: payload.benchmark_spread_bps,
+        benchmarkSource: payload.benchmark_source,
+      }
+    : null
 
   return (
     <div className="wrap">
@@ -51,20 +63,7 @@ export default function MispricingPage() {
         </section>
       )}
 
-      {!spreads && tables && (
-        <section className="section">
-          <div className="callout">
-            <p className="eyebrow">Illustrative, not sourced</p>
-            <p>
-              No cohort spreads were retrieved at build time, so the benchmark side
-              of the comparison is unavailable. The divergence figure is suppressed
-              rather than filled with a plausible placeholder.
-            </p>
-          </div>
-        </section>
-      )}
-
-      {tables && <MispricingClient tables={tables} spreads={spreads} />}
+      {tables && <MispricingClient tables={tables} />}
 
       <section className="section">
         <details className="spec">
@@ -97,10 +96,11 @@ export default function MispricingPage() {
               asserted by a test rather than left to memory.
             </p>
             <p>
-              Cohort spreads are ICE BofA option-adjusted spread indices, fetched from
-              FRED <em>at build time</em> so that no credential reaches a browser and
-              the page renders with every backend stopped. Series IDs and retrieval
-              dates are listed on <Link href="/data">Data</Link>.
+              The benchmark is the January 2026 Damodaran synthetic-rating default
+              spread, emitted from the same Python source as the rating tables. It is
+              a periodic analytical input, not an ICE index, live credit price or
+              issuer bond quote. Source and licensing details are listed on{' '}
+              <Link href="/data">Data</Link>.
             </p>
           </div>
         </details>

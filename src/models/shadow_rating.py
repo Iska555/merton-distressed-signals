@@ -31,7 +31,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-__all__ = ["ShadowRating", "shadow_rating", "RATING_SCALE", "SOURCE"]
+__all__ = [
+    "DAMODARAN_SPREAD_BPS_JAN2026",
+    "RATING_SCALE",
+    "SOURCE",
+    "ShadowRating",
+    "shadow_rating",
+]
 
 SOURCE = {
     "table": "Damodaran synthetic rating, interest coverage to rating",
@@ -52,11 +58,10 @@ SOURCE = {
                        "metric on Merton-inapplicability grounds.",
 }
 
-# Damodaran publishes a spread beside each rating. It is NOT used as a spread
-# source anywhere -- cohort spreads come from FRED for both size bands, because
-# the small-firm table's spread column is a 2017 snapshot and stale for
-# benchmarking. These are retained solely as an INDEPENDENT CORROBORATION that
-# the FRED percent-to-basis-point conversion carries no factor-of-100 error.
+# Damodaran publishes a January 2026 default spread beside each large-company
+# synthetic rating. This periodic table is the permitted public benchmark for
+# the illustrative divergence screen. It is not a live credit price, an index
+# observation or an issuer bond quote.
 DAMODARAN_SPREAD_BPS_JAN2026 = {
     "AAA": 40, "AA": 55, "A+": 70, "A": 78, "A-": 89, "BBB": 111,
     "BB+": 138, "BB": 184, "B+": 275, "B": 321, "B-": 509,
@@ -121,8 +126,7 @@ RATING_SCALE = [
     "CCC", "CC", "C", "D",
 ]
 
-# Rating -> the FRED ICE BofA cohort index it maps to. The site reads the live
-# series; these are the bucket assignments, not spread levels.
+# Rating to broad rating bucket. These labels contain no market observations.
 COHORT_INDEX = {
     "AAA": "AAA", "AA": "AA", "A+": "A", "A": "A", "A-": "A",
     "BBB": "BBB", "BB+": "BB", "BB": "BB",

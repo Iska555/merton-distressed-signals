@@ -16,18 +16,7 @@
     "shadow_rating.json": {
       "source": "src/models/shadow_rating.py",
       "rows_in": 15,
-      "description": "Coverage-to-rating thresholds, emitted from the Python module so the browser cannot hold a divergent copy. Accounting inputs only: no Merton quantity enters the benchmark rating."
-    },
-    "cohort_spreads.json": {
-      "source": "FRED ICE BofA option-adjusted spread indices",
-      "rows_in": 7,
-      "description": "Latest OAS per rating cohort. Index averages across many unrelated issuers, NOT any single firm's bond.",
-      "retrieved": "2026-08-22T17:45:11+00:00"
-    },
-    "spread_corroboration.json": {
-      "source": "FRED ICE BofA OAS vs Damodaran synthetic-rating spreads",
-      "rows_in": 7,
-      "description": "Validation check on the percent-to-basis-point conversion, against an independent source."
+      "description": "Coverage-to-rating thresholds and the January 2026 Damodaran periodic benchmark, emitted from the Python module so the browser cannot hold a divergent copy. Accounting inputs only: no Merton quantity enters the benchmark rating."
     }
   }
 }

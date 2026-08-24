@@ -234,16 +234,15 @@ class TestProvenance:
     def test_financial_table_is_recorded_as_deliberately_unused(self):
         assert "NOT used" in sr.SOURCE["financial_table"]
 
-    def test_damodaran_spreads_are_not_used_as_a_spread_source(self):
+    def test_damodaran_spreads_do_not_enter_rating_assignment(self):
         """
-        Retained only to corroborate FRED's unit conversion. If the module ever
-        starts serving them as benchmark levels, the 2017 small-cap column would
-        leak into a 2026 comparison.
+        Benchmark spreads are published beside the rating tables, but the spread
+        level must not influence the accounting-only rating assignment.
         """
         source = inspect.getsource(sr.shadow_rating)
         assert "DAMODARAN_SPREAD_BPS" not in source
 
-    def test_spread_corroboration_covers_the_scale(self):
+    def test_periodic_benchmark_covers_the_scale(self):
         for rating in sr.RATING_SCALE:
             assert rating in sr.DAMODARAN_SPREAD_BPS_JAN2026
 

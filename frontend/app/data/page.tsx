@@ -1,39 +1,10 @@
-import fs from 'node:fs'
-import path from 'node:path'
 import Link from 'next/link'
 import SectionMark from '@/components/SectionMark'
 import { getManifest, getMeasurement, pct } from '@/lib/siteData'
 
-interface Corroboration {
-  rows: {
-    grade: string
-    fred_bps: number
-    damodaran_bps: number
-    difference_bps: number
-    ratio: number | null
-  }[]
-  fred_observation: string
-  damodaran_vintage: string
-  note: string
-}
-
-function readCorroboration(): Corroboration | null {
-  try {
-    return JSON.parse(
-      fs.readFileSync(
-        path.join(process.cwd(), 'public', 'data', 'spread_corroboration.json'),
-        'utf-8',
-      ),
-    ) as Corroboration
-  } catch {
-    return null
-  }
-}
-
 export default function DataPage() {
   const manifest = getManifest()
   const m = getMeasurement()
-  const corr = readCorroboration()
 
   return (
     <div className="wrap">
@@ -83,15 +54,21 @@ export default function DataPage() {
               </tr>
               <tr>
                 <td>FRED ICE BofA OAS indices</td>
-                <td>Cohort benchmark spreads</td>
-                <td className="mono">BAMLC0A1CAAA … BAMLH0A3HYC</td>
-                <td>API key, fetched at build time only</td>
+                <td>Licensing review only; observations excluded</td>
+                <td className="mono">ICE BofA OAS</td>
+                <td>Publicly accessible, publication restricted</td>
               </tr>
               <tr>
-                <td>Price vendor listing file</td>
-                <td>Symbol trading windows, delisting dates</td>
-                <td className="mono">supported_tickers</td>
-                <td>Public file, no key</td>
+                <td>Tiingo end-of-day prices</td>
+                <td>Historical prices and symbol trading windows</td>
+                <td className="mono">EOD API</td>
+                <td>API key; plan storage terms apply</td>
+              </tr>
+              <tr>
+                <td>Damodaran synthetic ratings</td>
+                <td>Rating tables and January 2026 periodic benchmark</td>
+                <td className="mono">ratings.html</td>
+                <td>Public, no key</td>
               </tr>
             </tbody>
           </table>
@@ -102,6 +79,12 @@ export default function DataPage() {
             <span className="mono">{manifest.git_commit}</span>.
           </p>
         )}
+        <p className="source-line">
+          <a href="/data/SOURCES.json" download>
+            Download the source and licensing registry
+          </a>
+          .
+        </p>
       </section>
 
       <section className="section">
@@ -135,56 +118,6 @@ export default function DataPage() {
           <p className="prose">No manifest found. Run <span className="mono">python -m scripts.build_site_data</span>.</p>
         )}
       </section>
-
-      {corr && (
-        <section className="section">
-          <h2>Validation: two unrelated sources agree on units</h2>
-          <p className="prose">
-            A factor-of-100 error in a percent-to-basis-point conversion is easy to
-            make and invisible once made, because the resulting numbers still look
-            like spreads. This checks the FRED figures against Damodaran&rsquo;s
-            synthetic-rating spread column, which is built from traded bonds and has
-            no connection to FRED.
-          </p>
-          <div className="scroll-x">
-            <table className="data">
-              <thead>
-                <tr>
-                  <th>Grade</th>
-                  <th style={{ textAlign: 'right' }}>FRED ({corr.fred_observation})</th>
-                  <th style={{ textAlign: 'right' }}>
-                    Damodaran ({corr.damodaran_vintage})
-                  </th>
-                  <th style={{ textAlign: 'right' }}>Difference</th>
-                </tr>
-              </thead>
-              <tbody>
-                {corr.rows.map((r) => (
-                  <tr key={r.grade}>
-                    <td className="mono">{r.grade}</td>
-                    <td className="num">{r.fred_bps.toFixed(0)}</td>
-                    <td className="num">{r.damodaran_bps}</td>
-                    <td
-                      className="num"
-                      style={{
-                        color:
-                          Math.abs(r.difference_bps) > 100 ? 'var(--muted)' : 'inherit',
-                      }}
-                    >
-                      {r.difference_bps > 0 ? '+' : ''}
-                      {r.difference_bps.toFixed(0)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="prose">
-            Investment grade agrees within a few basis points across two independent
-            sources, which is strong evidence the conversion is correct. {corr.note}
-          </p>
-        </section>
-      )}
 
       <section className="section">
         <h2>Exclusions, split by cause</h2>
@@ -306,9 +239,10 @@ export default function DataPage() {
             strata with its cell counts, for this reason.
           </p>
           <p>
-            <strong>The benchmark is a cohort, not an issuer.</strong> Issuer-level
-            bond pricing requires TRACE, which is not freely available. The mispricing
-            module therefore reports direction, not level.
+            <strong>The benchmark is periodic, not an issuer price.</strong> The
+            January 2026 Damodaran synthetic-rating default spread is not an ICE
+            index, live credit price or issuer bond quote. The mispricing module
+            therefore reports screening direction, not tradable basis points.
           </p>
           <p>
             <strong>Quota-constrained design.</strong> The control ratio was set by a
@@ -343,8 +277,9 @@ export default function DataPage() {
           Model scripts write deterministic CSVs to{' '}
           <span className="mono">data/processed/</span>. Random seeds are fixed; the
           matching procedure consults no RNG at all, because its tie-break is a total
-          order. <span className="mono">FRED_API_KEY</span> is the only credential,
-          it is read at build time only, and it never reaches a browser.
+          order. SEC access uses a descriptive User-Agent, and Tiingo access uses a
+          local API key subject to plan quotas and storage terms. Credentials never
+          reach the browser.
         </p>
       </section>
     </div>

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "sec-edgar-search",
+    "publisher": "U.S. Securities and Exchange Commission",
+    "official_url": "https://www.sec.gov/search-filings/edgar-application-programming-interfaces",
+    "used_for": "8-K Item 1.03 bankruptcy-event candidates and filing text",
+    "access": "Public SEC EDGAR interfaces; no API key; descriptive User-Agent required",
+    "terms_url": "https://www.sec.gov/about/webmaster-frequently-asked-questions",
+    "redistribution": "Government-created SEC content and public EDGAR filings are free to access and reuse with citation. Committed outputs are derived research artifacts, not a redistributed raw filing feed.",
+    "point_in_time_limit": "Full-text search covers 2001 onward, and filing availability is bounded by the disclosure filed by each registrant at that date.",
+    "known_failure_mode": "Item 1.03 search results are candidates, not confirmed issuer bankruptcies; filings can concern a subsidiary or an unrelated event."
+  },
+  {
+    "id": "sec-companyfacts",
+    "publisher": "U.S. Securities and Exchange Commission",
+    "official_url": "https://data.sec.gov/",
+    "used_for": "Point-in-time debt, shares, public float, trading symbols and filing fundamentals",
+    "access": "Public SEC data APIs; no API key; descriptive User-Agent required",
+    "terms_url": "https://www.sec.gov/about/webmaster-frequently-asked-questions",
+    "redistribution": "Government-created SEC content and public EDGAR filings are free to access and reuse with citation. Committed outputs are derived research artifacts, not redistributed Company Facts responses.",
+    "point_in_time_limit": "Company Facts depends on XBRL disclosure, which is sparse before roughly 2009. Research filters on filed date so later disclosures are not visible early.",
+    "known_failure_mode": "Concept names, units and duplicate filings vary by issuer; current submissions metadata can also be wrong for a historical ticker."
+  },
+  {
+    "id": "sec-dera-fsds",
+    "publisher": "U.S. Securities and Exchange Commission",
+    "official_url": "https://www.sec.gov/data-research/sec-markets-data/financial-statement-data-sets",
+    "used_for": "Quarterly point-in-time filer universe and bulk financial-statement facts",
+    "access": "Public quarterly ZIP archives; no API key",
+    "terms_url": "https://www.sec.gov/about/webmaster-frequently-asked-questions",
+    "redistribution": "Government-created SEC data are reusable with citation. Committed outputs are derived research artifacts rather than redistributed quarterly archives.",
+    "point_in_time_limit": "The quarterly sets begin in 2009 and reflect information filed during each archive period, not facts known before filing.",
+    "known_failure_mode": "Historical coverage is limited by XBRL adoption and issuer disclosure; amended, duplicated or differently tagged facts require deterministic selection."
+  },
+  {
+    "id": "fred-ice-bofa-oas",
+    "publisher": "Federal Reserve Bank of St. Louis and ICE Data Indices, LLC",
+    "official_url": "https://fred.stlouisfed.org/series/BAMLC0A4CBBB",
+    "used_for": "Licensing review only; ICE BofA option-adjusted spread observations are excluded from public outputs",
+    "access": "FRED web access and API access under FRED terms and the source-specific series notes",
+    "terms_url": "https://fred.stlouisfed.org/legal/terms/",
+    "redistribution": "Excluded from committed public output. The ICE series notes state that exact index data are copyrighted, for internal use only, and may not be published without approval.",
+    "point_in_time_limit": "The reviewed series exposes a rolling recent window rather than the full historical period required for the bankruptcy study.",
+    "known_failure_mode": "Public access through FRED does not grant unrestricted redistribution, and the index is a cohort average rather than an issuer bond price."
+  },
+  {
+    "id": "tiingo-prices",
+    "publisher": "Tiingo, Inc.",
+    "official_url": "https://www.tiingo.com/documentation/end-of-day",
+    "used_for": "Historical equity prices and symbol-listing validation for delisted firms",
+    "access": "Authenticated API; plan quotas and terms apply",
+    "terms_url": "https://app.tiingo.com/tos/",
+    "redistribution": "Starter and trial plans prohibit persistent raw-data storage. Only non-reconstructable derived products may be retained or distributed under the terms; committed outputs are derived research artifacts, not raw price histories.",
+    "point_in_time_limit": "Historical prices are usable only after a contemporaneous issuer-symbol link is established; current ticker metadata cannot establish historical identity.",
+    "known_failure_mode": "Tickers are reused, delisted histories can be missing, and a valid symbol can resolve to a different company unless identity and trading dates are checked."
+  },
+  {
+    "id": "damodaran-synthetic-rating",
+    "publisher": "NYU Stern, Aswath Damodaran",
+    "official_url": "https://pages.stern.nyu.edu/adamodar/New_Home_Page/data.html",
+    "used_for": "Synthetic-rating thresholds and the January 2026 periodic default-spread benchmark",
+    "access": "Public web download; no API key",
+    "terms_url": "https://pages.stern.nyu.edu/~adamodar/pdfiles/blog/DataUpdate1for2026.pdf",
+    "redistribution": "Published guidance permits practitioners to use current data as an analytical starting point. The committed mapping supports a cited derived screen and is not presented as a live market feed.",
+    "point_in_time_limit": "The default-spread benchmark is a January 2026 periodic snapshot. The large-firm rating table is January 2026 and the small-firm table is January 2017.",
+    "known_failure_mode": "The rating is a synthetic analytical classification, not an agency rating, live credit price, ICE index or issuer bond quote."
+  }
+]

@@ -1,0 +1,56 @@
+import json
+from pathlib import Path
+
+from src.models import shadow_rating
+
+
+ROOT = Path(__file__).resolve().parents[1]
+REGISTRY = ROOT / "frontend" / "public" / "data" / "SOURCES.json"
+REQUIRED = {
+    "id", "publisher", "official_url", "used_for", "access", "terms_url",
+    "redistribution", "point_in_time_limit", "known_failure_mode",
+}
+
+
+def test_source_registry_is_complete_and_uses_official_links():
+    rows = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    assert {row["id"] for row in rows} == {
+        "sec-edgar-search", "sec-companyfacts", "sec-dera-fsds",
+        "fred-ice-bofa-oas", "tiingo-prices", "damodaran-synthetic-rating",
+    }
+    for row in rows:
+        assert REQUIRED <= row.keys()
+        assert row["official_url"].startswith("https://")
+        assert row["terms_url"].startswith("https://")
+        assert all(str(row[field]).strip() for field in REQUIRED)
+
+
+def test_restricted_top_level_market_data_is_not_publicly_committed():
+    public = ROOT / "frontend" / "public" / "data"
+    assert not (public / "cohort_spreads.json").exists()
+    assert not (public / "spread_corroboration.json").exists()
+    builder = (ROOT / "scripts" / "build_site_data.py").read_text(encoding="utf-8")
+    assert "BAMLC0A" not in builder
+    assert "BAMLH0A" not in builder
+
+
+def test_shadow_rating_payload_carries_the_permitted_periodic_benchmark():
+    payload = json.loads(
+        (ROOT / "frontend" / "public" / "data" / "shadow_rating.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert payload["benchmark_spread_bps"]["BBB"] == 111
+    assert payload["benchmark_source"]["publisher"] == "NYU Stern, Aswath Damodaran"
+
+
+def test_committed_benchmark_exactly_matches_python_source():
+    payload = json.loads(
+        (ROOT / "frontend" / "public" / "data" / "shadow_rating.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert payload["benchmark_spread_bps"] == (
+        shadow_rating.DAMODARAN_SPREAD_BPS_JAN2026
+    )
+    assert payload["benchmark_source"] == shadow_rating.SOURCE
