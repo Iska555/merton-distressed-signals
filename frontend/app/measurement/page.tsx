@@ -315,7 +315,7 @@ export default function MeasurementPage() {
             <div>
               <blockquote>
                 A point estimate from 19 of 24 (79%) firms was published without
-                its interval, whose 95% bounds ran from 61% to 93%. The finding
+                its interval, whose 95% bounds ran from 60% to 91%. The finding
                 did not collapse. It was never that precise.
               </blockquote>
               <cite>

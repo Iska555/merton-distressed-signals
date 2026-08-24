@@ -153,7 +153,7 @@ def check(frame: pd.DataFrame) -> Report:
     print("\n-- the retracted cell, and the limit of the suppression rule --")
     lo, hi = X.wilson_interval(19, 24)
     r.claim(abs(lo - 0.595) < 0.005 and abs(hi - 0.908) < 0.005,
-            "the retracted cell's 95% bounds ran 61% to 93%",
+            "the retracted cell's 95% bounds ran 60% to 91%",
             "README, /measurement, RESOLUTION_AUDIT.md §7.1, DECISIONS.md D5")
     r.claim(X.cell(pd.DataFrame({"resolved": [True] * 19 + [False] * 5}))["reportable"],
             "that cell would still be reportable today -- the rule is a floor",

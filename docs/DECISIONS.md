@@ -218,7 +218,7 @@ Three things moved between the two runs. Holding each fixed in turn:
 | Ordinary imprecision | **The remainder.** 18 of 22 against 38 of 65 is not significant (Fisher exact, p = 0.07). |
 
 So the finding did not "collapse". A point estimate was published without its
-interval, from a cell whose 95% Wilson bounds ran from 61% to 93%, and then
+interval, from a cell whose 95% Wilson bounds ran from 60% to 91%, and then
 several of the resolutions underneath it were correctly withdrawn.
 
 ### The limit of the fix

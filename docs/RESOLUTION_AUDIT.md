@@ -195,7 +195,7 @@ nothing was identified. Holding each fixed:
 | Ordinary imprecision | **The remainder.** 18 of 22 against 38 of 65 is not a significant difference (Fisher exact, p = 0.07); the intervals overlap. |
 
 So the finding did not collapse. A point estimate was published without its
-interval, from a cell whose 95% Wilson bounds ran from 61% to 93%, and several of
+interval, from a cell whose 95% Wilson bounds ran from 60% to 91%, and several of
 the resolutions underneath it were then correctly withdrawn.
 
 **The limit of the fix.** Suppressing rates on wide intervals is a floor, not a

@@ -177,7 +177,7 @@ export default function Home() {
               bars={m.by_era.map((e, i) => ({
                 label: e.label.replace('-', ' to 20'),
                 pct: e.rate * 100,
-                value: `${(e.rate * 100).toFixed(1)}%`,
+                value: `${e.resolved} of ${e.n} (${(e.rate * 100).toFixed(1)}%)`,
                 highlight: i === m.by_era.length - 1,
               }))}
             />

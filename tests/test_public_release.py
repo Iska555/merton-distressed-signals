@@ -1,3 +1,5 @@
+import html as html_module
+import json
 from pathlib import Path
 
 
@@ -25,9 +27,7 @@ def source_text(path: Path) -> str:
 
 
 def test_public_release_contains_no_unfinished_module_copy():
-    text = "\n".join(
-        source_text(path) for path in PUBLIC_SOURCE
-    ).lower()
+    text = "\n".join(source_text(path) for path in PUBLIC_SOURCE).lower()
     for phrase in (
         "awaiting sample",
         "in progress",
@@ -44,9 +44,7 @@ def test_evidence_route_is_not_published_before_results_exist():
 
 
 def test_public_copy_frames_the_benchmark_as_periodic_not_live_credit():
-    text = "\n".join(
-        source_text(path) for path in BENCHMARK_COPY
-    ).lower()
+    text = "\n".join(source_text(path) for path in BENCHMARK_COPY).lower()
     for stale in (
         "credit investors are charging",
         "credit implies more risk",
@@ -57,6 +55,45 @@ def test_public_copy_frames_the_benchmark_as_periodic_not_live_credit():
     ):
         assert stale not in text
     assert "january 2026 periodic synthetic-rating default-spread benchmark" in text
+
+
+def test_retracted_wilson_interval_uses_the_computed_rounded_bounds():
+    sources = (
+        ROOT / "frontend" / "app" / "measurement" / "page.tsx",
+        ROOT / "docs" / "DECISIONS.md",
+        ROOT / "docs" / "RESOLUTION_AUDIT.md",
+        ROOT / "scripts" / "check_published_figures.py",
+    )
+
+    for path in sources:
+        text = source_text(path)
+        assert "60% to 91%" in text
+        assert "61% to 93%" not in text
+
+
+def test_homepage_figure_one_renders_all_measurement_era_cell_counts():
+    measurement = json.loads(
+        (ROOT / "frontend" / "public" / "data" / "measurement.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    page = ROOT / "frontend" / ".next" / "server" / "app" / "index.html"
+    assert page.exists(), "frontend build is absent; run npm run build before this test"
+    rendered = html_module.unescape(page.read_text(encoding="utf-8"))
+    expected = [
+        f"{era['resolved']} of {era['n']} ({era['rate'] * 100:.1f}%)"
+        for era in measurement["by_era"]
+    ]
+
+    assert expected == [
+        "6 of 47 (12.8%)",
+        "14 of 71 (19.7%)",
+        "46 of 96 (47.9%)",
+        "37 of 65 (56.9%)",
+        "46 of 67 (68.7%)",
+    ]
+    for text in expected:
+        assert text in rendered
 
 
 def test_public_empirical_copy_includes_the_specified_cell_counts():
@@ -83,8 +120,9 @@ def test_public_empirical_copy_includes_the_specified_cell_counts():
         "1 of 14 (7%) against the 6 of 47 (13%) era",
         "41 of 346 (11.8%) candidates and 14 of 149 (9.4%) resolved",
         "19 of 24 (79%)",
-        "61% to 93%",
+        "60% to 91%",
     ):
         assert phrase in measurement
     assert "51%" not in measurement
+    assert "61% to 93%" not in measurement
     assert "3,132-filer 2023 Q1 universe" in mispricing
