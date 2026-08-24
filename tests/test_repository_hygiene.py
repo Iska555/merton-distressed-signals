@@ -16,7 +16,7 @@ ACCEPTANCE_SURFACES = (
     Path(".github"),
     Path("Makefile"),
 )
-IGNORED_DIRECTORIES = {".next", "node_modules", "dist", "out"}
+IGNORED_DIRECTORIES = {".next", "node_modules", "dist", "out", "build"}
 
 
 def _backend_references(root: Path) -> list[Path]:
@@ -29,13 +29,19 @@ def _backend_references(root: Path) -> list[Path]:
             candidates = (
                 path
                 for path in surface.rglob("*")
-                if path.is_file() and not IGNORED_DIRECTORIES.intersection(path.parts)
+                if path.is_file()
+                and not IGNORED_DIRECTORIES.intersection(
+                    path.relative_to(surface).parts
+                )
             )
         else:
             continue
         for path in candidates:
             try:
-                if "backend/" in path.read_text(encoding="utf-8"):
+                content = path.read_bytes()
+                if b"\x00" in content:
+                    continue
+                if "backend/" in content.decode("utf-8"):
                     paths.append(path)
             except (OSError, UnicodeDecodeError):
                 continue
@@ -50,23 +56,38 @@ def test_backend_recovery_references_are_limited_to_the_data_inventory():
     assert not _backend_references(ROOT)
 
 
-def test_backend_hygiene_recurses_and_ignores_dependency_build_and_binary_files(tmp_path):
-    source = tmp_path / "src" / "nested" / "reference.py"
+def test_backend_hygiene_scans_a_checkout_under_an_ignored_ancestor(tmp_path):
+    root = tmp_path / "out" / "repo"
+    source = root / "src" / "nested" / "reference.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("legacy = 'backend/'\n", encoding="utf-8")
+
+    assert _backend_references(root) == [source]
+
+
+def test_backend_hygiene_ignores_repo_local_outputs_and_binary_files(tmp_path):
+    root = tmp_path / "repo"
+    source = root / "src" / "nested" / "reference.py"
     source.parent.mkdir(parents=True)
     source.write_text("legacy = 'backend/'\n", encoding="utf-8")
 
     for path in (
-        tmp_path / "frontend" / "node_modules" / "package.js",
-        tmp_path / "frontend" / ".next" / "server.js",
+        root / "src" / "out" / "generated.py",
+        root / "src" / "build" / "generated.py",
+        root / "frontend" / "node_modules" / "package.js",
+        root / "frontend" / ".next" / "server.js",
     ):
         path.parent.mkdir(parents=True)
         path.write_text("legacy = 'backend/'\n", encoding="utf-8")
 
-    binary = tmp_path / "scripts" / "legacy.bin"
-    binary.parent.mkdir(parents=True)
-    binary.write_bytes(b"backend/\xff")
+    nul_binary = root / "scripts" / "nul.bin"
+    nul_binary.parent.mkdir(parents=True)
+    nul_binary.write_bytes(b"backend/\x00")
 
-    assert _backend_references(tmp_path) == [source]
+    undecodable_binary = root / "scripts" / "legacy.bin"
+    undecodable_binary.write_bytes(b"backend/\xff")
+
+    assert _backend_references(root) == [source]
 
 
 def test_tests_do_not_leave_visualization_pngs_at_repository_root():
