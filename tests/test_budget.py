@@ -17,7 +17,38 @@ from src.data.budget import BudgetExhausted, SymbolBudget
 
 @pytest.fixture
 def ledger(tmp_path):
-    return SymbolBudget("tiingo", cap=10, reserve=2, path=tmp_path / "ledger.json")
+    budget = SymbolBudget("tiingo", cap=10, reserve=2, path=tmp_path / "ledger.json")
+    budget.reconcile(authoritative_used=0)
+    return budget
+
+
+class TestReconciliation:
+    def test_new_or_monthless_ledger_refuses_spend_until_reconciled(self, tmp_path):
+        ledger = SymbolBudget(
+            "tiingo", cap=10, reserve=2, path=tmp_path / "ledger.json"
+        )
+
+        with pytest.raises(RuntimeError, match="reconcil"):
+            ledger.spend("AAPL")
+
+    def test_authoritative_usage_is_the_baseline_for_local_spend(self, tmp_path):
+        ledger = SymbolBudget(
+            "tiingo", cap=10, reserve=2, path=tmp_path / "ledger.json"
+        )
+
+        ledger.reconcile(authoritative_used=3)
+        assert ledger.status().used == 3
+
+        ledger.spend("AAPL")
+        assert ledger.status().used == 4
+
+    def test_reconciliation_rejects_impossible_provider_usage(self, tmp_path):
+        ledger = SymbolBudget(
+            "tiingo", cap=10, reserve=2, path=tmp_path / "ledger.json"
+        )
+
+        with pytest.raises(ValueError, match="between 0 and 10"):
+            ledger.reconcile(authoritative_used=11)
 
 
 class TestSpending:
@@ -94,6 +125,7 @@ class TestPersistence:
     def test_ledger_survives_reload(self, tmp_path):
         path = tmp_path / "ledger.json"
         first = SymbolBudget("tiingo", cap=10, reserve=2, path=path)
+        first.reconcile(authoritative_used=0)
         first.spend("AAPL")
         first.spend("MSFT")
 
@@ -107,6 +139,7 @@ class TestPersistence:
         symbols = [f"SYM{i}" for i in range(6)]
 
         first = SymbolBudget("tiingo", cap=100, reserve=10, path=path)
+        first.reconcile(authoritative_used=0)
         for symbol in symbols:
             first.spend(symbol)
         after_first = first.status().used
@@ -128,6 +161,7 @@ class TestPersistence:
         """Sorted keys and symbols, so the committed file has stable diffs."""
         path = tmp_path / "ledger.json"
         ledger = SymbolBudget("tiingo", cap=10, reserve=2, path=path)
+        ledger.reconcile(authoritative_used=0)
         for symbol in ("ZZZ", "AAA", "MMM"):
             ledger.spend(symbol)
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -149,6 +183,26 @@ class TestRateLimiter:
 
 class TestCacheIntegration:
     """Tiingo Starter and Trial responses are never persisted as raw data."""
+
+    def test_unreconciled_ledger_refuses_before_network_access(
+        self, tmp_path, monkeypatch
+    ):
+        from src.data import prices
+
+        monkeypatch.setattr(prices, "TIINGO_API_KEY", "fake")
+
+        def forbidden_network(*_args, **_kwargs):
+            raise AssertionError("network must not be reached before reconciliation")
+
+        monkeypatch.setattr(prices.urllib.request, "urlopen", forbidden_network)
+        ledger = SymbolBudget("tiingo", cap=10, reserve=2, path=tmp_path / "l.json")
+
+        got = prices.fetch_tiingo(
+            "TEST", "2023-01-01", "2023-12-31", budget=ledger
+        )
+
+        assert not got.ok
+        assert "reconcil" in got.reason.lower()
 
     def test_default_fetch_does_not_persist_raw_response(self, tmp_path, monkeypatch):
         import io
@@ -175,6 +229,7 @@ class TestCacheIntegration:
 
         path = prices._cache_path("tiingo", "TEST", "2023-01-01", "2023-12-31")
         ledger = SymbolBudget("tiingo", cap=10, reserve=2, path=tmp_path / "l.json")
+        ledger.reconcile(authoritative_used=0)
         got = prices.fetch_tiingo(
             "TEST", "2023-01-01", "2023-12-31", budget=ledger
         )
@@ -191,6 +246,7 @@ class TestCacheIntegration:
         monkeypatch.setattr(prices, "TIINGO_API_KEY", None)
 
         ledger = SymbolBudget("tiingo", cap=10, reserve=2, path=tmp_path / "l.json")
+        ledger.reconcile(authoritative_used=0)
         got = prices.fetch_tiingo("NOKEY", "2023-01-01", "2023-12-31", budget=ledger)
         assert not got.ok
         assert "not configured" in got.reason
@@ -203,6 +259,7 @@ class TestCacheIntegration:
         monkeypatch.setattr(prices, "TIINGO_API_KEY", "fake")
 
         ledger = SymbolBudget("tiingo", cap=2, reserve=2, path=tmp_path / "l.json")
+        ledger.reconcile(authoritative_used=0)
         got = prices.fetch_tiingo("ANY", "2023-01-01", "2023-12-31", budget=ledger)
         assert not got.ok
         assert got.reason.startswith("budget:")

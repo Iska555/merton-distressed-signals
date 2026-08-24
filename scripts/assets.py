@@ -7,8 +7,7 @@ byte-identical files, so assets diff in git like code and cannot drift from the
 numbers beside them.
 
     python -m scripts.assets --out frontend/public --logo divergence
-    python -m scripts.assets --out frontend/public --audit data/processed/resolution_audit.csv
-    python -m scripts.assets --out /tmp/preview --demo
+    python -m scripts.assets --out /tmp/preview
 
 Chocolate, burgundy and red sit close in hue, so they cannot carry categorical
 meaning in a chart. Charts separate categories by lightness and texture, never
@@ -17,13 +16,12 @@ by warm hue alone. The full warm range is used freely everywhere else.
 from __future__ import annotations
 
 import argparse
-import csv
 import datetime as _dt
 import html
 import os
 import subprocess
 import sys
-from collections import Counter, OrderedDict
+from collections import OrderedDict
 from pathlib import Path
 
 
@@ -60,16 +58,10 @@ P_DARK = {
     "paper": "#FFFFFF",
 }
 
-FIG = {
-    "primary": "var(--fig-primary, #A81C2A)",
-    "recessive": "var(--fig-recessive, #E8DCD6)",
-    "third": "var(--fig-third, #6B3F23)",
-    "ink": "var(--fig-ink, #2B1A17)",
-    "muted": "var(--fig-muted, #7B675C)",
-    "rule": "var(--fig-rule, #E7DCD6)",
-    "signal": "var(--fig-signal, #C0272D)",
-}
-
+WITHDRAWN_ASSETS = (
+    "figures/sample-field.svg",
+    "marks/evidence.svg",
+)
 
 def _svg(
     body: str,
@@ -165,14 +157,6 @@ MARKS: "OrderedDict[str, str]" = OrderedDict(
             ),
         ),
         (
-            "evidence",
-            _m(
-                '<path d="M3 6 L21 6"/>'
-                '<path d="M3 6 C10 6 12 13 21 14"/>'
-                '<path d="M3 6 C9 7 11 19 21 21"/>'
-            ),
-        ),
-        (
             "discrimination",
             _m(
                 '<path d="M12 3 L12 21"/>'
@@ -207,182 +191,6 @@ def mark_svg(name: str) -> str:
         label=f"{name} section mark",
         description=f"Decorative line symbol for the {name} section.",
     )
-
-
-RESOLVED, UNREACHABLE, INAPPLICABLE = "resolved", "unreachable", "inapplicable"
-STATE_ORDER = [RESOLVED, UNREACHABLE, INAPPLICABLE]
-STATE_LABEL = {
-    RESOLVED: "Resolved to a traded symbol",
-    UNREACHABLE: "Unreachable from public data",
-    INAPPLICABLE: "Not a Merton object",
-}
-THRESHOLDS = [(2011, "XBRL instances appear"), (2019, "Cover page gains a symbol column")]
-
-
-def _classify(row: dict) -> str:
-    outcome = (
-        row.get("outcome") or row.get("status") or row.get("resolved") or ""
-    ).strip().lower()
-    family = (
-        row.get("reason_family") or row.get("exclusion_family") or ""
-    ).strip().lower()
-    if outcome in ("resolved", "ok", "true", "1"):
-        return RESOLVED
-    if "inapplic" in family or "model" in family:
-        return INAPPLICABLE
-    return UNREACHABLE
-
-
-def load_audit(path: str) -> list[tuple[int, str]]:
-    rows: list[tuple[int, str]] = []
-    with open(path, newline="", encoding="utf-8") as fh:
-        for row in csv.DictReader(fh):
-            raw = (
-                row.get("event_date")
-                or row.get("filing_date")
-                or row.get("event_year")
-                or ""
-            ).strip()
-            if len(raw) < 4 or not raw[:4].isdigit():
-                continue
-            rows.append((int(raw[:4]), _classify(row)))
-    rows.sort(key=lambda item: (item[0], STATE_ORDER.index(item[1])))
-    return rows
-
-
-def demo_rows() -> list[tuple[int, str]]:
-    shape = {
-        2010: (24, 0.08), 2011: (21, 0.14), 2012: (19, 0.18),
-        2013: (17, 0.19), 2014: (16, 0.20), 2015: (23, 0.21),
-        2016: (28, 0.22), 2017: (21, 0.24), 2018: (19, 0.26),
-        2019: (22, 0.47), 2020: (34, 0.52), 2021: (18, 0.55),
-        2022: (17, 0.65), 2023: (26, 0.69), 2024: (21, 0.71),
-    }
-    out: list[tuple[int, str]] = []
-    for year, (count, share) in sorted(shape.items()):
-        resolved = int(round(count * share))
-        absent = count - resolved
-        inapplicable = max(1, absent // 6)
-        out += [(year, RESOLVED)] * resolved
-        out += [(year, INAPPLICABLE)] * inapplicable
-        out += [(year, UNREACHABLE)] * (absent - inapplicable)
-    out.sort(key=lambda item: (item[0], STATE_ORDER.index(item[1])))
-    return out
-
-
-def sample_field_svg(rows: list[tuple[int, str]], *, demo: bool = False) -> str:
-    by_year: "OrderedDict[int, Counter]" = OrderedDict()
-    for year, state in rows:
-        by_year.setdefault(year, Counter())[state] += 1
-    if not by_year:
-        raise SystemExit("no rows to plot")
-    years = sorted(by_year)
-
-    cell, gap, stack, year_gap = 9, 2, 8, 14
-    step = cell + gap
-    pad_l = pad_r = 24
-    pad_t, pad_b = 88, 78
-
-    blocks, x = [], pad_l
-    for year in years:
-        columns = max(1, -(-sum(by_year[year].values()) // stack))
-        width = columns * step - gap
-        blocks.append((year, x, width))
-        x += width + year_gap
-    plot_w = x - year_gap - pad_l
-    plot_h = stack * step - gap
-    width, height = pad_l + plot_w + pad_r, pad_t + plot_h + pad_b
-    base = pad_t + plot_h
-
-    output: list[str] = []
-    output.append(
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
-        'width="100%" role="img" aria-labelledby="sf-t sf-d" '
-        'font-family="Archivo, system-ui, sans-serif">'
-    )
-    output.append('<title id="sf-t">Every bankruptcy candidate, by filing year and outcome</title>')
-    output.append(
-        f'<desc id="sf-d">{len(rows)} candidates, one square each, grouped into the year of '
-        'filing. Block width tracks how many firms failed that year. Colour and texture show '
-        'whether the firm could be matched to a traded security.</desc>'
-    )
-    output.append(
-        '<defs><pattern id="hatch" width="4" height="4" patternUnits="userSpaceOnUse" '
-        f'patternTransform="rotate(45)"><rect width="4" height="4" fill="{FIG["recessive"]}"/>'
-        f'<line x1="0" y1="0" x2="0" y2="4" stroke="{FIG["third"]}" '
-        'stroke-width="2.2"/></pattern></defs>'
-    )
-
-    fill_for = {
-        RESOLVED: FIG["primary"],
-        UNREACHABLE: FIG["recessive"],
-        INAPPLICABLE: "url(#hatch)",
-    }
-    for year, x0, _width in blocks:
-        sequence: list[str] = []
-        for state in STATE_ORDER:
-            sequence += [state] * by_year[year].get(state, 0)
-        for index, state in enumerate(sequence):
-            column, row = divmod(index, stack)
-            output.append(
-                f'<rect x="{x0 + column * step}" y="{base - cell - row * step}" '
-                f'width="{cell}" height="{cell}" fill="{fill_for[state]}"/>'
-            )
-
-    for level, (threshold_year, label) in enumerate(THRESHOLDS):
-        if threshold_year not in years:
-            continue
-        line_x = blocks[years.index(threshold_year)][1] - year_gap / 2
-        top = pad_t - 16 - level * 26
-        output.append(
-            f'<line x1="{line_x:.1f}" y1="{top + 6:.1f}" x2="{line_x:.1f}" '
-            f'y2="{base + 6}" stroke="{FIG["signal"]}" stroke-width="1.5" '
-            'stroke-dasharray="4 3"/>'
-        )
-        anchor = "end" if line_x > pad_l + plot_w * 0.72 else "start"
-        text_x = line_x - 7 if anchor == "end" else line_x + 7
-        output.append(
-            f'<text x="{text_x:.1f}" y="{top:.1f}" fill="{FIG["signal"]}" '
-            f'font-size="10.5" font-weight="700" letter-spacing="0.11em" '
-            f'text-anchor="{anchor}">{html.escape(label.upper())}</text>'
-        )
-
-    output.append(
-        f'<line x1="{pad_l}" y1="{base + 12}" x2="{pad_l + plot_w}" '
-        f'y2="{base + 12}" stroke="{FIG["rule"]}" stroke-width="1"/>'
-    )
-    for year, x0, block_width in blocks:
-        output.append(
-            f'<text x="{x0 + block_width / 2:.1f}" y="{base + 30}" '
-            f'fill="{FIG["muted"]}" font-size="10" text-anchor="middle" '
-            f'font-family="IBM Plex Mono, monospace">{str(year)[2:]}</text>'
-        )
-
-    legend_x, legend_y = pad_l, base + 58
-    for state in STATE_ORDER:
-        count = sum(1 for _, item_state in rows if item_state == state)
-        label = f"{STATE_LABEL[state]} ({count})"
-        legend_width = 18 + len(label) * 6.05
-        if legend_x > pad_l and legend_x + legend_width > pad_l + plot_w:
-            legend_x, legend_y = pad_l, legend_y + 20
-        output.append(
-            f'<rect x="{legend_x}" y="{legend_y - 9}" width="10" height="10" '
-            f'fill="{fill_for[state]}" stroke="{FIG["rule"]}" stroke-width="0.5"/>'
-        )
-        output.append(
-            f'<text x="{legend_x + 16}" y="{legend_y}" fill="{FIG["muted"]}" '
-            f'font-size="11.5">{html.escape(label)}</text>'
-        )
-        legend_x += legend_width + 16
-
-    if demo:
-        output.append(
-            f'<text x="{pad_l}" y="20" fill="{FIG["signal"]}" font-size="11" '
-            'font-weight="700" letter-spacing="0.12em">'
-            'SYNTHETIC PREVIEW. NOT REAL DATA.</text>'
-        )
-    output.append("</svg>")
-    return "\n".join(output)
 
 
 def hero(
@@ -554,8 +362,6 @@ def main() -> None:
         choices=sorted(LOGOS) + ["all"],
         help="which mark to ship; --logo all writes every candidate for review",
     )
-    parser.add_argument("--audit", help="resolution audit CSV")
-    parser.add_argument("--demo", action="store_true")
     args = parser.parse_args()
 
     brand = os.path.join(args.out, "brand")
@@ -563,6 +369,8 @@ def main() -> None:
     marks = os.path.join(args.out, "marks")
     for directory in (brand, figures, marks):
         os.makedirs(directory, exist_ok=True)
+    for relative in WITHDRAWN_ASSETS:
+        (Path(args.out) / relative).unlink(missing_ok=True)
 
     print("brand")
     kinds = sorted(LOGOS) if args.logo == "all" else [args.logo]
@@ -601,24 +409,6 @@ def main() -> None:
         _write(os.path.join(marks, f"{name}.svg"), mark_svg(name), "assets.py")
 
     print("figures")
-    if args.demo:
-        rows, source = demo_rows(), "SYNTHETIC DEMO DATA"
-    elif args.audit:
-        rows, source = load_audit(args.audit), args.audit
-    else:
-        rows, source = None, None
-    if rows:
-        _write(
-            os.path.join(figures, "sample-field.svg"),
-            sample_field_svg(rows, demo=args.demo),
-            source,
-        )
-        resolved = sum(1 for _, state in rows if state == RESOLVED)
-        print(f"  {len(rows)} candidates, {resolved} resolved ({resolved / len(rows):.1%})")
-    else:
-        print("  skipped sample field: pass --audit PATH or --demo")
-
-    print("hero")
     hero(figures)
 
     print("\ndone. assets live under:")

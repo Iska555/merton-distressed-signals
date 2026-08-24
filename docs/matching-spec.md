@@ -1,5 +1,13 @@
 # Control Matching Specification (pre-registered)
 
+> [!CAUTION]
+> **Superseded for treatment-universe construction on 24 August 2026.** The
+> bankruptcy sample used by this document was relevance-truncated by a pagination
+> defect. No empirical rate or repeated-case inference in this file is current
+> evidence. The census rebuild specification now governs enumeration, clustering
+> and population eligibility. Control-matching principles remain design history
+> until a corrected treatment population exists.
+
 **Status:** pre-registered. Committed **before** any matching code was written and
 before any treatment-firm price series was retrieved.
 

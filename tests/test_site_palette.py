@@ -157,32 +157,7 @@ def test_no_superseded_palette_hex_remains_in_scoped_files():
     assert not offenders, "\n".join(offenders)
 
 
-def test_heatmap_uses_a_single_token_driven_red_ramp_in_rendered_output():
-    """
-    The ramp mixes the primary red into the page ground, so it inverts with
-    the theme instead of baking a light-theme white into every cell.
-    """
-    page = (ROOT / "frontend" / ".next" / "server" / "app" / "measurement.html").read_text(
-        encoding="utf-8"
-    )
-    mixes = re.findall(
-        r"color-mix\(in srgb, ?var\(--fig-primary\) ([0-9.]+)%, ?var\(--ground\)\)", page
-    )
-    assert mixes, "no token-driven heatmap ramp in the rendered grid"
-    assert max(float(value) for value in mixes) <= 62.0, (
-        "the ramp must stay capped so in-cell text keeps 4.5:1 in both themes"
-    )
-    assert "rgb(255, 255, 255)" not in page
-    assert "rgb(168, 28, 42)" not in page
-    assert "rgb(13, 74, 71)" not in page
-
-
-def test_warm_category_charts_have_texture_not_hue_alone():
-    sample = (ROOT / "frontend" / "public" / "figures" / "sample-field.svg").read_text(
-        encoding="utf-8"
-    )
-    assert 'patternTransform="rotate(45)"' in sample
-
+def test_homepage_two_series_chart_uses_texture_not_hue_alone():
     home = (ROOT / "frontend" / ".next" / "server" / "app" / "index.html").read_text(
         encoding="utf-8"
     )

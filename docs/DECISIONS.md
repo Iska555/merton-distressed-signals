@@ -1,5 +1,11 @@
 # Research decisions and their evidence
 
+> [!CAUTION]
+> **Measurement evidence withdrawn 24 August 2026.** Decisions about the live
+> Merton solver, benchmark independence and data rights remain current. Every
+> bankruptcy-sample rate, disclosure-era result and repeat-filing inference below
+> is retained only as correction history pending the complete census rebuild.
+
 Consequential choices, each with the finding that forced it. Every one of these
 must surface on `/data`. Dated so a reader can see what was decided before the
 data was seen.

@@ -1,18 +1,6 @@
 {
-  "generated_utc": "2026-08-24T18:05:27+00:00",
-  "git_commit": "592dc81",
+  "schema_version": 1,
   "files": {
-    "measurement.json": {
-      "source": "data/processed/resolution_audit.csv",
-      "rows_in": 346,
-      "description": "Symbol-resolution audit of 8-K Item 1.03 bankruptcy candidates: resolution rate by era, public-float band and SIC division, with exclusion reason codes split into data unavailability vs model inapplicability.",
-      "retrieved": "SEC EDGAR full-text search and XBRL company facts"
-    },
-    "verification.json": {
-      "source": "data/processed/filing_text_verification.csv",
-      "rows_in": 20,
-      "description": "Hand-verification sample for symbol resolution accuracy."
-    },
     "shadow_rating.json": {
       "source": "src/models/shadow_rating.py",
       "rows_in": 15,

@@ -1,5 +1,12 @@
 # Resolution Audit: who gets into the treatment cohort, and who doesn't
 
+> [!CAUTION]
+> **Withdrawn 24 August 2026.** The collector behind this audit paginated SEC
+> results incorrectly and produced a relevance-truncated sample with no known
+> inclusion probability. Every rate below is retained only as correction
+> history. It is not current evidence. The replacement design is in
+> `docs/superpowers/specs/2026-08-24-measurement-integrity-census-design.md`.
+
 **Run:** 2026-08-22 · **Sample:** 346 bankruptcy candidates, 25 per year, 2010–2024
 **Source:** 8-K Item 1.03 filings via EDGAR full-text search
 **Output:** `data/processed/resolution_audit.csv`

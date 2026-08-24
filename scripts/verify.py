@@ -22,13 +22,14 @@ def verification_commands(root: Path) -> tuple[Check, ...]:
     frontend = root / "frontend"
     return (
         Check("generated assets", (python, "-m", "scripts.check_assets"), root),
-        Check(
-            "published figures",
-            (python, "-m", "scripts.check_published_figures"),
-            root,
-        ),
+        Check("site data", (python, "-m", "scripts.check_site_data"), root),
         Check("frontend lint", ("npm", "run", "lint"), frontend),
         Check("frontend build", ("npm", "run", "build"), frontend),
+        Check(
+            "frontend dependency audit",
+            ("npm", "audit", "--omit=dev", "--audit-level=low"),
+            frontend,
+        ),
         Check("root tests", (python, "-m", "pytest", "tests", "-q"), root),
     )
 

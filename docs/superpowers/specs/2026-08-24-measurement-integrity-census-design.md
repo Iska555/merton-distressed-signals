@@ -1,8 +1,8 @@
 # Measurement Integrity Census Rebuild
 
-**Status:** Approved architecture, pending specification review
+**Status:** Approved architecture, implementation authorized
 **Date:** 2026-08-24
-**Release state:** Public release remains on hold until every acceptance condition in this document is met.
+**Release state:** `/measurement` and its public artifacts remain withheld. The Model, Mispricing, Discrimination, Cases and Data routes may publish after their independent release gates pass.
 
 ## 1. Purpose
 
@@ -13,7 +13,7 @@ Rebuild the bankruptcy-candidate evidence base as a reproducible census, then se
 
 The existing 346-row sample remains useful as evidence of a sampling defect, but it is superseded as an estimator. All rates and repeated-filing claims currently derived from it, including every rate on `/measurement`, are unverified until regenerated under this design.
 
-No branch push, merge, production deployment, or public release is permitted before the rebuilt evidence and all release gates pass.
+The census acceptance conditions govern restoration of `/measurement`, not publication of the five routes that do not depend on the defective sample. Those routes must contain no withdrawn rate and must carry the dated correction record.
 
 ## 2. Confirmed defect and its measured effect
 
@@ -167,55 +167,26 @@ Archive schema, required columns, expected units, and row counts must be validat
 
 Within Population 1, report timely submission availability and timely usable-assets availability for the fixed eras in Section 9. Publish both the numerator and denominator. This result is descriptive evidence about disclosure coverage and does not retroactively change the census.
 
-## 7. Census fallback, pre-registered before resolution
+## 7. Census fallback decision
 
 Enumeration, document retrieval, qualifying-filing identification, and clustering remain censuses. There is no fallback to convenience sampling for these stages.
 
-After a 200-case identity-resolution pilot, a probability-sample fallback may be triggered only if either:
-
-- the census contains more than 7,500 registrant-case clusters; or
-- measured pilot throughput projects more than 12 hours for one serial full-resolution run.
-
-The pilot exposes timing and completion status only; outcome labels and aggregate rates remain hidden until the trigger decision is recorded. If triggered, cases are sampled within era by one-digit SIC division by DERA-availability strata, with Population 2 eligibility included as an explicit stratum so the investment population is represented by design. Every row receives a known inclusion probability. Population estimates use Horvitz-Thompson weights and design-based confidence intervals. Sampling code, seed, stratum counts, inclusion probabilities, and finite-population corrections are committed.
-
-The complete enumerated census and funnel counts are still published. Only the expensive identity and price-resolution stages may use the probability sample.
+Do not design a probability-sample fallback before the 200-case pilot proves one is needed. The pilot exposes timing and completion status only. If measured throughput makes full identity or price resolution impractical, stop before aggregate outcomes are inspected and amend this specification with a probability design, explicit strata and known inclusion probabilities. The enumerated census and funnel remain complete in every case.
 
 ## 8. Falsification of the legacy 346-row sample
 
 The old sample is preserved as a superseded artifact and matched back to Population 1. The test asks whether relevance-ranked truncation created a detectably different sample from the population the legacy design intended to represent.
 
-### 8.1 Variables
+The defect is mechanically established and no old estimator will be salvaged. The comparison therefore documents the mechanism rather than running a large inferential test family.
 
-Compare legacy membership on:
+Match the legacy 346 rows back to Population 1 and report, overall and by year:
 
-- event year;
-- DERA submission and usable-assets availability;
-- public float and a separate public-float-missing indicator, conditioned by era;
-- one-digit and two-digit SIC, including missing SIC;
-- qualifying filing count per CIK and filing count per 24-month cluster;
-- maximum search `_score` within the cluster; and
-- log normalized length of the document carrying that maximum score.
+- the distribution of maximum search `_score` within each cluster;
+- the normalized length of the document carrying that maximum score;
+- median document length within the cluster as a robustness view; and
+- standardized mean differences between the legacy rows and Population 1.
 
-Use accession and `_id` as deterministic tie-breaks when multiple documents share the maximum score. Median cluster-document length is a declared robustness measure, not a replacement for the primary max-score-document field.
-
-Public float is descriptive only. Its XBRL dependence is handled by reporting missingness and era-conditioned comparisons rather than treating missing values as small firms.
-
-### 8.2 Tests and thresholds
-
-Run both an overall comparison and within-year comparisons that isolate relevance ranking from the intended equal-year allocation. The reference distribution uses 10,000 deterministic randomizations that preserve 25 selections per year where available and preserve the legacy global CIK deduplication rule.
-
-Use standardized mean differences and Kolmogorov-Smirnov statistics for continuous fields, Cramer's V for categorical fields, and Holm-adjusted p-values across the pre-registered family.
-
-The legacy sample passes only if the omnibus randomization test has `p >= 0.05` and every absolute standardized mean difference or Cramer's V is below 0.10.
-
-The proposed document-length mechanism is supported only if all of the following hold:
-
-- the omnibus test rejects at `p < 0.05`;
-- legacy rows have higher `_score` and shorter normalized documents;
-- both `_score` and log length have absolute standardized mean differences of at least 0.20; and
-- both directional tests remain significant at Holm-adjusted `p < 0.05`.
-
-If the omnibus test rejects without this stable directional pattern, report detectable but mechanistically unresolved selection bias. Publish all outcomes, including a null result.
+Use accession and `_id` as deterministic tie-breaks when documents share the maximum score. Publish counts, means, standard deviations, medians, quartiles and empirical distribution plots. State the directional hypothesis before calculation: relevance truncation should retain higher-scoring, shorter documents. Report the comparison even if the expected direction does not appear. No randomization family, Holm adjustment or representativeness pass condition is required because every old estimate is already withdrawn.
 
 ## 9. Pre-registered disclosure-era gradient
 
@@ -292,14 +263,14 @@ DERA is not a greenfield ingestion path, but point-in-time eligibility and confl
 
 | Workstream | Estimated effort | Material cost |
 |---|---:|---|
-| Complete SEC enumerator and manifests | 2 to 3 working days | SEC retrieval time and polite rate limits |
-| Clustering, matched-document retrieval, and length metrics | 2 to 4 working days | Archive-document transfer and cache growth |
-| DERA hardening and 64-quarter ingestion | 3 to 5 working days | About 7.3 GB sequential ZIP transfer; about 83 MB retained if the cached quarter is representative |
-| Identity-resolution census and reliable reruns | 1 to 2 working days | Pilot-dependent; projected 4 to 12 hours per complete unattended run |
-| Legacy falsification and era tests | 2 to 3 working days | Compute is modest after data freeze |
-| Blinded verification and adjudication | 2 to 4 working days | Human-dependent |
-| Site regeneration, correction record, and release review | 2 to 3 working days | Browser and CI verification |
-| **Total** | **13 to 20 working days** | **Approximately 2.5 to 4 working weeks** |
+| Complete SEC enumerator and manifests | 1.5 to 2 working days | SEC retrieval time and polite rate limits |
+| Clustering, matched-document retrieval, and length metrics | 1.5 to 2 working days | Archive-document transfer and cache growth |
+| DERA hardening and 64-quarter ingestion | 2 to 3 working days | About 7.3 GB sequential ZIP transfer; about 83 MB retained if the cached quarter is representative |
+| Identity-resolution census and reliable reruns | 1 to 1.5 working days | Pilot-dependent; projected 4 to 12 hours per complete unattended run |
+| Legacy score and document-length comparison | 0.5 to 1 working day | Compute is modest after data freeze |
+| Blinded verification and adjudication | 1 to 2 working days | Human-dependent |
+| Measurement-route regeneration and review | 0.5 to 1 working day | Browser and CI verification |
+| **Total** | **8 to 12 working days** | **Approximately 1.5 to 2.5 working weeks** |
 
 No calendar release date is committed until the 200-case pilot measures document-fetch and identity-resolution throughput. The estimate must be revised from observed throughput, not optimism.
 
@@ -319,7 +290,7 @@ Implementation is accepted only when all of the following are demonstrated:
 - Population 2 is mechanically proven to be a strict subset of Population 1.
 - DERA fixtures prove no look-ahead, amendment timing, 450-day staleness, tag fallback, unit checks, and deterministic conflict handling.
 - DERA availability by era is generated from Population 1 without filtering it.
-- Falsification statistics and randomizations reproduce from a fixed seed.
+- Legacy `_score` and document-length comparisons reproduce from the frozen retrieval manifest.
 - Every verification row has a schema-valid human verdict.
 - Every chart and sentence containing a number is generated from a declared data artifact.
 - The funnel contains every specified stage and annotates distinct CIKs without violating monotonicity.
@@ -327,8 +298,8 @@ Implementation is accepted only when all of the following are demonstrated:
 - No chart uses chocolate, burgundy, and red as hue-only categorical encodings.
 - Asset regeneration, published-figure reproduction, Python tests, frontend lint, frontend build, npm production audit, em-dash test, and repository drift checks all pass.
 - Commit metadata contains only the owner's authorship and no AI co-author trailer.
-- A final independent code review finds no critical or important issue before push, merge, and production deployment.
+- A final independent code review finds no critical or important issue before the measurement route is restored.
 
 ## 16. Decision boundary
 
-Approval of this document authorizes implementation planning, not implementation. The implementation plan must break the work into reviewable, test-first milestones and preserve the release hold. Any change to the population definitions, 2012 start, USD 50 million floor, clustering convention, fallback trigger, falsification thresholds, or era-gradient criteria requires a documented specification amendment before outcomes are used.
+Approval of this document authorizes implementation directly against its milestones, with test-first changes and review checkpoints. Any change to the population definitions, 2012 start, USD 50 million floor, clustering convention or era-gradient criteria requires a documented specification amendment before outcomes are used.

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from scripts.check_assets import GENERATED_ASSETS, compare_assets
 
 
@@ -15,11 +17,9 @@ def test_generated_inventory_contains_every_public_asset():
         "brand/logo.svg",
         "figures/hero-paths-dark.png",
         "figures/hero-paths-light.png",
-        "figures/sample-field.svg",
         "marks/cases.svg",
         "marks/data.svg",
         "marks/discrimination.svg",
-        "marks/evidence.svg",
         "marks/measurement.svg",
         "marks/mispricing.svg",
         "marks/model.svg",
@@ -48,3 +48,48 @@ def test_compare_assets_reports_missing_extra_and_changed_files(tmp_path):
         "uncommitted: extra.svg",
         "missing from generation: missing.svg",
     ]
+
+
+def test_compare_assets_rejects_generated_files_outside_the_inventory(tmp_path):
+    committed = tmp_path / "committed"
+    generated = tmp_path / "generated"
+    committed.mkdir()
+    generated.mkdir()
+    (committed / "expected.svg").write_bytes(b"same")
+    (generated / "expected.svg").write_bytes(b"same")
+    figures = generated / "figures"
+    figures.mkdir()
+    (figures / "sample-field.svg").write_bytes(b"withdrawn")
+
+    assert compare_assets(committed, generated, ("expected.svg",)) == [
+        "unexpected generated asset: figures/sample-field.svg"
+    ]
+
+
+def test_compare_assets_rejects_stale_committed_files_in_managed_directories(tmp_path):
+    committed = tmp_path / "committed"
+    generated = tmp_path / "generated"
+    for root in (committed, generated):
+        (root / "figures").mkdir(parents=True)
+        (root / "figures" / "hero.svg").write_bytes(b"same")
+    (committed / "figures" / "sample-field.svg").write_bytes(b"withdrawn")
+
+    assert compare_assets(committed, generated, ("figures/hero.svg",)) == [
+        "unexpected committed asset: figures/sample-field.svg"
+    ]
+
+
+def test_supported_asset_cli_cannot_generate_the_withdrawn_sample_field():
+    source = (Path(__file__).resolve().parents[1] / "scripts" / "assets.py").read_text(
+        encoding="utf-8"
+    )
+    checker = (
+        Path(__file__).resolve().parents[1] / "scripts" / "check_assets.py"
+    ).read_text(encoding="utf-8")
+
+    assert 'ap.add_argument("--audit"' not in source
+    assert 'ap.add_argument("--demo"' not in source
+    assert "def sample_field_svg" not in source
+    assert "sample_field_svg(" not in source
+    assert '"figures/sample-field.svg"' in source
+    assert 'parser.add_argument(\n        "--audit"' not in checker

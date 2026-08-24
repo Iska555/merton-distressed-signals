@@ -37,9 +37,9 @@ const mono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: 'Distressed Credit Signals',
   description:
-    'Most corporate bankruptcies cannot be studied. Whether a failed company ' +
-    'leaves a usable record depends on when it failed, and the reason is ' +
-    'regulatory rather than economic.',
+    'Interactive structural credit research: solve the Merton model live, ' +
+    'compare independent market and accounting views of risk, and inspect ' +
+    'every assumption and correction.',
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [

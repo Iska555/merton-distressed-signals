@@ -29,6 +29,7 @@ dist/
 # ---- Data ----
 # Raw API pulls are cache and may be large: not committed.
 data/raw/
+data/symbol_budget_ledger.json
 *.pkl
 *.db
 # NOTE: data/processed/*.csv ARE committed on purpose - they are the site's

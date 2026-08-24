@@ -79,17 +79,29 @@ def test_public_release_contains_no_unfinished_module_copy():
     text = "\n".join(source_text(path) for path in PUBLIC_SOURCE).lower()
     for phrase in (
         "awaiting sample",
-        "in progress",
         "not yet computed",
         "does not exist yet",
     ):
         assert phrase not in text
 
 
-def test_evidence_route_is_not_published_before_results_exist():
+def test_unfinished_research_routes_are_not_published():
     assert not (ROOT / "frontend" / "app" / "evidence" / "page.tsx").exists()
+    assert not (ROOT / "frontend" / "app" / "measurement" / "page.tsx").exists()
+    assert not (ROOT / "frontend" / "public" / "marks" / "evidence.svg").exists()
     nav = (ROOT / "frontend" / "components" / "Nav.tsx").read_text(encoding="utf-8")
     assert "href: '/evidence'" not in nav
+    assert "href: '/measurement'" not in nav
+
+
+def test_withdrawn_measurement_artifacts_are_not_in_the_public_directory():
+    public = ROOT / "frontend" / "public"
+    for relative in (
+        "data/measurement.json",
+        "data/verification.json",
+        "figures/sample-field.svg",
+    ):
+        assert not (public / relative).exists(), relative
 
 
 def test_public_copy_frames_the_benchmark_as_periodic_not_live_credit():
@@ -108,7 +120,6 @@ def test_public_copy_frames_the_benchmark_as_periodic_not_live_credit():
 
 def test_retracted_wilson_interval_uses_the_computed_rounded_bounds():
     sources = (
-        ROOT / "frontend" / "app" / "measurement" / "page.tsx",
         ROOT / "docs" / "DECISIONS.md",
         ROOT / "docs" / "RESOLUTION_AUDIT.md",
         ROOT / "scripts" / "check_published_figures.py",
@@ -120,31 +131,11 @@ def test_retracted_wilson_interval_uses_the_computed_rounded_bounds():
         assert "61% to 93%" not in text
 
 
-def test_homepage_figure_one_renders_all_measurement_era_cell_counts():
-    measurement = json.loads(
-        (ROOT / "frontend" / "public" / "data" / "measurement.json").read_text(
-            encoding="utf-8"
-        )
-    )
-    page = ROOT / "frontend" / ".next" / "server" / "app" / "index.html"
-    assert page.exists(), "frontend build is absent; run npm run build before this test"
-    rendered = html_module.unescape(page.read_text(encoding="utf-8"))
-    expected = [
-        (
-            era["label"].replace("-", " to 20", 1),
-            f"{era['resolved']} of {era['n']} ({era['rate'] * 100:.1f}%)",
-        )
-        for era in measurement["by_era"]
-    ]
-
-    assert expected == [
-        ("2010 to 2011", "6 of 47 (12.8%)"),
-        ("2012 to 2014", "14 of 71 (19.7%)"),
-        ("2015 to 2018", "46 of 96 (47.9%)"),
-        ("2019 to 2021", "37 of 65 (56.9%)"),
-        ("2022 to 2024", "46 of 67 (68.7%)"),
-    ]
-    assert barrow_pairs(rendered) == expected
+def test_release_build_ships_five_routes_and_holds_measurement():
+    build = ROOT / "frontend" / ".next" / "server" / "app"
+    for route in ("model", "mispricing", "discrimination", "case-studies", "data"):
+        assert (build / f"{route}.html").exists(), route
+    assert not (build / "measurement.html").exists()
 
 
 def test_mispricing_renders_checked_source_metadata_without_a_pending_flag():
@@ -202,29 +193,118 @@ def test_base_rate_copy_frames_slider_values_as_illustrative_assumptions():
     assert "low-base-rate through severe-stress scenarios" in text
 
 
-def test_public_empirical_copy_includes_the_specified_cell_counts():
-    homepage = source_text(ROOT / "frontend" / "app" / "page.tsx")
-    data_page = source_text(ROOT / "frontend" / "app" / "data" / "page.tsx")
-    measurement = source_text(ROOT / "frontend" / "app" / "measurement" / "page.tsx")
+def test_public_release_exposes_the_withdrawal_without_current_sample_claims():
+    build = ROOT / "frontend" / ".next" / "server" / "app"
+    route_files = (
+        "index.html",
+        "model.html",
+        "mispricing.html",
+        "discrimination.html",
+        "case-studies.html",
+        "data.html",
+    )
+    pages = {
+        name: html_module.unescape((build / name).read_text(encoding="utf-8"))
+        for name in route_files
+    }
+    homepage = pages["index.html"]
+    data_page = pages["data.html"]
 
-    for phrase in (
-        "149 of 346 (43.1%)",
-        "6 of 47 (12.8%) to 46 of 67 (68.7%)",
-        "29 of 346 (8.4%)",
+    assert 'data-research-status="withdrawn"' in homepage
+    assert 'data-research-status="withdrawn"' in data_page
+    for correction_fact in (
+        "offsets by 10 while the SEC returned 100 results per response",
+        "stopped after four requests",
+        "647 reported hits",
+        "128 unique retrieved documents",
+        "99 visible registrants",
+        "25-row selection",
+        "no known inclusion probability",
+        "Every rate derived from that set is withdrawn",
     ):
-        assert phrase in homepage
-    assert "6 of 47 (12.8%) to 46 of 67 (68.7%)" in data_page
-    for phrase in (
-        "Measurement data unavailable.",
-        "6 of 47 (12.8%) and 46 of 67 (68.7%)",
-        "14 of 47 (30%) and 5 of 96 (5%)",
-        "0 of 13; 13 of 34 (38%) against 46 of 96 (48%); 9 of 19 (47%) against 37 of 65 (57%)",
-        "2 of 9 (22%) against 6 of 47 (13%) through 27 of 33 (82%) against 46 of 67 (69%)",
-        "1 of 14 (7%) against the 6 of 47 (13%) era",
-        "41 of 346 (11.8%) candidates and 14 of 149 (9.4%) resolved",
-        "19 of 24 (79%)",
-        "60% to 91%",
+        assert correction_fact in homepage
+        assert correction_fact in data_page
+    assert "relevance-ranked, not chronological" in homepage
+    assert "ranked results by relevance rather than filing date" in data_page
+
+    built_text = " ".join(pages.values())
+    public_text = " ".join(
+        path.read_text(encoding="utf-8", errors="ignore")
+        for path in (ROOT / "frontend" / "public").rglob("*")
+        if path.is_file() and path.suffix in {".json", ".svg", ".txt", ".webmanifest"}
+    )
+    shipped = f"{built_text} {public_text}"
+    for withdrawn_claim in (
+        "149 of 346",
+        "43.1%",
+        "29 of 346",
+        "8.4%",
+        "12.8%",
+        "19.7%",
+        "47.9%",
+        "56.9%",
+        "68.7%",
+        'href="/measurement"',
+        '"/data/measurement.json"',
+        '"/data/verification.json"',
+        '"/figures/sample-field.svg"',
     ):
-        assert phrase in measurement
-    assert "51%" not in measurement
-    assert "61% to 93%" not in measurement
+        assert withdrawn_claim not in shipped
+
+
+def test_current_reproduction_guidance_uses_the_frozen_python_environment():
+    current_guidance = (
+        ROOT / "README.md",
+        ROOT / "frontend" / "README.md",
+        ROOT / "frontend" / "app" / "data" / "page.tsx",
+        ROOT / "frontend" / "app" / "mispricing" / "page.tsx",
+    )
+    ambient_python = re.compile(r"(?<!uv run --frozen )python -m scripts\.")
+
+    for path in current_guidance:
+        text = path.read_text(encoding="utf-8")
+        assert not ambient_python.search(text), path
+
+
+def test_superseded_release_specs_cannot_be_mistaken_for_current_instructions():
+    current = "docs/superpowers/specs/2026-08-24-measurement-integrity-census-design.md"
+    historical = (
+        ROOT
+        / "docs"
+        / "superpowers"
+        / "specs"
+        / "2026-08-24-phase-0-credibility-foundation.md",
+        ROOT
+        / "docs"
+        / "superpowers"
+        / "plans"
+        / "2026-08-24-phase-0-credibility-foundation.md",
+        ROOT
+        / "docs"
+        / "superpowers"
+        / "specs"
+        / "2026-08-23-chocolate-burgundy-assets-design.md",
+        ROOT
+        / "docs"
+        / "superpowers"
+        / "plans"
+        / "2026-08-23-chocolate-burgundy-assets.md",
+    )
+
+    for path in historical:
+        heading = "\n".join(path.read_text(encoding="utf-8").splitlines()[:12])
+        assert "SUPERSEDED" in heading
+        assert current in heading
+
+
+def test_withdrawn_measurement_has_no_dormant_publication_api():
+    python_builder = (ROOT / "scripts" / "build_site_data.py").read_text(
+        encoding="utf-8"
+    )
+    typescript_loader = (ROOT / "frontend" / "lib" / "siteData.ts").read_text(
+        encoding="utf-8"
+    )
+
+    assert "def build_measurement" not in python_builder
+    assert "def build_verification" not in python_builder
+    assert "getMeasurement" not in typescript_loader

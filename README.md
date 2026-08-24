@@ -6,143 +6,152 @@
 </p>
 
 <p align="center">
-  <strong>Structural credit research under public-data constraints.</strong><br>
-  A reproducible research system for measuring distress, testing what the record can support, and exposing what conventional credit datasets leave out.
+  <strong>Structural credit research, built to survive the second question.</strong><br>
+  Live capital-structure analytics, independent risk benchmarks, explicit data rights, and a public correction trail.
 </p>
 
-<p align="center"><code>PHASE 0 | AUGUST 2026 | REPRODUCIBLE RELEASE</code></p>
+<p align="center"><code>PHASE 0 // PUBLIC RELEASE // AUGUST 2026</code></p>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="frontend/public/figures/hero-paths-dark.png">
   <img src="frontend/public/figures/hero-paths-light.png" width="2000" alt="Simulated firm asset paths around a structural default barrier">
 </picture>
 
-<p align="center"><sub>Structural model simulation: sigma 34%, mu 5%, horizon 3 years, barrier 56, seed 1974. The image is ambient model output, not observed issuer data.</sub></p>
+<p align="center"><sub>Structural simulation: sigma 34%, mu 5%, horizon 3 years, barrier 56, seed 1974. Ambient model output, not observed issuer data.</sub></p>
 
 > [!IMPORTANT]
-> **149 of 346 sampled US bankruptcy candidates from 2010 to 2024, or 43.1%, can be resolved to a traded symbol from free public data.** Resolution rises from 6 of 47 (12.8%) in 2010 to 2011 to 46 of 67 (68.7%) in 2022 to 2024. The gradient is driven by disclosure infrastructure, not an economic change in default.
+> **Measurement study withdrawn, 24 August 2026.** Pre-publication review found that the bankruptcy collector advanced offsets by 10 while the SEC returned 100 results per response, then stopped after four requests. For 2016, 647 reported hits became 128 unique retrieved documents and 99 visible registrants before a 25-row selection. Results were relevance-ranked, not chronological, so the retained rows had no known inclusion probability. Every rate derived from that set is withdrawn. The route and public artifacts are withheld while the universe is rebuilt as a complete census. Results will be published whatever they show.
 
-## Investment signal
+The approved [measurement-integrity census specification](docs/superpowers/specs/2026-08-24-measurement-integrity-census-design.md) defines the replacement population, operational case unit, point-in-time DERA rules, correction funnel and blinded verification.
 
-Most credit models begin after a clean issuer universe already exists. This project asks the prior question: **which failed firms become observable enough to enter the model at all?**
+## Investment terminal
 
-That distinction matters because a research dataset can look complete while selecting issuers that are easier to identify, price, and model. The selection changes by disclosure era and issuer type. Any apparent distress signal inherits that measurement boundary before portfolio construction begins.
+The live release starts where an investment discussion starts: capital structure, independent evidence, decision cost and model boundary.
 
-| Research terminal | Current evidence |
-|---|---:|
-| Bankruptcy candidates | 346 filings, 2010 to 2024 |
-| Resolved to a traded symbol | 149 of 346 (43.1%) |
-| Earliest disclosure era | 6 of 47 (12.8%) |
-| Latest disclosure era | 46 of 67 (68.7%) |
-| Near the large-firm rating boundary | 265 of 3,132 issuers (8.5%) |
-| Published research modules | 6 completed modules |
-| Empirical prediction claim | Not made before a matched control cohort exists |
-
-This is a measurement finding before it is a modelling result. It changes how a credit researcher should interpret backtests, survivor comparisons, apparent coverage, and model confidence.
-
-## Decision relevance
-
-- **Private credit:** demonstrates the discipline required when prices are absent, borrower histories are sparse, and public comparables carry selection bias.
-- **Distressed and special situations:** separates economic distress from the mechanics of finding the security that actually traded at the event date.
-- **Asset management:** treats model output as a ranked decision aid, then tests how base rates and false positives affect portfolio usefulness.
-- **Wealth and portfolio management:** makes assumptions, provenance, confidence, and downside interpretation visible before a signal reaches an allocation decision.
-- **Private equity and energy underwriting:** provides a foundation for public-comparable volatility, leverage stress, covenant headroom, and recovery analysis without pretending that public equity is private debt.
-
-## Research system
-
-| Module | Investment question | Current artifact |
+| Module | Investment question | Live artifact |
 |---|---|---|
-| **Model** | How far is enterprise value from the default barrier? | Client-side Merton solver with assumptions exposed |
-| **Mispricing** | Where does equity-implied risk disagree with a periodic credit benchmark? | Directional screen against the January 2026 Damodaran synthetic-rating default-spread table |
-| **Measurement** | Which defaults can the public record actually identify? | Full 346-candidate resolution audit with era, sector, size, and cell counts |
-| **Discrimination** | When does a ranker become a useful alarm? | Interactive base-rate precision and false-positive exhibit |
-| **Cases** | What do the model and data boundaries look like issuer by issuer? | Completed boundary case studies |
-| **Data** | Can every published claim be traced and rebuilt? | Provenance, licensing policy, manifests, and downloadable derived artifacts |
+| **Model** | How far are firm assets from the debt barrier? | Two-equation Merton solver running entirely in the browser |
+| **Mispricing** | Where do market-implied and accounting-implied risk disagree? | Structural debt spread against an independent January 2026 synthetic-rating benchmark |
+| **Discrimination** | What does a credit alarm cost at a realistic base rate? | Interactive precision, false-positive and confusion-matrix exhibit |
+| **Cases** | Where does the model stop being credible? | Clearly labelled illustrative boundary cases |
+| **Data** | Can a reviewer trace every live claim and correction? | Sources, licensing, deterministic manifest and withdrawal record |
+| **Measurement** | Which SEC registrant-cases can public data support? | **WITHDRAWN // CENSUS REBUILD ACTIVE** |
 
-Every published rate carries its numerator and denominator. Every figure keeps its title, number, and source line. No route requires a running API server.
+No route requires a running API server. Interactive model output is computed from visible inputs. Retained static evidence is generated from committed sources.
 
-## What makes the work defensible
+## The signal architecture
 
-1. **Point-in-time identity:** a current ticker is never accepted as proof that the same security traded at the bankruptcy date.
-2. **Visible exclusions:** unreachable firms and model-inapplicable entities remain in the denominator and in the public audit.
-3. **Conditioned comparisons:** era, sector, and size are reported together, with unstable cells withheld. One highlighted cell has 95% Wilson bounds from 60% to 91%, so the uncertainty stays visible.
-4. **No circular benchmark:** the equity-implied screen is compared with a periodic synthetic-rating table, not with a value derived from the same model output.
-5. **Deterministic publication:** generated assets and research figures are rebuilt and compared byte for byte before release.
-6. **Explicit data rights:** raw third-party feeds are not committed or republished when their terms do not permit it.
-
-## Research boundary
-
-This is not an issuer-bond pricing system, a live trading signal, or an arbitrage claim. The January 2026 Damodaran input is a periodic analytical benchmark, not a contemporaneous bond quote, index observation, or issuer-specific spread.
-
-The current release does not claim empirical model accuracy. That requires a pre-specified, point-in-time matched survivor cohort. The next evidence gate will report walk-forward discrimination with confidence intervals, precision at a realistic base rate, and an explicit false-positive cost.
-
-Public disclosure also limits the study window. Pre-2011 filings often lack XBRL, and cover pages did not gain a structured trading-symbol field until 2019. The 2008 to 2009 default cluster is outside the reach of this free-public-data design.
-
-## Research roadmap
-
-The next releases deepen one credit thesis rather than adding unrelated breadth:
-
-1. **Matched-control validation:** point-in-time survivor cohort, walk-forward evaluation, AUC with confidence intervals, precision, calibration, and false-positive cost.
-2. **Investment committee memo:** one resolvable issuer with distance to default, implied spread, leverage, downside case, covenant decision, and out-of-sample outcome.
-3. **Recovery and LGD:** recovery by claim class for a carefully documented bankruptcy subsample.
-4. **Private-credit bridge:** public-comparable asset volatility translated into a private-borrower stress case and covenant headroom analysis.
-
-## Data flow
+The project separates two views that are often allowed to contaminate each other.
 
 ```mermaid
 flowchart LR
-    A[SEC EDGAR event universe] --> B[Point-in-time identity resolution]
-    B --> C[Audited research panel]
-    C --> D[Merton structural model]
-    C --> E[Measurement diagnostics]
-    D --> F[Equity-implied credit screen]
-    D --> G[Base-rate decision analysis]
-    E --> H[Committed research artifacts]
-    F --> H
-    G --> H
-    H --> I[Static Next.js research interface]
+    A[Equity value and volatility] --> B[Joint Merton solve]
+    B --> C[Asset value and asset volatility]
+    C --> D[Distance to default]
+    C --> E[Structural debt spread]
+
+    F[Interest coverage] --> G[Synthetic rating]
+    H[Size, debt and margin] --> G
+    G --> I[Periodic benchmark spread]
+
+    E --> J[Risk divergence]
+    I --> J
+    J --> K[Screening direction]
 ```
+
+The accounting benchmark has no path from model-implied asset value, asset volatility, distance to default or spread. Changing the Merton inputs cannot move the comparator. That independence is enforced in tests.
+
+## What the live model does
+
+Merton treats equity as a call option on firm assets. The browser solves the option equation and the equity-volatility relation jointly for unobserved asset value and asset volatility using nested bisection at a tolerance of `1e-8`.
+
+From those values it reports:
+
+- distance to default under the declared asset drift;
+- a default-probability proxy from the declared distance to default;
+- risky debt value under the structural model; and
+- the structural debt spread implied by that debt value.
+
+The Python research library also contains a separate PD-times-LGD expected-loss approximation. It is not the structural debt spread displayed by the site, and the two quantities must not be compared as if they were one formula.
+
+## Why an investment professional should care
+
+- **Private credit:** translates equity-market information into an asset-volatility and downside framework while stating where private-borrower data require comparable-company judgement.
+- **Distressed and special situations:** makes identity, instrument applicability and event-time evidence explicit before a signal is trusted.
+- **Asset management:** distinguishes a ranked analytical screen from an executable trade and exposes the base-rate cost of false positives.
+- **Wealth and portfolio management:** shows how model uncertainty, source provenance and downside interpretation should be communicated before allocation.
+- **Private equity and energy:** creates a foundation for comparable volatility, leverage stress, covenant headroom and recovery analysis without pretending public equity is private debt.
+
+## Research correction as a feature
+
+The withdrawn sample is not being repaired in place. The replacement design requires:
+
+1. complete enumeration of SEC Item 1.03 search hits from 2010 through 2024;
+2. an explicit 24-month registrant-case clustering convention with sensitivity checks;
+3. a public-record coverage census with no size filter;
+4. a strict 2012 onward investment subset using timely DERA total assets of at least USD 50 million;
+5. a funnel from reported hits through final study eligibility;
+6. event-time identity and price checks with no look-ahead; and
+7. blinded verification with no blank verdicts.
+
+The old artifacts remain recoverable in Git history and in clearly labelled correction documents. They are not copied into the deployed public directory.
+
+## Repository map
 
 ```text
 src/
-  data/       identity resolution, source adapters, quota ledger, sample construction
-  models/     Merton, synthetic rating, discrimination, event-study logic
-scripts/      audits, deterministic assets, publication, release verification
+  data/       SEC, DERA, identity, pricing and local budget controls
+  models/     Merton, synthetic rating and discrimination logic
+scripts/      deterministic generation, audits and release verification
 data/
-  processed/  committed derived research outputs
-frontend/     Next.js research interface, built from committed data
-docs/         methods, research decisions, audit notes, source policy
+  processed/  derived research history, including withdrawn evidence
+frontend/     static Next.js research terminal with Vercel Analytics
+docs/         methods, decisions, correction records and census specification
+tests/        numerical, provenance, publication and browser-level contracts
 ```
 
-Generated site data carry source and commit provenance. A published figure must trace to a committed input or to a computation whose inputs and assumptions are shown.
+## Reproduce the public release
 
-## Reproduce the release
-
-Requirements: Python 3.11 or later, Node 22 or later, and Chromium for asset verification.
+Requirements: [uv](https://docs.astral.sh/uv/), Python 3.11 or later, Node 22
+or later, and Chromium. `uv.lock` is the research environment contract.
 
 ```bash
-python -m pip install -e ".[dev,assets]"
-python -m playwright install chromium
+uv lock --check
+uv sync --frozen --all-extras
+uv run --frozen python -m playwright install chromium
 cd frontend
 npm ci
 cd ..
+uv run --frozen python -m scripts.build_site_data
+uv run --frozen python -m scripts.verify
 ```
 
-Copy `.env.example` to `.env` and add only the credentials needed for a local research run. Credentials are never committed or exposed to the browser.
+The release gate checks generated-asset and live-data drift, frontend lint, production build, production npm vulnerabilities, browser analytics integration and the supported Python suite.
 
-Run the complete release gate from the repository root:
+Tiingo access fails closed until its credential's current-month unique-symbol
+usage has been reconciled from the provider dashboard. Record that authoritative
+starting count before any research fetch:
 
 ```bash
-python -m scripts.verify
+uv run --frozen python -m src.data.budget reconcile --used 123
 ```
 
-The gate regenerates and compares public assets, reproduces published figures, lints and builds the frontend, runs the browser-level analytics check, then executes the supported Python tests. `make verify` delegates to the same command.
+The credential-associated ledger stays local and ignored. Only aggregate,
+non-sensitive usage metadata may be committed.
 
 ## Data governance
 
-The public site commits derived research artifacts, not raw third-party feeds. SEC EDGAR provides event candidates, filing facts, and the point-in-time filer universe. Tiingo supports delisted-price research subject to its plan terms, and starter or trial raw responses are handled only in memory. FRED ICE BofA OAS was reviewed and excluded from public output because its series notes restrict publication of exact observations.
+The public site commits derived research artifacts, not raw third-party feeds. SEC EDGAR and DERA data are used with source hashes and point-in-time rules. Tiingo credentials and symbol-level usage history remain local and subject to plan terms. FRED ICE BofA OAS observations were excluded from public output after licensing review. The benchmark used on the live site is the January 2026 NYU Stern Damodaran synthetic-rating default-spread table, not an issuer bond quote or a live index.
 
-Read the [data-source and licensing policy](docs/DATA_SOURCES.md), the [resolution audit](docs/RESOLUTION_AUDIT.md), and the machine-readable [source registry](frontend/public/data/SOURCES.json).
+Read the [source and licensing policy](docs/DATA_SOURCES.md), the [research decisions](docs/DECISIONS.md), and the machine-readable [source registry](frontend/public/data/SOURCES.json).
+
+## Forward research sequence
+
+1. Restore Measurement only after the census and blinded verification pass.
+2. Build a point-in-time matched control cohort and walk-forward discrimination study.
+3. Publish one investment-committee credit memo with a pass, watch or covenant decision.
+4. Add recovery and LGD by claim class.
+5. Bridge public-comparable asset volatility into a private-credit covenant stress case.
 
 ## Selected references
 
@@ -152,4 +161,4 @@ Read the [data-source and licensing policy](docs/DATA_SOURCES.md), the [resoluti
 - Eom, Y. H., Helwege, J. and Huang, J.-Z. (2004). Structural models of corporate bond pricing: an empirical analysis. *Review of Financial Studies* 17(2).
 - Huang, J.-Z. and Huang, M. (2012). How much of the corporate-treasury yield spread is due to credit risk? *Review of Asset Pricing Studies* 2(2).
 
-<p align="center"><strong>Built as research that can survive the second question.</strong></p>
+<p align="center"><strong>Research is credible when the correction mechanism is visible.</strong></p>

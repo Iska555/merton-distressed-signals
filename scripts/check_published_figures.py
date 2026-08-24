@@ -1,5 +1,5 @@
 """
-Assert that the numbers written in prose still match the committed data.
+Reproduce the arithmetic retained in the withdrawn measurement archive.
 
 Tests verify that the code does what the code intends. They do not verify that
 a sentence in the README is still true after a re-run, and that failure has
@@ -9,12 +9,13 @@ claims about within-era orderings were written from a glance at a console table
 and were wrong -- "four of five" for a thing that is five of five, "three of
 four" for a thing that is two of four.
 
-Every claim below is stated the way it appears in visible UI or in the docs,
-next to the computation that has to reproduce it. When a re-run moves a number,
-this script says which sentence is now false and where it lives.
+The underlying sample was withdrawn on 24 August 2026 after a pagination defect
+was found. Reproducing its arithmetic does not establish representativeness or
+restore any result. This command exists only to keep the correction history
+internally consistent while the census replacement is built.
 
 Run:  python -m scripts.check_published_figures
-Exit: 0 if every published figure reproduces, 1 otherwise.
+Exit: 0 if every archived figure reproduces arithmetically, 1 otherwise.
 """
 from __future__ import annotations
 
@@ -174,6 +175,7 @@ def check(frame: pd.DataFrame) -> Report:
 
 
 def main() -> int:
+    print("WITHDRAWN MEASUREMENT ARCHIVE: arithmetic check only; not current evidence.")
     path = DATA_PROCESSED / "resolution_audit.csv"
     if not path.exists():
         print(f"{path} absent; run python -m scripts.audit_resolution first")
@@ -182,14 +184,14 @@ def main() -> int:
 
     print(f"\n{'=' * 70}")
     if report.failures:
-        print(f"{len(report.failures)} of {report.checked} published figures no "
+        print(f"{len(report.failures)} of {report.checked} archived figures no "
               "longer reproduce:\n")
         for f in report.failures:
             print(f"  - {f}")
         print("\nFix the prose, or fix the pipeline. Do not fix the threshold.")
         return 1
-    print(f"All {report.checked} published figures reproduce from "
-          f"{path.name}.")
+    print(f"All {report.checked} archived figures reproduce arithmetically from "
+          f"{path.name}. They remain withdrawn.")
     return 0
 
 

@@ -35,24 +35,44 @@ def test_restricted_top_level_market_data_is_not_publicly_committed():
     assert "BAMLH0A" not in builder
 
 
-def test_generator_removes_stale_restricted_market_data(tmp_path, monkeypatch):
+def test_generator_removes_stale_restricted_and_withdrawn_public_data(
+    tmp_path, monkeypatch
+):
     output = tmp_path / "public-data"
-    processed = tmp_path / "processed"
     output.mkdir()
-    processed.mkdir()
     restricted = [
         output / "cohort_spreads.json",
         output / "spread_corroboration.json",
+        output / "measurement.json",
+        output / "verification.json",
     ]
     for path in restricted:
         path.write_text('{"restricted": true}\n', encoding="utf-8")
 
     monkeypatch.setattr(build_site_data, "OUT", output)
-    monkeypatch.setattr(build_site_data, "DATA_PROCESSED", processed)
-    monkeypatch.setattr(build_site_data, "git_commit", lambda: "test")
 
     assert build_site_data.main() == 0
     assert all(not path.exists() for path in restricted)
+
+
+def test_site_data_manifest_contains_only_reproducible_provenance(
+    tmp_path, monkeypatch
+):
+    output = tmp_path / "public-data"
+    output.mkdir()
+
+    monkeypatch.setattr(build_site_data, "OUT", output)
+
+    assert build_site_data.main() == 0
+    first = (output / "MANIFEST.json").read_bytes()
+    assert build_site_data.main() == 0
+    second = (output / "MANIFEST.json").read_bytes()
+
+    assert first == second
+    manifest = json.loads(first)
+    assert manifest["schema_version"] == 1
+    assert "generated_utc" not in manifest
+    assert "git_commit" not in manifest
 
 
 def test_shadow_rating_payload_carries_the_permitted_periodic_benchmark():

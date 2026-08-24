@@ -1,6 +1,10 @@
 # Phase 0 Credibility Foundation
 
-**Status:** Approved for implementation on 2026-08-24
+> **SUPERSEDED:** The measurement publication instructions in this document were
+> withdrawn after the SEC enumeration defect was confirmed. Current authority:
+> `docs/superpowers/specs/2026-08-24-measurement-integrity-census-design.md`.
+
+**Status:** Historical implementation record, superseded on 2026-08-24
 
 ## Objective
 

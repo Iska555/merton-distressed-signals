@@ -6,10 +6,12 @@ Tiingo's free tier allows 500 UNIQUE SYMBOLS PER CALENDAR MONTH, alongside
 it does not reset on a new run, and exhausting it locks the project out until
 the 1st of the following month. Exploratory fetching would burn it silently.
 
-So symbol spend is treated as a budget with a hard stop rather than a warning,
-and the ledger is committed to the repository. A symbol already fetched this
-month costs nothing to fetch again; a symbol never fetched costs one slot,
-permanently, until the month rolls over.
+So symbol spend is treated as a budget with a hard stop rather than a warning.
+The credential-associated symbol ledger remains local and ignored. It is a
+conservative process control, not an authoritative provider statement, and must
+be reconciled with account usage before a new research fetch. A symbol already
+recorded locally this month costs nothing in the local estimate; a new symbol
+costs one slot until the month rolls over.
 
 The ledger is deliberately conservative: it records a symbol as spent BEFORE
 the request is issued. A failed request still consumed the slot as far as the
@@ -17,6 +19,7 @@ provider is concerned, and assuming otherwise is how a budget gets overrun.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import threading
 import time
@@ -41,6 +44,10 @@ _lock = threading.Lock()
 
 class BudgetExhausted(RuntimeError):
     """Raised instead of issuing a request that would breach the monthly cap."""
+
+
+class BudgetUnreconciled(BudgetExhausted):
+    """Raised when provider usage has not been confirmed for this month."""
 
 
 @dataclass
@@ -121,22 +128,68 @@ class SymbolBudget:
         providers = self._data.setdefault("providers", {})
         provider = providers.setdefault(self.provider, {"cap": self.cap, "months": {}})
         return provider["months"].setdefault(
-            month, {"symbols": [], "first_spend": None, "last_spend": None}
+            month,
+            {
+                "authoritative_used": None,
+                "reconciled_at": None,
+                "symbols": [],
+                "first_spend": None,
+                "last_spend": None,
+            },
         )
+
+    def _require_reconciled(self, month: str | None = None) -> dict:
+        month = month or _current_month()
+        node = self._month_node(month)
+        if node.get("authoritative_used") is None or not node.get("reconciled_at"):
+            raise BudgetUnreconciled(
+                f"Refusing {self.provider} spend: {month} account usage has not been "
+                "reconciled. Check the provider dashboard, then record the current "
+                "unique-symbol usage before fetching."
+            )
+        return node
+
+    @staticmethod
+    def _used(node: dict) -> int:
+        return int(node["authoritative_used"]) + len(node["symbols"])
+
+    def reconcile(self, *, authoritative_used: int) -> None:
+        """Start a current-month local ledger from provider-reported usage.
+
+        The provider total already includes all earlier requests. Local symbols are
+        therefore reset and count only requests made after this reconciliation.
+        """
+        if isinstance(authoritative_used, bool) or not isinstance(authoritative_used, int):
+            raise TypeError("authoritative_used must be an integer")
+        if not 0 <= authoritative_used <= self.cap:
+            raise ValueError(f"authoritative_used must be between 0 and {self.cap}")
+
+        with _lock:
+            node = self._month_node()
+            node.update(
+                {
+                    "authoritative_used": authoritative_used,
+                    "reconciled_at": _now().isoformat(timespec="seconds"),
+                    "symbols": [],
+                    "first_spend": None,
+                    "last_spend": None,
+                }
+            )
+            self._save()
 
     # --------------------------------------------------------------- query
     def status(self, month: str | None = None) -> BudgetStatus:
         month = month or _current_month()
-        node = self._month_node(month)
-        return BudgetStatus(month, len(node["symbols"]), self.cap, self.reserve)
+        node = self._require_reconciled(month)
+        return BudgetStatus(month, self._used(node), self.cap, self.reserve)
 
     def is_free(self, symbol: str) -> bool:
         """True if this symbol was already spent this month, so re-fetch is free."""
-        return symbol.upper() in set(self._month_node()["symbols"])
+        return symbol.upper() in set(self._require_reconciled()["symbols"])
 
     def would_exceed(self, symbols) -> list[str]:
         """Which of these symbols are new this month, i.e. would cost a slot."""
-        spent = set(self._month_node()["symbols"])
+        spent = set(self._require_reconciled()["symbols"])
         seen, new = set(), []
         for symbol in symbols:
             upper = symbol.upper()
@@ -156,11 +209,11 @@ class SymbolBudget:
         """
         symbol = symbol.upper()
         with _lock:
-            node = self._month_node()
+            node = self._require_reconciled()
             if symbol in set(node["symbols"]):
                 return  # already spent this month; free
 
-            used = len(node["symbols"])
+            used = self._used(node)
             ceiling = self.cap if allow_reserve else self.cap - self.reserve
             if used >= ceiling:
                 status = self.status()
@@ -233,3 +286,28 @@ class RateLimiter:
 def tiingo_rate_limiter() -> RateLimiter:
     # One under the cap, so a concurrent manual call cannot tip it over.
     return RateLimiter(TIINGO_HOURLY_REQUEST_CAP - 1, 3600.0, name="tiingo")
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Reconcile or inspect the local metered-provider budget ledger."
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    reconcile_parser = subparsers.add_parser(
+        "reconcile", help="record current-month usage from the provider dashboard"
+    )
+    reconcile_parser.add_argument("--provider", default="tiingo")
+    reconcile_parser.add_argument("--used", type=int, required=True)
+    status_parser = subparsers.add_parser("status", help="show reconciled usage")
+    status_parser.add_argument("--provider", default="tiingo")
+    args = parser.parse_args(argv)
+
+    budget = SymbolBudget(args.provider)
+    if args.command == "reconcile":
+        budget.reconcile(authoritative_used=args.used)
+    print(budget.status())
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

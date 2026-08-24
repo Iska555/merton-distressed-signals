@@ -222,7 +222,8 @@ class TestSingleDefinition:
         source = (ROOT / "scripts" / "build_site_data.py").read_text(encoding="utf-8")
         assert "SIZE_BANDS =" not in source
         assert "ERA_BANDS =" not in source
-        assert "crosstabs" in source
+        assert "crosstabs" not in source
+        assert "build_measurement" not in source
 
     def test_audit_script_reports_conditional_tables(self):
         source = (ROOT / "scripts" / "audit_resolution.py").read_text(encoding="utf-8")

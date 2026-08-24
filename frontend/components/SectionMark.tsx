@@ -2,7 +2,6 @@ export type SectionName =
   | 'model'
   | 'mispricing'
   | 'measurement'
-  | 'evidence'
   | 'discrimination'
   | 'cases'
   | 'data'

@@ -1,5 +1,10 @@
 # Chocolate, Burgundy, and Red Site Design
 
+> **SUPERSEDED IN PART:** The palette and brand system remain current, but the
+> sample-field generation and `/measurement` placement instructions are withdrawn.
+> Current authority:
+> `docs/superpowers/specs/2026-08-24-measurement-integrity-census-design.md`.
+
 ## Goal
 
 Replace the existing petrol and green identity with a chocolate, burgundy, and red system, generate every visual asset from one deterministic script, and wire those assets into the Next.js site.

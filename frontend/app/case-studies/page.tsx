@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import SectionMark from '@/components/SectionMark'
 
 interface IllustrativeCase {
@@ -145,13 +144,11 @@ export default function CaseStudies() {
             not on it.
           </p>
           <p>
-            <strong>The consequence for this study.</strong> Financial firms are
-            retained in the sample but reported separately, never pooled into the
-            headline. The pre-registered primary metric is computed on non-financials
-            only. Because financials also resolve at a lower rate than other sectors,
-            the cohort under-samples them anyway, which flatters the headline result
-            and weakens the sector panel. Both directions are stated on{' '}
-            <Link href="/measurement">Measurement</Link>.
+            <strong>The consequence for the rebuilt study.</strong> Financial firms
+            require separate reporting because deposit funding, regulation and
+            off-balance-sheet exposure violate assumptions that fit non-financial
+            capital structures more closely. The census specification fixes that
+            treatment before any empirical result is restored.
           </p>
         </div>
       </section>

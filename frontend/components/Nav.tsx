@@ -8,7 +8,6 @@ import ThemeToggle from '@/components/ThemeToggle'
 const LINKS = [
   { href: '/model', label: 'Model' },
   { href: '/mispricing', label: 'Mispricing' },
-  { href: '/measurement', label: 'Measurement' },
   { href: '/discrimination', label: 'Discrimination' },
   { href: '/case-studies', label: 'Cases' },
   { href: '/data', label: 'Data' },

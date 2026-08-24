@@ -1,25 +1,66 @@
 import Link from 'next/link'
 import SectionMark from '@/components/SectionMark'
-import { getManifest, getMeasurement, pct } from '@/lib/siteData'
+import { getManifest } from '@/lib/siteData'
+
+const REPOSITORY = 'https://github.com/Iska555/merton-distressed-signals'
+const CENSUS_SPEC =
+  `${REPOSITORY}/blob/main/docs/superpowers/specs/` +
+  '2026-08-24-measurement-integrity-census-design.md'
 
 export default function DataPage() {
   const manifest = getManifest()
-  const m = getMeasurement()
 
   return (
     <div className="wrap">
       <header className="masthead">
         <div className="section-eyebrow">
           <SectionMark name="data" />
-          <p className="eyebrow">Data</p>
+          <p className="eyebrow">Data &middot; provenance before precision</p>
         </div>
-        <h1>Every number here traces to a file you can open.</h1>
+        <h1>Every live result traces to a source or a visible equation.</h1>
         <p className="lede">
-          Every figure on this site traces to a file listed here or to a computation
-          from inputs shown on screen. Where a number could not be sourced, the page
-          carrying it says so rather than filling the gap.
+          The public release separates interactive model output from empirical
+          evidence. When an evidence pipeline failed review, its page and public data
+          were withdrawn instead of being silently revised.
         </p>
       </header>
+
+      <section
+        id="measurement-correction"
+        className="section"
+        data-research-status="withdrawn"
+        aria-labelledby="correction-title"
+      >
+        <div className="callout">
+          <p className="eyebrow">Correction record &middot; 24 August 2026</p>
+          <h2 id="correction-title">Measurement study withdrawn before publication.</h2>
+          <p>
+            Pre-publication review found that the collector building the bankruptcy
+            candidate set advanced offsets by 10 while the SEC returned 100 results
+            per response, then stopped after four requests. For 2016, 647 reported
+            hits became 128 unique retrieved documents and 99 visible registrants
+            before a 25-row selection was made.
+          </p>
+          <p>
+            The endpoint ranked results by relevance rather than filing date. The
+            retained observations therefore had no known inclusion probability. Every
+            rate derived from that set is withdrawn, including the resolution
+            headline, disclosure-era gradient and repeat-filing rate. Historical files
+            remain in Git as correction evidence, not as current research output.
+          </p>
+          <p>
+            The replacement is a complete census of SEC Item 1.03 filings from 2010
+            through 2024, an operational registrant-case convention, point-in-time
+            DERA eligibility and blinded verification. Results will be published
+            whatever they show.
+          </p>
+          <p>
+            <a href={CENSUS_SPEC}>Read the approved census specification</a>
+            {' · '}
+            <a href={`${REPOSITORY}/commits/main`}>Inspect the repository history</a>
+          </p>
+        </div>
+      </section>
 
       <section className="section">
         <h2>Sources</h2>
@@ -36,27 +77,21 @@ export default function DataPage() {
             <tbody>
               <tr>
                 <td>SEC EDGAR full-text search</td>
-                <td>Bankruptcy events</td>
+                <td>Registrant-case census under rebuild</td>
                 <td className="mono">8-K Item 1.03</td>
-                <td>Public, no key. Covers 2001 onward</td>
+                <td>Public, no key</td>
               </tr>
               <tr>
                 <td>SEC XBRL company facts</td>
-                <td>Debt, share counts, public float, trading symbol</td>
+                <td>Debt, shares and point-in-time identity evidence</td>
                 <td className="mono">data.sec.gov/api/xbrl</td>
                 <td>Public, no key</td>
               </tr>
               <tr>
                 <td>SEC DERA Financial Statement Data Sets</td>
-                <td>Point-in-time filer universe and bulk fundamentals</td>
+                <td>Point-in-time filer universe and total-assets eligibility</td>
                 <td className="mono">quarterly ZIP</td>
                 <td>Public, no key</td>
-              </tr>
-              <tr>
-                <td>FRED ICE BofA OAS indices</td>
-                <td>Licensing review only; observations excluded</td>
-                <td className="mono">ICE BofA OAS</td>
-                <td>Publicly accessible, publication restricted</td>
               </tr>
               <tr>
                 <td>Tiingo end-of-day prices</td>
@@ -66,19 +101,19 @@ export default function DataPage() {
               </tr>
               <tr>
                 <td>Damodaran synthetic ratings</td>
-                <td>Rating tables and January 2026 periodic benchmark</td>
+                <td>January 2026 periodic credit benchmark</td>
                 <td className="mono">ratings.html</td>
                 <td>Public, no key</td>
+              </tr>
+              <tr>
+                <td>FRED ICE BofA OAS indices</td>
+                <td>Licensing review only; observations excluded</td>
+                <td className="mono">ICE BofA OAS</td>
+                <td>Publicly accessible, publication restricted</td>
               </tr>
             </tbody>
           </table>
         </div>
-        {manifest && (
-          <p className="source-line">
-            Site data generated {manifest.generated_utc.slice(0, 10)} at commit{' '}
-            <span className="mono">{manifest.git_commit}</span>.
-          </p>
-        )}
         <p className="source-line">
           <a href="/data/SOURCES.json" download>
             Download the source and licensing registry
@@ -88,7 +123,7 @@ export default function DataPage() {
       </section>
 
       <section className="section">
-        <h2>Committed outputs</h2>
+        <h2>Live committed outputs</h2>
         {manifest ? (
           <div className="scroll-x">
             <table className="data">
@@ -115,172 +150,110 @@ export default function DataPage() {
             </table>
           </div>
         ) : (
-          <p className="prose">No manifest found. Run <span className="mono">python -m scripts.build_site_data</span>.</p>
+          <p className="prose">
+            No manifest found. Run{' '}
+            <span className="mono">uv run --frozen python -m scripts.build_site_data</span>.
+          </p>
         )}
+        <p className="source-line">
+          The manifest is deterministic. It contains versioned source provenance and
+          no wall-clock timestamp or self-referential commit hash.
+        </p>
       </section>
 
       <section className="section">
-        <h2>Exclusions, split by cause</h2>
+        <h2>Research populations under rebuild</h2>
         <p className="prose">
-          Two families with opposite implications, reported separately and never
-          pooled. A single undifferentiated exclusion count would hide the
-          distinction.
+          The definitions below were fixed before the census results land. They are
+          design commitments, not reported findings.
         </p>
         <div className="scroll-x">
           <table className="data">
             <thead>
+              <tr><th>Layer</th><th>Pre-registered rule</th></tr>
+            </thead>
+            <tbody>
               <tr>
-                <th>Family</th>
-                <th>Meaning</th>
-                <th>Implication</th>
-                <th style={{ textAlign: 'right' }}>N</th>
+                <td>Registrant-case candidate</td>
+                <td>Item 1.03 filings clustered by CIK in an anchored 24-month window</td>
               </tr>
+              <tr>
+                <td>Population 1</td>
+                <td>Complete public-record coverage census, 2010 to 2024, no size floor</td>
+              </tr>
+              <tr>
+                <td>Population 2</td>
+                <td>Strict 2012 to 2024 subset with timely DERA assets of at least USD 50 million</td>
+              </tr>
+              <tr>
+                <td>Event-time rule</td>
+                <td>No filing, amendment, identity fact or price unavailable at the event may enter</td>
+              </tr>
+              <tr>
+                <td>Verification</td>
+                <td>Blinded 80-row adjudication with no blank verdicts</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="section">
+        <h2>Exclusions retain their meaning, not their withdrawn counts</h2>
+        <div className="scroll-x">
+          <table className="data">
+            <thead>
+              <tr><th>Family</th><th>Meaning</th><th>Research implication</th></tr>
             </thead>
             <tbody>
               <tr>
                 <td className="mono">data_unavailability</td>
-                <td>The firm belongs in the study; the sources cannot support it</td>
-                <td>A limitation, possibly a biased one</td>
-                <td className="num">{m?.exclusion_families['data_unavailability'] ?? 'n/a'}</td>
+                <td>The case belongs in the question; public sources cannot support it</td>
+                <td>A limitation that may create selection bias</td>
               </tr>
               <tr>
                 <td className="mono">model_inapplicability</td>
-                <td>The sources are fine; the firm is not a Merton object</td>
-                <td>A scope definition, and a correct exclusion</td>
-                <td className="num">{m?.exclusion_families['model_inapplicability'] ?? 'n/a'}</td>
+                <td>The record is available; the security is not a clean Merton object</td>
+                <td>A declared scope boundary</td>
               </tr>
             </tbody>
           </table>
         </div>
         <p className="prose">
-          Limited partnerships, royalty and statutory trusts and special-purpose
-          entities fall in the second family. Merton prices equity as a call option
-          on firm assets; a partnership interest is not that instrument, so such a
-          registrant does not belong in the cohort even when its data is complete.
-          Financial firms sit awkwardly across both and are handled by the sector
-          panel rather than a code. See <Link href="/case-studies">Case studies</Link>.
+          Limited partnerships, royalty trusts and special-purpose entities do not
+          become ordinary corporate equity merely because their filings are machine
+          readable. The <Link href="/case-studies">case studies</Link> show why data
+          reach and model applicability must remain separate decisions.
         </p>
       </section>
 
       <section className="section">
-        <h2>Sample construction</h2>
-        <p className="prose">
-          The matching rule was pre-registered in{' '}
-          <span className="mono">docs/matching-spec.md</span>, committed before any
-          matching code was written and before any treatment-firm price series was
-          retrieved. Control matching is the easiest place in a study like this to
-          cheat without noticing: once treatment paths are visible, every judgement
-          about who counts as comparable gets pulled toward the set that makes the
-          separation look cleaner.
-        </p>
-        <div className="scroll-x">
-          <table className="data">
-            <thead>
-              <tr><th>Parameter</th><th>Fixed in advance as</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Event</td><td className="mono">Earliest 8-K Item 1.03 per CIK</td></tr>
-              <tr><td>Covariate date</td><td className="mono">t − 24 months, point-in-time</td></tr>
-              <tr><td>Calendar time</td><td className="mono">Exact match on anchor quarter</td></tr>
-              <tr><td>Sector</td><td className="mono">Exact match on SIC division</td></tr>
-              <tr><td>Size</td><td className="mono">log(total assets) decile, ±1</td></tr>
-              <tr><td>Leverage</td><td className="mono">liabilities/assets decile, ±1</td></tr>
-              <tr><td>Replacement</td><td className="mono">Without, across the whole study</td></tr>
-              <tr><td>Tie-break</td><td className="mono">Assets gap, leverage gap, then CIK</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p className="prose">
-          Five amendments have been made since, each in its own commit with a stated
-          reason: the ratio table corrected, the provenance tier renamed, calendar
-          time promoted to an explicit matching variable, the control-eligibility
-          rule reversed so that firms defaulting <em>after</em> a treatment
-          firm&rsquo;s event are retained and censored rather than excluded, and
-          era-conditional reporting extended from headline metrics to every
-          descriptive cross-tab.
-        </p>
-        <p className="prose">
-          The fourth changes matched sets: excluding later-defaulting controls would
-          have biased the false-positive rate low, and that is the single number
-          this study exists to produce. The fifth was forced by a published finding that turned
-          out to be the era gradient measured a second time under another name; the
-          original rule covered headline metrics but not the audit&rsquo;s own
-          cross-tabs, so it was extended rather than narrowed.
-        </p>
-      </section>
-
-      <section className="section">
-        <h2>Limitations</h2>
+        <h2>Current release boundary</h2>
         <div className="callout">
-          <p className="eyebrow">Stated, not buried</p>
           <p>
-            <strong>Period selection.</strong> The usable window is 2012–2024. Two
-            structural thresholds cause this and neither can be worked around with
-            free data. The sample is therefore a period of historically low default
-            rates with no systemic credit event, and discriminatory power measured on
-            it does not generalise to a crisis.
+            <strong>Live:</strong> the browser-based structural solver, independent
+            synthetic-rating comparison, base-rate decision exhibit, illustrative
+            boundary cases, and this provenance record.
           </p>
           <p>
-            <strong>Survivorship, both sides.</strong> Treatment firms enter only if
-            their ticker resolves and their prices survive; controls are drawn from a
-            point-in-time filer universe specifically to avoid the mirror-image bias
-            of sampling firms still listed today.
+            <strong>Held:</strong> all bankruptcy-sample rates, era comparisons,
+            repeat-cluster estimates and empirical discrimination results.
           </p>
           <p>
-            <strong>Selection into the cohort is not random.</strong> It is
-            overwhelmingly a matter of <em>when</em> a firm failed: resolution
-            runs from 6 of 47 (12.8%) to 46 of 67 (68.7%) across the window, so
-            the cohort is heavily late. Once era is held fixed, most other
-            apparent gradients stop being gradients. A size effect published
-            earlier does not replicate at all. A sector effect does survive:
-            mining resolves below its own era throughout. The cohort also
-            under-samples financials, which flatters the headline result. Every
-            cross-tab on{' '}
-            <Link href="/measurement">Measurement</Link> is reported within era
-            strata with its cell counts, for this reason.
+            <strong>Not claimed:</strong> issuer-specific bond pricing, a live trading
+            signal, historical default-model accuracy, or performance in a crisis.
           </p>
-          <p>
-            <strong>The benchmark is periodic, not an issuer price.</strong> The
-            January 2026 Damodaran synthetic-rating default spread is not an ICE
-            index, live credit price or issuer bond quote. The mispricing module
-            therefore reports screening direction, not tradable basis points.
-          </p>
-          <p>
-            <strong>Quota-constrained design.</strong> The control ratio was set by a
-            price-API monthly symbol cap, not by statistical power, and size is
-            matched on book assets rather than market cap for the same reason.
-          </p>
-          {m && (
-            <p>
-              <strong>Current sample state.</strong> {m.resolved} of{' '}
-              {m.total_candidates} sampled bankruptcy filings resolve (
-              {pct(m.resolution_rate)}). Full breakdown on{' '}
-              <Link href="/measurement">Measurement</Link>.
-            </p>
-          )}
         </div>
       </section>
 
       <section className="section">
-        <h2>Reproduction</h2>
-        <div className="eq">
-          python -m scripts.audit_resolution --start 2010 --end 2024 --per-year 25
-          <br />
-          python -m scripts.verify_filing_text --n 80
-          <br />
-          python -m scripts.build_site_data
-          <br />
-          python -m scripts.smell_test
-          <br />
-          cd frontend &amp;&amp; npm run build
-        </div>
+        <h2>Reproduce the public release</h2>
+        <div className="eq">uv run --frozen python -m scripts.verify</div>
         <p className="prose">
-          Model scripts write deterministic CSVs to{' '}
-          <span className="mono">data/processed/</span>. Random seeds are fixed; the
-          matching procedure consults no RNG at all, because its tie-break is a total
-          order. SEC access uses a descriptive User-Agent, and Tiingo access uses a
-          local API key subject to plan quotas and storage terms. Credentials never
-          reach the browser.
+          The gate regenerates deterministic assets and live site data, lints and
+          builds the frontend, audits production npm
+          dependencies, exercises the browser analytics integration and runs the
+          Python test suite. Credentials never reach the browser.
         </p>
       </section>
     </div>

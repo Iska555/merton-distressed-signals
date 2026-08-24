@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import csv
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -11,40 +10,8 @@ SVG_NS = {"svg": "http://www.w3.org/2000/svg"}
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def _write_audit(path) -> None:
-    fieldnames = ["event_year", "resolved", "exclusion_family"]
-    rows = [
-        {"event_year": "2012", "resolved": "True", "exclusion_family": "resolved"},
-        {
-            "event_year": "2013",
-            "resolved": "False",
-            "exclusion_family": "data_unavailability",
-        },
-        {
-            "event_year": "2014",
-            "resolved": "False",
-            "exclusion_family": "model_inapplicability",
-        },
-    ]
-    with path.open("w", newline="", encoding="utf-8") as fh:
-        writer = csv.DictWriter(fh, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
-
-
 def _root(svg: str) -> ET.Element:
     return ET.fromstring(svg)
-
-
-def test_load_audit_reads_repository_schema(tmp_path):
-    audit = tmp_path / "audit.csv"
-    _write_audit(audit)
-
-    assert assets.load_audit(str(audit)) == [
-        (2012, assets.RESOLVED),
-        (2013, assets.UNREACHABLE),
-        (2014, assets.INAPPLICABLE),
-    ]
 
 
 def test_generated_comment_is_independent_of_wall_clock(tmp_path, monkeypatch):
@@ -76,7 +43,6 @@ def test_every_svg_builder_emits_title_and_description():
         assets.icon_svg("break", assets.P),
         assets.lockup_svg("break", assets.P),
         *[assets.mark_svg(name) for name in assets.MARKS],
-        assets.sample_field_svg(assets.demo_rows(), demo=True),
     ]
 
     for svg in svgs:

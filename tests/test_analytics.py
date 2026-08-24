@@ -82,3 +82,58 @@ def test_production_site_requests_vercel_analytics_script() -> None:
         except subprocess.TimeoutExpired:
             process.kill()
             process.wait(timeout=5)
+
+
+def test_mobile_navigation_exposes_every_live_route_on_its_own_row() -> None:
+    """A one-row desktop nav clips most routes at a 390 pixel viewport."""
+    assert (FRONTEND / ".next").exists(), (
+        "frontend build is absent; run npm run build in frontend/"
+    )
+    node = shutil.which("node")
+    assert node, "Node.js is required to exercise the production site"
+
+    port = _free_port()
+    url = f"http://127.0.0.1:{port}"
+    process = subprocess.Popen(
+        [
+            node,
+            str(FRONTEND / "node_modules" / "next" / "dist" / "bin" / "next"),
+            "start",
+            "--hostname",
+            "127.0.0.1",
+            "--port",
+            str(port),
+        ],
+        cwd=FRONTEND,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    try:
+        _wait_for_server(url, process)
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            page = browser.new_page(viewport={"width": 390, "height": 844})
+            page.goto(url, wait_until="networkidle")
+
+            brand = page.locator(".nav-brand").bounding_box()
+            links = page.locator(".nav-links").bounding_box()
+            assert brand and links
+            assert links["y"] >= brand["y"] + brand["height"]
+            assert page.locator(".nav-inner").bounding_box()["height"] >= 90
+            navigation = page.get_by_role("navigation")
+            for label in ("Model", "Mispricing", "Discrimination", "Cases", "Data"):
+                box = navigation.get_by_role(
+                    "link", name=label, exact=True
+                ).bounding_box()
+                assert box, label
+                assert 0 <= box["x"] < 390
+                assert box["x"] + box["width"] <= 390
+            browser.close()
+    finally:
+        process.terminate()
+        try:
+            process.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=5)

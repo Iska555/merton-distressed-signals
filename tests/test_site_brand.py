@@ -44,7 +44,6 @@ def test_homepage_uses_hero_paths_and_states_the_asserted_parameters():
     [
         ("/model", "model"),
         ("/mispricing", "mispricing"),
-        ("/measurement", "measurement"),
         ("/discrimination", "discrimination"),
         ("/case-studies", "cases"),
         ("/data", "data"),
@@ -69,16 +68,11 @@ def test_homepage_cards_have_all_six_module_marks():
         assert f"url(/marks/{mark}.svg)" in page
 
 
-def test_sample_field_is_the_requested_numbered_figure_on_both_pages():
+def test_withdrawn_sample_field_is_not_rendered_or_published():
     home = _page("/")
-    measurement = _page("/measurement")
 
-    assert 'src="/figures/sample-field.svg"' in home
-    assert 'src="/figures/sample-field.svg"' in measurement
-    assert '<span class="fignum">Figure 2</span>' in home
-    assert '<span class="fignum">Figure 1</span>' in measurement
-    assert "n = 346 candidates" in home
-    assert "n = 346 candidates" in measurement
+    assert 'src="/figures/sample-field.svg"' not in home
+    assert not (ROOT / "frontend" / "public" / "figures" / "sample-field.svg").exists()
 
 
 def test_every_inline_chart_svg_has_title_and_description():

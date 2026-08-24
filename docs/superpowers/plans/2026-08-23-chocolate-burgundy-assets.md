@@ -1,5 +1,9 @@
 # Chocolate, Burgundy, and Red Assets Implementation Plan
 
+> **SUPERSEDED IN PART:** Do not execute the sample-field or `/measurement`
+> publication tasks in this historical plan. Current authority:
+> `docs/superpowers/specs/2026-08-24-measurement-integrity-census-design.md`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Ship the chocolate, burgundy, and red site identity with one deterministic generator and fully wired, accessible assets.

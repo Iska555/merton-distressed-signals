@@ -78,7 +78,7 @@ export default function MispricingPage() {
             <p className="eyebrow">Not available</p>
             <p>
               Rating tables were not generated. Run{' '}
-              <span className="mono">python -m scripts.build_site_data</span>.
+              <span className="mono">uv run --frozen python -m scripts.build_site_data</span>.
             </p>
           </div>
         </section>
