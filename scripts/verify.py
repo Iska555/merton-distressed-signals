@@ -18,12 +18,7 @@ class Check:
 
 def verification_commands(root: Path) -> tuple[Check, ...]:
     """Return the portable, test-facing verification plan for *root*."""
-    executable_name = Path(sys.executable).name
-    python = (
-        "python"
-        if executable_name.lower().removesuffix(".exe") == "python"
-        else executable_name
-    )
+    python = "python"
     frontend = root / "frontend"
     return (
         Check("generated assets", (python, "-m", "scripts.check_assets"), root),

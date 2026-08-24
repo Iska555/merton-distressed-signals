@@ -1,6 +1,6 @@
 # Distressed Credit Signals
 
-**149 of 346 sampled US bankruptcy candidates from 2010 to 2024, or 43.1%, can be resolved to a traded symbol from free public data.** The result is a measurement finding before it is a modelling result: resolution rises from 12.8% in 2010 to 2011 to 68.7% in 2022 to 2024 as structured filings and cover-page symbol disclosure improve.
+**149 of 346 sampled US bankruptcy candidates from 2010 to 2024, or 43.1%, can be resolved to a traded symbol from free public data.** The result is a measurement finding before it is a modelling result: resolution rises from 6 of 47 (12.8%) in 2010 to 2011 to 46 of 67 (68.7%) in 2022 to 2024 as structured filings and cover-page symbol disclosure improve.
 
 ## Why it matters
 
