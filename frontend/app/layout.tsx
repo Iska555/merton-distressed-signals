@@ -62,7 +62,7 @@ export default function RootLayout({
     >
       <body>
         <Script id="restore-theme" strategy="beforeInteractive">
-          {`try{if(localStorage.getItem('dcs-theme')==='dark'){document.documentElement.dataset.theme='dark'}}catch{}`}
+          {`try{if(localStorage.getItem('dcs-theme')==='light'){document.documentElement.dataset.theme='light'}}catch{}`}
         </Script>
         <Nav />
         <main>{children}</main>

@@ -24,7 +24,6 @@ export default function Home() {
             height={680}
             alt=""
             unoptimized
-            priority
           />
         </picture>
         <picture className="hero-art hero-art-dark">

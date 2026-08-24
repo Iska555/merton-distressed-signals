@@ -12,18 +12,32 @@ import type { ConditionalTable } from '@/lib/siteData'
  * reader infer a rate the data does not support, which is the exact failure
  * this page exists to document.
  */
+/**
+ * The ramp runs from the page ground to the primary red, so a low rate
+ * recedes into the page and a high one advances out of it. Mixing against
+ * tokens rather than baking hex means the same markup reads correctly in
+ * both themes: the ground is white in light and near-black in dark, and the
+ * direction of the ramp is preserved either way.
+ */
+const RAMP_CAP = 0.62
+
 function shade(rate: number): string {
-  // Interpolate white to deep red. Rate is already 0..1.
-  const t = Math.max(0, Math.min(1, rate))
-  const from = [255, 255, 255]
-  const to = [168, 28, 42]
-  const mix = from.map((f, i) => Math.round(f + (to[i] - f) * t))
-  return `rgb(${mix[0]}, ${mix[1]}, ${mix[2]})`
+  const t = Math.max(0, Math.min(1, rate)) * RAMP_CAP
+  return `color-mix(in srgb, var(--fig-primary) ${(t * 100).toFixed(1)}%, var(--ground))`
 }
 
-/** White type once the ground is dark enough to need it. */
-function ink(rate: number): string {
-  return rate >= 0.75 ? '#FFFFFF' : 'var(--fig-ink)'
+/**
+ * One text colour across the whole ramp, which is why the ramp is capped.
+ *
+ * A full-range ground-to-red ramp passes through a band where neither the
+ * body ink nor its inverse clears 4.5:1, in both themes. Capping the mix at
+ * RAMP_CAP keeps every cell light enough (light theme) or dark enough (dark
+ * theme) for --fig-ink, worst case 4.89:1. The legend swatches run through
+ * the same function, so the scale a reader matches against is the scale the
+ * cells are actually drawn on.
+ */
+function ink(): string {
+  return 'var(--fig-ink)'
 }
 
 export default function Heatmap({
@@ -84,7 +98,7 @@ export default function Heatmap({
                     <td key={i}>
                       <div
                         className="cell"
-                        style={{ background: shade(c.rate), color: ink(c.rate) }}
+                        style={{ background: shade(c.rate), color: ink() }}
                       >
                         <span className="r">{(c.rate * 100).toFixed(0)}%</span>
                         <span className="c">

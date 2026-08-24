@@ -205,7 +205,8 @@ export default function MeasurementPage() {
                 Resolution rate by sector within era, with cell counts
               </span>
               <span className="figsrc">
-                Shading runs white to deep red across 0 to 100 percent. Divisions
+                Shading runs from the page ground to red across 0 to 100
+                percent, so the scale reads the same in either theme. Divisions
                 with fewer than nine candidates are omitted from the grid and
                 appear in the full table below.
               </span>

@@ -82,13 +82,51 @@ def _contrast(first: str, second: str) -> float:
 
 
 def test_theme_tokens_match_the_approved_palette():
-    light = _tokens(":root")
-    dark = _tokens(':root[data-theme="dark"]')
+    """
+    Dark is the default, so it is bare :root that must carry the dark values.
+    Light is the opt-in and lives under [data-theme="light"]. Asserting the
+    values against those two selectors specifically is what keeps the default
+    from silently flipping back.
+    """
+    dark = _tokens(":root")
+    light = _tokens(':root[data-theme="light"]')
 
-    for name, value in LIGHT.items():
-        assert light[name].upper() == value
     for name, value in DARK.items():
-        assert dark[name].upper() == value
+        assert dark[name].upper() == value, name
+    for name, value in LIGHT.items():
+        # The band foregrounds are shared, so they resolve from :root.
+        expected = light.get(name, dark.get(name, ""))
+        assert expected.upper() == value, name
+
+
+def test_dark_is_the_default_theme():
+    """
+    Three things have to agree or the first paint is wrong: the cascade, the
+    restore script, and the toggle. The cascade is checked above. Here we pin
+    the other two to the light opt-in.
+    """
+    css = CSS.read_text(encoding="utf-8")
+    assert ':root[data-theme="dark"]' not in css, (
+        "a dark-attribute selector means dark is no longer the base theme"
+    )
+    assert "color-scheme: dark;" in css
+
+    layout = (ROOT / "frontend" / "app" / "layout.tsx").read_text(encoding="utf-8")
+    assert "getItem('dcs-theme')==='light'" in layout
+    assert "dataset.theme='light'" in layout
+
+    toggle = (ROOT / "frontend" / "components" / "ThemeToggle.tsx").read_text(
+        encoding="utf-8"
+    )
+    assert "dataset.theme === 'light' ? 'dark' : 'light'" in toggle
+
+
+def test_the_default_ground_is_dark_in_rendered_html():
+    """The built page must not ship a light theme attribute on the document."""
+    page = (ROOT / "frontend" / ".next" / "server" / "app" / "index.html").read_text(
+        encoding="utf-8"
+    )
+    assert 'data-theme="light"' not in page.split("<body")[0]
 
 
 def test_body_and_band_text_clear_wcag_aa():
@@ -119,12 +157,23 @@ def test_no_superseded_palette_hex_remains_in_scoped_files():
     assert not offenders, "\n".join(offenders)
 
 
-def test_heatmap_uses_a_single_white_to_deep_red_ramp_in_rendered_output():
+def test_heatmap_uses_a_single_token_driven_red_ramp_in_rendered_output():
+    """
+    The ramp mixes the primary red into the page ground, so it inverts with
+    the theme instead of baking a light-theme white into every cell.
+    """
     page = (ROOT / "frontend" / ".next" / "server" / "app" / "measurement.html").read_text(
         encoding="utf-8"
     )
-    assert "rgb(255, 255, 255)" in page
-    assert "rgb(168, 28, 42)" in page
+    mixes = re.findall(
+        r"color-mix\(in srgb, ?var\(--fig-primary\) ([0-9.]+)%, ?var\(--ground\)\)", page
+    )
+    assert mixes, "no token-driven heatmap ramp in the rendered grid"
+    assert max(float(value) for value in mixes) <= 62.0, (
+        "the ramp must stay capped so in-cell text keeps 4.5:1 in both themes"
+    )
+    assert "rgb(255, 255, 255)" not in page
+    assert "rgb(168, 28, 42)" not in page
     assert "rgb(13, 74, 71)" not in page
 
 
