@@ -1,306 +1,78 @@
 # Distressed Credit Signals
 
-**Equity-implied credit risk from a structural model, and what it costs to act on it.**
+**149 of 346 sampled US bankruptcy candidates from 2010 to 2024, or 43.1%, can be resolved to a traded symbol from free public data.** The result is a measurement finding before it is a modelling result: resolution rises from 12.8% in 2010 to 2011 to 68.7% in 2022 to 2024 as structured filings and cover-page symbol disclosure improve.
 
----
+## Why it matters
 
-## Research question
+Credit research datasets can look complete while silently selecting issuers that are easier to identify, price and model. That selection changes with disclosure rules, era and issuer type. This project makes the failure boundary visible, preserves the exclusions, and treats a structural credit screen as a decision aid rather than a claim of tradable precision.
 
-> Does distance to default, computed from the Merton (1974) structural model on
-> equity data alone, separate firms that subsequently default from comparable
-> firms that do not, and what false-positive rate does that separation cost at
-> realistic base rates?
+## Current release
 
-The second clause is the contribution. Anyone can show distance to default falls
-before a bankruptcy; the sample of failed firms guarantees it. The question worth
-asking is what the model does on firms that survive.
+- **Model:** a client-side Merton solver with inputs and assumptions shown.
+- **Mispricing:** an equity-implied screen against the **January 2026 Damodaran periodic synthetic-rating default-spread benchmark**. It is a periodic analytical input, not live market, index, or issuer-bond data.
+- **Measurement:** a reproducible audit of all 346 candidates, including resolution status, disclosure-era effects, sector limits and cell counts.
+- **Discrimination:** an interactive base-rate precision exhibit that demonstrates why a ranker is not automatically an alarm.
+- **Cases and data:** completed boundary case studies, provenance, source policy and downloadable derived artifacts.
 
----
+The site publishes six completed research modules: Model, Mispricing, Measurement, Discrimination, Cases and Data. Every published rate carries its cell count. No route requires a running API server.
 
-## Status
+## Next research milestone
 
-Sample construction is in progress. Pages that need it say so rather than
-showing a placeholder.
+The next release will add a pre-specified, point-in-time matched control cohort and report out-of-sample discrimination with confidence intervals, precision at a realistic base rate and false-positive cost. Those results are intentionally not claimed before the cohort exists.
 
-| Component | State |
-|---|---|
-| Merton model + interactive solver | Complete, client-side |
-| Mispricing screen (shadow rating, cohort benchmark) | Complete |
-| Measurement study (resolution audit) | Complete |
-| Base-rate precision exhibit | Complete |
-| Event-time DD paths | Awaiting sample |
-| ROC / AUC / estimator horse race | Awaiting sample |
+## Research boundaries
 
----
+This is not an issuer-bond pricing system or an arbitrage signal. The periodic benchmark is not a contemporaneous bond quote, and the screen reports direction rather than capture-ready basis points.
 
-## What this is not
+The study window is constrained by public disclosure. Pre-2011 filings often lack XBRL, and cover pages did not gain a structured trading-symbol field until 2019. The 2008 to 2009 default cluster is unreachable under this free-public-data design.
 
-**Not an arbitrage signal.** Issuer-level bond pricing requires TRACE, which is
-not freely available. The mispricing module compares an equity-implied spread
-against a *rating-cohort index average* of hundreds of unrelated issuers, not this
-firm's bond. It reports direction and disagreement, never basis points anyone
-could capture.
+The current release does not make an empirical model-accuracy claim. Measuring accuracy requires a matched survivor cohort, not only firms selected because they defaulted.
 
-**Not a study of the financial crisis.** The usable window is 2012–2024. Before
-roughly 2011 filings carry no XBRL; before 2019 they carry no trading symbol on
-the cover page at all. The 2008–09 default cluster is not merely absent. It is
-unreachable with free data.
+## Data and source policy
 
-**Not an accuracy claim.** A sample selected on the outcome cannot measure
-accuracy: a model flagging every firm on earth scores 100% on it. Discrimination
-is reported as AUC against a matched control cohort, with the false-positive rate
-stated.
+The public site commits derived research artifacts, not raw third-party feeds. SEC EDGAR provides event candidates, filing facts and the point-in-time filer universe. Tiingo supports delisted-price research subject to its plan terms, and starter or trial raw responses are handled only in memory. FRED ICE BofA OAS was reviewed and excluded from public output because its series notes restrict publication of exact observations.
 
-> An earlier version of this project advertised perfect signal accuracy across
-> seven major corporate collapses. That figure was a tautology: the code computed
-> it as *"perfect if a warning fired, zero otherwise"*, on a sample of seven firms
-> selected precisely because they defaulted, with `false_positives` hardcoded to
-> `0` beside a comment conceding it "would need non-event data to calculate." The
-> claim has been removed along with the reasoning that produced it.
+Read the full [data-source and licensing policy](docs/DATA_SOURCES.md) and download the machine-readable [source registry](frontend/public/data/SOURCES.json).
 
----
+## Install and verify
 
-## The three findings so far
-
-### 1. The measurement problem
-
-Constructing a survivorship-free sample of defaulted US firms from free public
-data is far harder than the literature admits, and the difficulty is *structured*.
-
-Two SEC filing-rule changes govern whether a delisted firm can be identified at
-all:
-
-| Threshold | Effect |
-|---|---|
-| ~2011 | XBRL instance documents begin to exist |
-| 2019 | FAST Act Modernization adds the cover-page trading symbol and its tag |
-
-Verified directly: Kodak's 2011 10-K cover page carries only *"Title of each
-Class"* and *"Name of each exchange on which registered"*. There is **no trading
-symbol on the page**. Cover-page extraction, the obvious fallback for older
-filings, is not unreliable before 2019: the datum does not exist. What survives
-is Item 5 prose: *"traded on the New York Stock Exchange under the symbol EK."*
-
-Resolution rises steeply and monotonically across the window, from **12.8%** in
-2010–11 to **68.7%** in 2022–24, on 346 sampled filings.
-
-Era is so dominant that it contaminates everything measured beside it, so every
-cross-tab is reported *within* era strata with cell counts, and a rate is
-withheld where the interval is too wide to read. Conditioned that way, a sector
-effect survives, since mining resolves below its own era in every era where the
-cell can be read and manufacturing above, and two earlier claims do not:
-
-- **Size.** An earlier draft reported float ≥ $200M resolving at 79% against 51%
-  below. It does not replicate, and of the four eras in which all three bands can
-  be read, the rate rises with size in exactly one. The first retraction of this
-  claim, which blamed small-sample noise, was itself wrong about the mechanism;
-  `docs/DECISIONS.md` D5 identifies the causes separately.
-- **Financials resolving worst.** That rested on one cell of fourteen firms in
-  the era where nothing resolves. What survives is a composition fact rather
-  than a rate: financials are 11.8% of candidates and 9.4% of the resolved set,
-  so the cohort under-samples the sector where Merton is least applicable.
-
-The size variable turned out to be part of the same finding as era rather than a
-second one: public float comes from `dei:EntityPublicFloat`, an XBRL tag, so a
-pre-2011 filer reports no float **by construction**. Float availability and XBRL
-presence agree on 86.7% of candidates. Full cross-tabs on `/measurement`.
-
-### 2. Two data traps that would have poisoned the study silently
-
-**The spliced ticker.** Bed Bath & Beyond traded near **$0.07** before its April
-2023 filing. A major free price source returns a continuous "BBBY" series showing
-**$19–36 and rising** straight through the bankruptcy. Those are Overstock/Beyond Inc.
-prices retro-mapped onto the recycled ticker. A pipeline trusting it would compute
-a healthy firm through a bankruptcy and record it as a model failure.
-
-**The concurrent symbol.** A registrant cannot trade under two symbols at once, so
-two candidate symbols whose trading windows *overlap* cannot both be its. A genuine
-re-ticker shows a handoff: Walter Investment's WAC ends 2018-02-09 as Ditech's DHCP
-begins 2018-02-06. Overlapping candidates are flagged and never auto-ranked.
-
-### 3. The base-rate result
-
-A model with respectable discriminatory power can still be near-useless as a
-standalone alarm. Catching 80% of defaults while flagging 20% of survivors, against
-a 1.5% annual default rate, yields **precision of about 5.7%**, roughly sixteen
-false alarms per real default.
-
-That is not an argument that structural models are worthless. It is an argument
-that they rank rather than alarm. Live exhibit on `/discrimination`.
-
----
-
-## The circularity, and how it was fixed
-
-The predecessor generated its signal as `theoretical_spread − market_spread`, where
-the market spread came from `get_spread_by_rating(rating)` and the rating came from
-`_estimate_rating_from_merton_leverage(V, D)`, a function of the model's own solved
-asset value. Both sides descended from the same output, so the gap was partly the
-model arguing with itself.
-
-Worse, for any firm classified as a bank or "shadow bank", a set that included
-Boeing, *both* sides were hardcoded: debt as `max(E * 9.0, 1.0)` and the benchmark
-as 80/120/200 bps by market-cap bucket.
-
-**The fix.** `src/models/shadow_rating.py` assigns the benchmark rating from filing
-fundamentals only: interest coverage as the primary axis, size band from total
-assets, at most one notch on debt/EBITDA or operating margin with the reason
-recorded. `tests/test_shadow_rating.py` asserts that the function signature admits
-no Merton-derived argument, that the module does not import the solver, and that its
-output is unchanged while asset value and volatility vary. The circularity cannot
-return by convention drift.
-
-**What remains limited.** A cohort index is not an issuer's bond, and structural
-models understate observed investment-grade spreads at short horizons because a real
-spread also pays for liquidity and tax. This is the documented credit spread puzzle (Eom,
-Helwege and Huang 2004; Huang and Huang 2012). The divergence is therefore read as
-direction, not level, and the page says so.
-
----
-
-## Data sources
-
-| Source | Used for | Access |
-|---|---|---|
-| SEC EDGAR full-text search | Bankruptcy events (8-K Item 1.03) | Public, no key, 2001+ |
-| SEC XBRL company facts | Debt, shares, float, trading symbol | Public, no key |
-| SEC DERA Financial Statement Data Sets | Point-in-time filer universe, bulk fundamentals | Public, no key |
-| FRED ICE BofA OAS indices | Cohort benchmark spreads | API key, build time only |
-| Price vendor listing file | Symbol trading windows, delisting dates | Public file, no key |
-
-Controls are drawn from a **point-in-time** filer universe rather than from firms
-listed today. Sampling current filers would have required a 2013 control to survive
-thirteen years, making the control group systematically healthier than the
-population and biasing the false-positive rate low. That is the mirror image of the
-treatment-side bias, and invisible in the output.
-
----
-
-## Method
-
-`docs/matching-spec.md` was committed **before** any matching code was written and
-before any treatment-firm price series was retrieved. It fixes in advance: matching
-variables and bucket boundaries, caliper, ratio, covariate measurement date,
-replacement policy, tie-break order, subsidiary adjudication, provenance tiers and
-the primary analysis.
-
-Five amendments have been made since, each in its own commit with a stated reason
-and disclosed on `/data`. The consequential one reversed control eligibility so that
-firms defaulting *after* a treatment firm's event are retained and censored rather
-than excluded. Excluding them uses future information to make a present selection.
-The most recent (§8.3) extends era-conditional reporting from headline metrics to
-every descriptive cross-tab, after a published finding turned out to be the era
-gradient measured a second time under another name.
-
-Thresholds are never chosen by maximising a metric on the study sample. Sliders on
-the site are reader-driven inputs, not fitted values.
-
----
-
-## Reproduction
+Use Python 3.11 or later and Node 22 or later.
 
 ```bash
-pip install -r backend/requirements.txt
-
-python -m scripts.audit_resolution --start 2010 --end 2024 --per-year 25
-python -m scripts.verify_filing_text --n 80
-python -m scripts.build_site_data
-python -m scripts.smell_test              # read the numbers; do not just check exit code
-python -m scripts.check_published_figures # every prose figure must reproduce
-
-cd frontend && npm install && npm run build
+python -m pip install -e ".[dev,assets]"
+python -m playwright install chromium
+cd frontend && npm ci && cd ..
 ```
 
-Model scripts write deterministic CSVs to `data/processed/`. Random seeds are fixed;
-the matching procedure consults no RNG at all, because its tie-break is a total
-order ending in ascending CIK.
+Copy `.env.example` to `.env` and add only the credentials needed for a local research run. Credentials are never committed or exposed to the browser.
 
-`scripts/smell_test.py` prints pipeline inputs beside figures from public filings.
-It exists because the 2.67× debt double-count that shipped in the predecessor was
-caught by a human reading Ford's `$435.67B` and finding it absurd, not by a test.
-Tests verify the code does what the code intends; they do not verify the numbers.
-
-`scripts/check_published_figures.py` closes the other half of that gap. It states
-each claim the way it appears in visible UI, next to the computation that has to
-reproduce it, and names the file the sentence lives in when one stops being true.
-It exists because stale figures have twice survived a re-run here: once in a
-sector table that was hand-edited for one section and not another, once in two
-within-era orderings written from a glance at a console rather than computed.
-
-### Environment
+Run the complete release gate from the repository root:
 
 ```bash
-cp .env.example backend/.env   # then fill in
+python -m scripts.verify
 ```
 
-| Variable | Required | Purpose |
-|---|---|---|
-| `FRED_API_KEY` | For cohort spreads | Read at build time only; never reaches a browser |
-| `TIINGO_API_KEY` | For delisted prices | Metered: 500 unique symbols per calendar month |
-
-> **Security note, resolved 2026-08-23.** A FRED API key was committed to this
-> repository's history in commit `6ca8476`. Untracking the file in `f778738`
-> did not remediate it: `git show 6ca8476:backend/.env` still returns the value,
-> and anyone who clones the repository has it. **The key has now been revoked
-> and reissued**. The exposed value returns HTTP 400 from the FRED API, so the
-> string still in history is inert. The lesson stands: removing a secret from
-> the working tree is not revocation, and only revocation ends the exposure.
-
----
+This regenerates and compares public assets, reproduces published figures, lints and builds the frontend, then runs the supported Python tests. `make verify` delegates to the same command.
 
 ## Architecture
 
 ```
 src/
-  data/       fetchers, identity resolution, budget ledger, sample construction
-  models/     merton, shadow_rating, discrimination, event_study
-scripts/      audit, verification, smell test, site data build
+  data/       identity resolution, source adapters, quota ledger, sample construction
+  models/     Merton, synthetic rating, discrimination and event-study logic
+scripts/      audits, public-data generation and release verification
 data/
-  raw/        cached API pulls (gitignored)
-  processed/  committed CSV outputs, the site's data source
-frontend/     Next.js; research pages read committed JSON at build time
-backend/      FastAPI, now optional
+  processed/  committed research outputs
+frontend/     Next.js site that reads committed data at build time
+docs/         methods, decisions and source policy
 ```
 
-Every route renders with the backend stopped. Research pages read static JSON
-produced by `scripts/build_site_data.py`, which writes a `MANIFEST.json` carrying
-the git commit and per-file provenance. A figure that cannot be traced back through
-that manifest to a committed CSV, or to a computation from inputs shown on screen,
-is a bug.
-
----
-
-## Limitations
-
-- **Period selection.** 2012–2024 only, a span of historically low default rates
-  with no systemic credit event. Discriminatory power measured on it does not
-  generalise to a crisis.
-- **Non-random selection into the cohort**, by era, size and sector.
-- **Cohort benchmark, not issuer pricing.** Direction, not level.
-- **Quota-constrained design.** The control ratio was set by an API symbol cap, not
-  by statistical power, and size is matched on book assets rather than market cap
-  for the same reason.
-- **Merton does not describe banks.** Deposit funding is callable on demand; SVB and
-  Credit Suisse were liquidity runs, not asset-value insolvencies. Financials are
-  reported separately and excluded from the pre-registered primary metric.
-- **Partnerships and trusts are not Merton objects** and are excluded on modelling
-  grounds, not data grounds.
-
----
+Generated site data carry a manifest with source and commit provenance. A published figure must trace to a committed input or to a computation whose inputs and assumptions are shown.
 
 ## References
 
-Merton, R. C. (1974). On the pricing of corporate debt: the risk structure of
-interest rates. *Journal of Finance* 29(2).
-
-Bharath, S. T. and Shumway, T. (2008). Forecasting default with the Merton distance
-to default model. *Review of Financial Studies* 21(3).
-
-Campbell, J. Y., Hilscher, J. and Szilagyi, J. (2008). In search of distress risk.
-*Journal of Finance* 63(6).
-
-Eom, Y. H., Helwege, J. and Huang, J.-Z. (2004). Structural models of corporate bond
-pricing: an empirical analysis. *Review of Financial Studies* 17(2).
-
-Huang, J.-Z. and Huang, M. (2012). How much of the corporate-treasury yield spread
-is due to credit risk? *Review of Asset Pricing Studies* 2(2).
+- Merton, R. C. (1974). On the pricing of corporate debt: the risk structure of interest rates. *Journal of Finance* 29(2).
+- Bharath, S. T. and Shumway, T. (2008). Forecasting default with the Merton distance to default model. *Review of Financial Studies* 21(3).
+- Campbell, J. Y., Hilscher, J. and Szilagyi, J. (2008). In search of distress risk. *Review of Financial Studies* 63(6).
+- Eom, Y. H., Helwege, J. and Huang, J.-Z. (2004). Structural models of corporate bond pricing: an empirical analysis. *Review of Financial Studies* 17(2).
+- Huang, J.-Z. and Huang, M. (2012). How much of the corporate-treasury yield spread is due to credit risk? *Review of Asset Pricing Studies* 2(2).
