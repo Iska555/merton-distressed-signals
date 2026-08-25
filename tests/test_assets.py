@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import xml.etree.ElementTree as ET
 from pathlib import Path
+
+from PIL import Image
 
 from scripts import assets
 
@@ -56,3 +59,21 @@ def test_every_committed_public_svg_has_title_and_description():
         root = ET.parse(path).getroot()
         assert len(root.findall("svg:title", SVG_NS)) == 1, path
         assert len(root.findall("svg:desc", SVG_NS)) == 1, path
+
+
+def test_png_writer_emits_the_canonical_cross_platform_encoding(tmp_path):
+    writer = getattr(assets, "_write_deterministic_png", None)
+    assert writer is not None, "assets need a canonical PNG writer"
+
+    image = Image.new("RGB", (2, 2))
+    pixels = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 255)]
+    image.putdata(pixels)
+    output = tmp_path / "fixture.png"
+
+    writer(image, output)
+
+    assert hashlib.sha256(output.read_bytes()).hexdigest() == (
+        "728cbedc0432e9c62e1d3f8b0b2dc65743a953e255b7e482d80f2e239e48f450"
+    )
+    with Image.open(output) as decoded:
+        assert list(decoded.convert("RGB").get_flattened_data()) == pixels

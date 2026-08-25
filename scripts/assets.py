@@ -18,9 +18,12 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import html
+import io
 import os
+import struct
 import subprocess
 import sys
+import zlib
 from collections import OrderedDict
 from pathlib import Path
 
@@ -62,6 +65,50 @@ WITHDRAWN_ASSETS = (
     "figures/sample-field.svg",
     "marks/evidence.svg",
 )
+
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+
+
+def _png_chunk(kind: bytes, payload: bytes) -> bytes:
+    body = kind + payload
+    checksum = zlib.crc32(body) & 0xFFFFFFFF
+    return struct.pack(">I", len(payload)) + body + struct.pack(">I", checksum)
+
+
+def _write_deterministic_png(image, path: str | os.PathLike[str]) -> None:
+    """Write an RGB PNG whose compressed bytes are stable across zlib builds."""
+    canonical = image.convert("RGB")
+    staged = io.BytesIO()
+    canonical.save(staged, format="PNG", optimize=True)
+
+    payload = staged.getvalue()
+    offset = len(PNG_SIGNATURE)
+    idat_parts: list[bytes] = []
+    while offset < len(payload):
+        length = struct.unpack(">I", payload[offset : offset + 4])[0]
+        kind = payload[offset + 4 : offset + 8]
+        if kind == b"IDAT":
+            idat_parts.append(payload[offset + 8 : offset + 8 + length])
+        offset += length + 12
+
+    scanlines = zlib.decompress(b"".join(idat_parts))
+    compressor = zlib.compressobj(
+        level=9,
+        method=zlib.DEFLATED,
+        wbits=15,
+        memLevel=9,
+        strategy=zlib.Z_RLE,
+    )
+    encoded = compressor.compress(scanlines) + compressor.flush()
+    width, height = canonical.size
+    ihdr = struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)
+    output = (
+        PNG_SIGNATURE
+        + _png_chunk(b"IHDR", ihdr)
+        + _png_chunk(b"IDAT", encoded)
+        + _png_chunk(b"IEND", b"")
+    )
+    Path(path).write_bytes(output)
 
 def _svg(
     body: str,
@@ -296,7 +343,7 @@ def hero(
         rendered = Image.alpha_composite(image.convert("RGBA"), layer).convert("RGB")
         rendered = rendered.resize((width, height), Image.Resampling.LANCZOS)
         output_path = os.path.join(out_dir, f"hero-paths-{name}.png")
-        rendered.save(output_path, optimize=True)
+        _write_deterministic_png(rendered, output_path)
         print(f"  wrote {output_path}  {os.path.getsize(output_path) / 1024:.0f} KB")
 
     print(f"  population default rate {rate:.1%}; showing {paths_n} paths, {default_count} below barrier")
