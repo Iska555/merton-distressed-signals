@@ -3,16 +3,16 @@
 /**
  * Explicit theme control.
  *
- * Dark is the default and lives on bare :root, so the first paint is correct
- * before this component hydrates. Light is the opt-in, stamped as
- * data-theme="light". Nothing here reads prefers-color-scheme: a reader who
- * wants light presses the control, and that choice is what persists.
+ * Light is the default and lives on bare :root, so the first paint is correct
+ * before this component hydrates. Dark is the opt-in, stamped as
+ * data-theme="dark". Nothing here reads prefers-color-scheme: a reader who
+ * wants dark presses the control, and that choice is what persists.
  */
 const STORAGE_KEY = 'dcs-theme'
 
 function applyTheme(theme: 'light' | 'dark') {
-  if (theme === 'light') {
-    document.documentElement.dataset.theme = 'light'
+  if (theme === 'dark') {
+    document.documentElement.dataset.theme = 'dark'
   } else {
     delete document.documentElement.dataset.theme
   }
@@ -20,7 +20,7 @@ function applyTheme(theme: 'light' | 'dark') {
 
 export default function ThemeToggle() {
   function toggleTheme() {
-    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
     applyTheme(next)
     try {
       window.localStorage.setItem(STORAGE_KEY, next)

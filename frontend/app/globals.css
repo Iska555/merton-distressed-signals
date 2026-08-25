@@ -5,11 +5,10 @@
 
   Three deliberate departures from that reference.
 
-  First, dark is the default. The warm dark ground is the identity of this
-  site, so it is what :root carries and what a reader sees before a single
-  line of JavaScript runs. Light is the explicit opt-in, under
-  [data-theme="light"]. Inverting the cascade this way rather than stamping
-  an attribute from a script means there is no light flash on first paint and
+  First, light is the default. It is what :root carries and what a reader sees
+  before a single line of JavaScript runs. Dark is the explicit opt-in, under
+  [data-theme="dark"]. Inverting the cascade this way rather than stamping
+  an attribute from a script means there is no dark flash on first paint and
   no dependence on JavaScript being enabled at all.
 
   Second, nothing switches on prefers-color-scheme. The theme changes only
@@ -27,21 +26,21 @@
 */
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  --ground:      #16100E;
-  --tint:        #1F1613;
-  --tint-warm:   #261B17;
-  --deep:        #43101A;
-  --deep-2:      #2E0B12;
-  --ink:         #F2E7E2;
-  --body:        #CDB8B0;
-  --muted:       #9C8479;
-  --signal:      #E4564F;
-  --rule:        #33241F;
-  --rule-strong: #4A352E;
-  --burgundy:    #C05A6B;
-  --chocolate:   #B98A5A;
+  --ground:      #FFFFFF;
+  --tint:        #FAF5F2;
+  --tint-warm:   #F3E9E4;
+  --deep:        #5C0F1D;
+  --deep-2:      #43101A;
+  --ink:         #2B1A17;
+  --body:        #4A3830;
+  --muted:       #7B675C;
+  --signal:      #C0272D;
+  --rule:        #E7DCD6;
+  --rule-strong: #CDBAB1;
+  --burgundy:    #7A1B2E;
+  --chocolate:   #6B3F23;
   --paper:       #FFFFFF;
 
   /* The deep band stays burgundy in both themes, so its foregrounds are shared. */
@@ -49,13 +48,13 @@
   --on-deep-mute: #E0BDB6;
   --on-deep-sig:  #F0A868;
 
-  --fig-primary:   #E4564F;
-  --fig-recessive: #4A352E;
-  --fig-third:     #B98A5A;
-  --fig-ink:       #F2E7E2;
-  --fig-muted:     #9C8479;
-  --fig-rule:      #33241F;
-  --fig-signal:    #E4564F;
+  --fig-primary:   #A81C2A;
+  --fig-recessive: #E8DCD6;
+  --fig-third:     #6B3F23;
+  --fig-ink:       #2B1A17;
+  --fig-muted:     #7B675C;
+  --fig-rule:      #E7DCD6;
+  --fig-signal:    #C0272D;
 
   --series-1: var(--fig-primary);
   --series-2: var(--fig-third);
@@ -74,30 +73,30 @@
   --mono:    var(--font-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 
-:root[data-theme="light"] {
-  color-scheme: light;
+:root[data-theme="dark"] {
+  color-scheme: dark;
 
-  --ground:      #FFFFFF;
-  --tint:        #FAF5F2;
-  --tint-warm:   #F3E9E4;
-  --deep:        #5C0F1D;
-  --deep-2:      #43101A;
-  --ink:         #2B1A17;
-  --body:        #4A3830;
-  --muted:       #7B675C;
-  --signal:      #C0272D;
-  --rule:        #E7DCD6;
-  --rule-strong: #CDBAB1;
-  --burgundy:    #7A1B2E;
-  --chocolate:   #6B3F23;
+  --ground:      #16100E;
+  --tint:        #1F1613;
+  --tint-warm:   #261B17;
+  --deep:        #43101A;
+  --deep-2:      #2E0B12;
+  --ink:         #F2E7E2;
+  --body:        #CDB8B0;
+  --muted:       #9C8479;
+  --signal:      #E4564F;
+  --rule:        #33241F;
+  --rule-strong: #4A352E;
+  --burgundy:    #C05A6B;
+  --chocolate:   #B98A5A;
 
-  --fig-primary:   #A81C2A;
-  --fig-recessive: #E8DCD6;
-  --fig-third:     #6B3F23;
-  --fig-ink:       #2B1A17;
-  --fig-muted:     #7B675C;
-  --fig-rule:      #E7DCD6;
-  --fig-signal:    #C0272D;
+  --fig-primary:   #E4564F;
+  --fig-recessive: #4A352E;
+  --fig-third:     #B98A5A;
+  --fig-ink:       #F2E7E2;
+  --fig-muted:     #9C8479;
+  --fig-rule:      #33241F;
+  --fig-signal:    #E4564F;
 }
 
 * { box-sizing: border-box; }
@@ -167,13 +166,13 @@ a { color: var(--signal); }
 }
 .nav-brand {
   display: block; width: min(300px, 29vw); min-width: 210px;
-  color: var(--ink); text-decoration: none; white-space: nowrap;
+  color: var(--deep); text-decoration: none; white-space: nowrap;
 }
-:root[data-theme="light"] .nav-brand { color: var(--deep); }
+:root[data-theme="dark"] .nav-brand { color: var(--ink); }
 .nav-lockup { display: block; width: 100%; height: auto; }
-.nav-lockup-light { display: none; }
-:root[data-theme="light"] .nav-lockup-dark { display: none; }
-:root[data-theme="light"] .nav-lockup-light { display: block; }
+.nav-lockup-dark { display: none; }
+:root[data-theme="dark"] .nav-lockup-light { display: none; }
+:root[data-theme="dark"] .nav-lockup-dark { display: block; }
 .nav-links {
   display: flex; flex: 1; min-width: 0; gap: 26px;
   overflow-x: auto; scrollbar-width: none;
@@ -224,9 +223,9 @@ a { color: var(--signal); }
   width: 100%; height: 100%; pointer-events: none;
 }
 .hero-art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
-.hero-art-light { display: none; }
-:root[data-theme="light"] .hero-art-dark { display: none; }
-:root[data-theme="light"] .hero-art-light { display: block; }
+.hero-art-dark { display: none; }
+:root[data-theme="dark"] .hero-art-light { display: none; }
+:root[data-theme="dark"] .hero-art-dark { display: block; }
 .hero-grid {
   display: grid; grid-template-columns: 1.35fr 1fr; gap: 56px; align-items: end;
 }
@@ -234,29 +233,18 @@ a { color: var(--signal); }
   .hero-grid { grid-template-columns: 1fr; gap: 40px; align-items: start; }
 }
 .hero-copy { display: flex; flex-direction: column; gap: 22px; }
-.hero h1 { color: var(--ink); }
-:root[data-theme="light"] .hero h1 { color: var(--deep); }
+.hero h1 { color: var(--deep); }
+:root[data-theme="dark"] .hero h1 { color: var(--ink); }
 .hero-rule { height: 1px; background: var(--rule); margin-top: 60px; }
 .hero-params {
   padding: 11px 0 14px; color: var(--muted); font-size: 11px;
   line-height: 1.45; letter-spacing: 0.025em;
 }
 
-.bignum {
-  display: flex; flex-direction: column; gap: 6px;
-  border-left: 4px solid var(--signal); padding-left: 22px;
-}
-.bignum .n {
-  font-family: var(--display); font-size: clamp(64px, 10vw, 104px);
-  font-weight: 600; line-height: 0.9; letter-spacing: -0.04em;
-  color: var(--signal); font-variant-numeric: tabular-nums;
-}
-.bignum .cap { font-size: 15px; color: var(--body); line-height: 1.45; max-width: 30ch; }
-
 /* Page-level masthead, the hero's quieter sibling for interior pages. */
 .masthead { padding: 60px 0 40px; display: flex; flex-direction: column; gap: 20px; }
-.masthead h1 { color: var(--ink); font-size: clamp(34px, 5vw, 54px); }
-:root[data-theme="light"] .masthead h1 { color: var(--deep); }
+.masthead h1 { color: var(--deep); font-size: clamp(34px, 5vw, 54px); }
+:root[data-theme="dark"] .masthead h1 { color: var(--ink); }
 .section-eyebrow { display: flex; align-items: center; gap: 10px; }
 .section-mark {
   display: inline-block; width: 28px; height: 28px; flex: 0 0 28px;
@@ -283,9 +271,9 @@ a { color: var(--signal); }
 }
 .stat .v {
   font-family: var(--display); font-size: 42px; font-weight: 600; line-height: 1;
-  letter-spacing: -0.028em; color: var(--ink); font-variant-numeric: tabular-nums;
+  letter-spacing: -0.028em; color: var(--deep); font-variant-numeric: tabular-nums;
 }
-:root[data-theme="light"] .stat .v { color: var(--deep); }
+:root[data-theme="dark"] .stat .v { color: var(--ink); }
 .stat .k {
   font-size: 11px; font-weight: 700; letter-spacing: 0.13em;
   text-transform: uppercase; color: var(--signal);
@@ -613,9 +601,9 @@ select {
 .out .v {
   font-family: var(--display); font-size: 32px; font-weight: 600;
   font-variant-numeric: tabular-nums; letter-spacing: -0.028em; line-height: 1.1;
-  color: var(--ink);
+  color: var(--deep);
 }
-:root[data-theme="light"] .out .v { color: var(--deep); }
+:root[data-theme="dark"] .out .v { color: var(--ink); }
 .out .k {
   font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--signal);

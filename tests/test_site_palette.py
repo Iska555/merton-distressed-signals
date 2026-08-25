@@ -83,50 +83,59 @@ def _contrast(first: str, second: str) -> float:
 
 def test_theme_tokens_match_the_approved_palette():
     """
-    Dark is the default, so it is bare :root that must carry the dark values.
-    Light is the opt-in and lives under [data-theme="light"]. Asserting the
+    Light is the default, so it is bare :root that must carry the light values.
+    Dark is the opt-in and lives under [data-theme="dark"]. Asserting the
     values against those two selectors specifically is what keeps the default
     from silently flipping back.
     """
-    dark = _tokens(":root")
-    light = _tokens(':root[data-theme="light"]')
+    light = _tokens(":root")
+    dark = _tokens(':root[data-theme="dark"]')
 
-    for name, value in DARK.items():
-        assert dark[name].upper() == value, name
     for name, value in LIGHT.items():
         # The band foregrounds are shared, so they resolve from :root.
-        expected = light.get(name, dark.get(name, ""))
+        expected = light.get(name, "")
+        assert expected.upper() == value, name
+    for name, value in DARK.items():
+        expected = dark.get(name, light.get(name, ""))
         assert expected.upper() == value, name
 
 
-def test_dark_is_the_default_theme():
+def test_light_is_the_default_theme():
     """
     Three things have to agree or the first paint is wrong: the cascade, the
     restore script, and the toggle. The cascade is checked above. Here we pin
-    the other two to the light opt-in.
+    the other two to the dark opt-in.
     """
     css = CSS.read_text(encoding="utf-8")
-    assert ':root[data-theme="dark"]' not in css, (
-        "a dark-attribute selector means dark is no longer the base theme"
+    assert ':root[data-theme="light"]' not in css, (
+        "a light-attribute selector means light is no longer the base theme"
     )
-    assert "color-scheme: dark;" in css
+    assert ':root[data-theme="dark"]' in css
 
     layout = (ROOT / "frontend" / "app" / "layout.tsx").read_text(encoding="utf-8")
-    assert "getItem('dcs-theme')==='light'" in layout
-    assert "dataset.theme='light'" in layout
+    assert "getItem('dcs-theme')==='dark'" in layout
+    assert "dataset.theme='dark'" in layout
 
     toggle = (ROOT / "frontend" / "components" / "ThemeToggle.tsx").read_text(
         encoding="utf-8"
     )
-    assert "dataset.theme === 'light' ? 'dark' : 'light'" in toggle
+    assert "dataset.theme === 'dark' ? 'light' : 'dark'" in toggle
 
 
-def test_the_default_ground_is_dark_in_rendered_html():
-    """The built page must not ship a light theme attribute on the document."""
+def test_the_default_ground_is_light_in_rendered_html():
+    """The built page must use bare :root so the default light theme paints first."""
     page = (ROOT / "frontend" / ".next" / "server" / "app" / "index.html").read_text(
         encoding="utf-8"
     )
-    assert 'data-theme="light"' not in page.split("<body")[0]
+    assert "data-theme=" not in page.split("<body")[0]
+
+
+def test_homepage_hero_omits_the_live_callout():
+    page = (ROOT / "frontend" / ".next" / "server" / "app" / "index.html").read_text(
+        encoding="utf-8"
+    )
+    assert 'class="bignum"' not in page
+    assert "Default risk starts inside the capital structure." in page
 
 
 def test_body_and_band_text_clear_wcag_aa():

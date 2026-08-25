@@ -43,13 +43,6 @@ export default function Home() {
                 independent accounting benchmark. Every assumption is exposed.
               </p>
             </div>
-            <div className="bignum">
-              <span className="n">LIVE</span>
-              <span className="cap">
-                Two-equation structural solve, recomputed in the browser from the
-                inputs you choose.
-              </span>
-            </div>
           </div>
           <div className="hero-rule" />
           <p className="hero-params mono">
